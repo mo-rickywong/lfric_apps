@@ -27,12 +27,15 @@ module ffsl_hori_alg_mod
   use mesh_mod,                         only: mesh_type
   use r_tran_field_mod,                 only: r_tran_field_type
   use timer_mod,                        only: timer
-  use transport_enumerated_types_mod,   only: equation_form_advective,    &
-                                              equation_form_conservative, &
-                                              equation_form_consistent,   &
-                                              direction_h,                &
-                                              splitting_strang_hvh,       &
-                                              horizontal_monotone_none,   &
+  use transport_enumerated_types_mod,   only: equation_form_advective,         &
+                                              equation_form_conservative,      &
+                                              equation_form_consistent,        &
+                                              direction_h,                     &
+                                              splitting_strang_hvh,            &
+                                              horizontal_monotone_none,        &
+                                              horizontal_monotone_positive,    &
+                                              special_edges_monotone_none,     &
+                                              special_edges_monotone_positive, &
                                               ffsl_splitting_swift
   use transport_metadata_mod,           only: transport_metadata_type
   use transport_runtime_alg_mod,        only: transport_runtime_type
@@ -58,7 +61,8 @@ module ffsl_hori_alg_mod
   use subgrid_config_mod,               only: inner_order, outer_order
   use finite_element_config_mod,        only: element_order
   use transport_config_mod,             only: extended_mesh, &
-                                              special_edges_treatment
+                                              special_edges_treatment,       &
+                                              special_edges_high_order
 
   implicit none
 
@@ -69,6 +73,7 @@ module ffsl_hori_alg_mod
   public  :: ffsl_hori_outer_alg
   public  :: ffsl_hori_swift_inner_alg
   private :: ffsl_extra_points
+  private :: monotone_option_special_edges
 
 contains
 
@@ -267,6 +272,7 @@ contains
     integer(kind=i_def) :: monotone
     logical(kind=l_def) :: strang
     logical(kind=l_def) :: monotone_remap
+    integer(kind=i_def) :: special_edges_monotone
 
     ! Constants
     integer(kind=i_def) :: mesh_id
@@ -283,6 +289,8 @@ contains
 
     ! Get options
     monotone = transport_metadata%get_horizontal_monotone()
+    special_edges_monotone = transport_metadata%get_special_edges_monotone()
+    call monotone_option_special_edges(special_edges_monotone, monotone)
     strang = (transport_metadata%get_splitting() == splitting_strang_hvh)
 
     ! Get pre-computed fields
@@ -308,7 +316,7 @@ contains
     call flux%initialise( vector_space = w2h_fs )
 
     ! Set constant values
-    extra_points = ffsl_extra_points(special_edges_treatment)
+    extra_points = ffsl_extra_points(special_edges_treatment,special_edges_high_order)
     stencil_extent_xy = dep_stencil_extent_xy + extra_points + inner_order
     ! PSyclone needs these to be different variables to the stencil_extents
     cfl_stencil_xy = stencil_extent_xy
@@ -356,7 +364,9 @@ contains
                                             panel_id_y, stencil_extent_xy,      &
                                             face_selector_ew,                   &
                                             face_selector_ns,                   &
+                                            special_edges_high_order,           &
                                             inner_order, monotone,              &
+                                            special_edges_monotone, min_val,    &
                                             cfl_stencil_xy, dt ) )
     else
       call invoke( setval_c(flux, 0.0_r_tran),                                  &
@@ -489,6 +499,7 @@ contains
     integer(kind=i_def) :: monotone
     logical(kind=l_def) :: strang
     logical(kind=l_def) :: monotone_remap
+    integer(kind=i_def) :: special_edges_monotone
     integer(kind=i_def) :: equation_form
     logical(kind=l_def) :: swift_splitting
 
@@ -511,6 +522,8 @@ contains
 
     ! Get options
     monotone = transport_metadata%get_horizontal_monotone()
+    special_edges_monotone = transport_metadata%get_special_edges_monotone()
+    call monotone_option_special_edges(special_edges_monotone, monotone)
     strang = (transport_metadata%get_splitting() == splitting_strang_hvh)
     equation_form = transport_metadata%get_equation_form()
     swift_splitting = (transport_metadata%get_ffsl_splitting() &
@@ -565,7 +578,7 @@ contains
     end if
 
     ! Set constant values
-    extra_points = ffsl_extra_points(special_edges_treatment)
+    extra_points = ffsl_extra_points(special_edges_treatment,special_edges_high_order)
     stencil_extent_xy = dep_stencil_extent_xy + extra_points + order
     ! PSyclone needs these to be different variables to the stencil_extents
     cfl_stencil_xy = stencil_extent_xy
@@ -627,8 +640,10 @@ contains
                                              panel_id_y, stencil_extent_xy,    &
                                              panel_id_x, stencil_extent_xy,    &
                                              face_selector_ew,                 &
-                                             face_selector_ns, order,          &
-                                             monotone, cfl_stencil_xy, dt ) )
+                                             face_selector_ns,                 &
+                                             special_edges_high_order, order,  &
+                                             monotone, special_edges_monotone, &
+                                             min_val, cfl_stencil_xy, dt ) )
 
     else if (equation_form == equation_form_consistent) then
       ! Consistent but not special edges ---------------------------------------
@@ -657,8 +672,10 @@ contains
                                              panel_id_y, stencil_extent_xy,    &
                                              panel_id_x, stencil_extent_xy,    &
                                              face_selector_ew,                 &
-                                             face_selector_ns, order,          &
-                                             monotone, cfl_stencil_xy, dt ) )
+                                             face_selector_ns,                 &
+                                             special_edges_high_order, order,  &
+                                             monotone, special_edges_monotone, &
+                                             min_val, cfl_stencil_xy, dt ) )
 
     else if (swift_splitting) then
       ! Advective/conservative, SWIFT splitting but not special edges ----------
@@ -687,8 +704,10 @@ contains
                                              panel_id_y, stencil_extent_xy,    &
                                              panel_id_x, stencil_extent_xy,    &
                                              face_selector_ew,                 &
-                                             face_selector_ns, order,          &
-                                             monotone, cfl_stencil_xy, dt ) )
+                                             face_selector_ns,                 &
+                                             special_edges_high_order, order,  &
+                                             monotone, special_edges_monotone, &
+                                             min_val, cfl_stencil_xy, dt ) )
 
     else
       ! Advective/conservative, COSMIC splitting but not special edges ---------
@@ -884,6 +903,7 @@ contains
     ! Transport options
     integer(kind=i_def) :: monotone
     logical(kind=l_def) :: monotone_remap
+    integer(kind=i_def) :: special_edges_monotone
     integer(kind=i_def) :: equation_form
     logical(kind=l_def) :: strang
 
@@ -902,6 +922,8 @@ contains
 
     ! Get options
     monotone = transport_metadata%get_horizontal_monotone()
+    special_edges_monotone = transport_metadata%get_special_edges_monotone()
+    call monotone_option_special_edges(special_edges_monotone, monotone)
     equation_form = transport_metadata%get_equation_form()
     strang = (transport_metadata%get_splitting() == splitting_strang_hvh)
 
@@ -940,7 +962,7 @@ contains
     call increment_y%initialise( vector_space = field_fs )
 
     ! Set constant values
-    extra_points = ffsl_extra_points(special_edges_treatment)
+    extra_points = ffsl_extra_points(special_edges_treatment,special_edges_high_order)
     stencil_extent_xy = dep_stencil_extent_xy + extra_points + order
     ! PSyclone needs these to be different variables to the stencil_extents
     cfl_stencil_xy = stencil_extent_xy
@@ -989,8 +1011,10 @@ contains
                                             panel_id_x, stencil_extent_xy,      &
                                             panel_id_y, stencil_extent_xy,      &
                                             face_selector_ew,                   &
-                                            face_selector_ns, order,            &
-                                            monotone, cfl_stencil_xy, step_dt ) )
+                                            face_selector_ns,                   &
+                                            special_edges_high_order, order,    &
+                                            monotone, special_edges_monotone,   &
+                                            min_val, cfl_stencil_xy, step_dt ) )
 
     else if (equation_form == equation_form_consistent) then
       ! Consistent but not special edges ---------------------------------------
@@ -1019,8 +1043,10 @@ contains
                                             panel_id_x, stencil_extent_xy,      &
                                             panel_id_y, stencil_extent_xy,      &
                                             face_selector_ew,                   &
-                                            face_selector_ns, order,            &
-                                            monotone, cfl_stencil_xy, step_dt ) )
+                                            face_selector_ns,                   &
+                                            special_edges_high_order, order,    &
+                                            monotone, special_edges_monotone,   &
+                                            min_val, cfl_stencil_xy, step_dt ) )
 
     else
       ! Advective/conservative but not special edges ---------------------------
@@ -1075,20 +1101,49 @@ contains
   !----------------------------------------------------------------------------
   !> @brief  Returns the number of extra points required for ffsl stencil
   !! @param[in]   special_edges_treatment    Logical special_edges_treatment=T/F
+  !! @param[in]   special_edges_high_order   Logical to use high order special edges
   !! @return      extra_points               The number of extra points required
   !----------------------------------------------------------------------------
-  function ffsl_extra_points(special_edges_treatment) result(extra_points)
+  function ffsl_extra_points(special_edges_treatment, &
+                             special_edges_high_order) result(extra_points)
 
-   implicit none
+    implicit none
 
-   logical(kind=l_def), intent(in) :: special_edges_treatment
-   integer(kind=i_def)             :: extra_points
+    logical(kind=l_def), intent(in) :: special_edges_treatment
+    logical(kind=l_def), intent(in) :: special_edges_high_order
+    integer(kind=i_def)             :: extra_points
 
-   if ( special_edges_treatment ) then
-       extra_points = 2_i_def
-    else
-       extra_points = 1_i_def
-   end if
+    if ( special_edges_treatment .AND. special_edges_high_order ) then
+        extra_points = 2_i_def
+     else
+        extra_points = 1_i_def
+    end if
   end function ffsl_extra_points
+
+  !----------------------------------------------------------------------------
+  !> @brief Sets the monotonicity option at special edges which is either
+  !!        no monotonicity, the same as the option away from special edges,
+  !!        or positivity.
+  !! @param[inout] special_edges_monotone The monotone option to set at panel edges
+  !!                                      when the special edges treatment is used
+  !! @param[in]    monotone               The monotone option away from panel edges
+  !----------------------------------------------------------------------------
+  subroutine monotone_option_special_edges(special_edges_monotone, &
+                                           monotone)
+
+    implicit none
+
+    integer(kind=i_def), intent(inout) :: special_edges_monotone
+    integer(kind=i_def), intent(in)    :: monotone
+
+    if (special_edges_monotone == special_edges_monotone_none) then
+      special_edges_monotone = horizontal_monotone_none
+    else if (special_edges_monotone == special_edges_monotone_positive) then
+      special_edges_monotone = horizontal_monotone_positive
+    else
+      special_edges_monotone = monotone
+    end if
+
+  end subroutine monotone_option_special_edges
 
 end module ffsl_hori_alg_mod

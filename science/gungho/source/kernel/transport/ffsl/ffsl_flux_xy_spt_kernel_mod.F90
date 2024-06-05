@@ -28,8 +28,8 @@ module ffsl_flux_xy_spt_kernel_mod
                                     ANY_DISCONTINUOUS_SPACE_1, &
                                     ANY_DISCONTINUOUS_SPACE_2, &
                                     ANY_DISCONTINUOUS_SPACE_3, &
-                                    Y1D
-  use constants_mod,         only : i_def, r_tran, r_def
+                                    Y1D, GH_LOGICAL
+  use constants_mod,         only : i_def, r_tran, r_def, l_def
   use fs_continuity_mod,     only : W3, W2h
   use kernel_mod,            only : kernel_type
   use reference_element_mod, only : W, E, N, S
@@ -44,7 +44,7 @@ module ffsl_flux_xy_spt_kernel_mod
   !> The type declaration for the kernel. Contains the metadata needed by the PSy layer
   type, public, extends(kernel_type) :: ffsl_flux_xy_spt_kernel_type
     private
-    type(arg_type) :: meta_args(15) = (/                                       &
+    type(arg_type) :: meta_args(18) = (/                                       &
          arg_type(GH_FIELD,  GH_REAL,    GH_WRITE, ANY_DISCONTINUOUS_SPACE_2), & ! flux
          arg_type(GH_FIELD,  GH_REAL,    GH_READ,  W3, STENCIL(X1D)),          & ! field_for_x
          arg_type(GH_FIELD,  GH_REAL,    GH_READ,  W3, STENCIL(X1D)),          & ! dry_mass_for_x
@@ -58,8 +58,11 @@ module ffsl_flux_xy_spt_kernel_mod
                                                                 STENCIL(Y1D)), & ! panel_id_y
          arg_type(GH_FIELD,  GH_INTEGER, GH_READ,  ANY_DISCONTINUOUS_SPACE_3), & ! face selector ew
          arg_type(GH_FIELD,  GH_INTEGER, GH_READ,  ANY_DISCONTINUOUS_SPACE_3), & ! face selector ns
+         arg_type(GH_SCALAR, GH_LOGICAL, GH_READ     ),                        & ! high_order_edges
          arg_type(GH_SCALAR, GH_INTEGER, GH_READ     ),                        & ! order
          arg_type(GH_SCALAR, GH_INTEGER, GH_READ     ),                        & ! monotone
+         arg_type(GH_SCALAR, GH_INTEGER, GH_READ     ),                        & ! edge_monotone
+         arg_type(GH_SCALAR, GH_REAL,    GH_READ     ),                        & ! min_val
          arg_type(GH_SCALAR, GH_INTEGER, GH_READ     ),                        & ! extent_size
          arg_type(GH_SCALAR, GH_REAL,    GH_READ     )                         & ! dt
          /)
@@ -104,8 +107,12 @@ contains
   !!                                    loop over for this column
   !> @param[in]     face_selector_ns    2D field indicating which N/S faces to
   !!                                    loop over for this column
+  !> @param[in]     high_order_edges    Flag to use high order with special edges
   !> @param[in]     order               Order of reconstruction
   !> @param[in]     monotone            Horizontal monotone option for FFSL
+  !> @param[in]     edge_monotone       Monotone option for FFSL at panel edges
+  !> @param[in]     min_val             Minimum value to enforce when using
+  !!                                    quasi-monotone limiter
   !> @param[in]     extent_size         Stencil extent needed for the LAM edge
   !> @param[in]     dt                  Time step
   !> @param[in]     ndf_w2h             Num of DoFs for W2h per cell
@@ -141,8 +148,11 @@ contains
                                     stencil_map_py,      &
                                     face_selector_ew,    &
                                     face_selector_ns,    &
+                                    high_order_edges,    &
                                     order,               &
                                     monotone,            &
+                                    edge_monotone,       &
+                                    min_val,             &
                                     extent_size,         &
                                     dt,                  &
                                     ndf_w2h,             &
@@ -158,8 +168,14 @@ contains
                                     undf_w3_2d,          &
                                     map_w3_2d )
 
-    use subgrid_horizontal_support_mod, only: horizontal_nirvana_recon_spt_edges, &
-                                              horizontal_ppm_recon_spt_edges
+    use subgrid_horizontal_support_mod, only: horizontal_nirvana_case,     &
+                                              horizontal_ppm_case,         &
+                                              nirvana_special_edge,        &
+                                              linear_special_edge,         &
+                                              fourth_order_special_edge,   &
+                                              fourth_nirvana_special_edge, &
+                                              monotonic_horizontal_edge,   &
+                                              subgrid_quadratic_recon
 
     implicit none
 
@@ -200,8 +216,11 @@ contains
     real(kind=r_tran),   intent(in)    :: dry_mass_for_y(undf_w3)
     real(kind=r_tran),   intent(in)    :: dep_dist(undf_w2h)
     real(kind=r_tran),   intent(in)    :: frac_dry_flux(undf_w2h)
+    logical(kind=l_def), intent(in)    :: high_order_edges
     integer(kind=i_def), intent(in)    :: order
     integer(kind=i_def), intent(in)    :: monotone
+    integer(kind=i_def), intent(in)    :: edge_monotone
+    real(kind=r_tran),   intent(in)    :: min_val
     integer(kind=i_def), intent(in)    :: extent_size
     real(kind=r_tran),   intent(in)    :: dt
     real(kind=r_def),    intent(in)    :: panel_id_x(undf_pid)
@@ -211,17 +230,19 @@ contains
 
     ! Integers
     integer(kind=i_def) :: local_dofs_x(2), local_dofs_y(2)
-    integer(kind=i_def) :: dof_iterator
+    integer(kind=i_def) :: dof_iterator, order_case, special_edge_case
     integer(kind=i_def) :: stencil_idx, col_idx, pid_idx
     integer(kind=i_def) :: sign_displacement, int_displacement
-    integer(kind=i_def) :: rel_idx, dep_cell_idx, rel_dep_cell_idx
-    integer(kind=i_def) :: dof_offset, sign_offset
+    integer(kind=i_def) :: rel_idx, rel_dep_cell_idx
+    integer(kind=i_def) :: dof_offset, sign_offset, edge_offset
     integer(kind=i_def) :: k, j, idx_3d
     integer(kind=i_def) :: stencil_half, lam_edge_size, recon_size
+    integer(kind=i_def) :: mono_option
 
     ! Reals
     real(kind=r_tran)   :: displacement, frac_dist
     real(kind=r_tran)   :: recon_field, int_mass
+    real(kind=r_tran)   :: field_edge_left, field_edge_right
 
     real(kind=r_tran),   allocatable :: field_local(:)
     integer(kind=i_def), allocatable :: ipanel_local(:)
@@ -230,8 +251,23 @@ contains
     local_dofs_x = (/ W, E /)
     local_dofs_y = (/ S, N /)
 
-    ! set size of array for reconstruction
-    recon_size = 3 + 2*order
+    ! Set size of array for reconstruction
+    if (high_order_edges) then
+      ! Increase stencil size by one for special edges
+      recon_size  = 3 + 2*order
+      ! The order_case determines which 1D scheme to use
+      ! and is set equal to the order argument
+      order_case  = order
+      edge_offset = 2
+    else
+      ! Use same stencil size as without special edges
+      recon_size  = 3 + 2*(order-1)
+      ! The order_case determines which 1D scheme to use
+      ! and the +10 is to indicate we reduce the order
+      ! at special edges
+      order_case  = order + 10
+      edge_offset = 1
+    end if
     allocate(field_local(recon_size))
     allocate(ipanel_local(recon_size))
 
@@ -309,7 +345,7 @@ contains
           do j = 1, recon_size
             ! If this column has idx 0, find relative index along column of
             ! the departure cell, between - stencil_half and stencil_half
-            rel_idx = rel_dep_cell_idx + j - order - 2
+            rel_idx = rel_dep_cell_idx + j - order - edge_offset
 
             ! Determine the index in the stencil from rel_idx
             ! e.g. for extent 4:
@@ -324,25 +360,108 @@ contains
             field_local(j) = field_for_x(col_idx + k)
             ipanel_local(j) = int(panel_id_x(pid_idx), i_def)
 
-            ! Store index of departure cell for later
-            if (j == order + 2) dep_cell_idx = col_idx
-
           end do
 
-          select case ( order )
+          select case ( order_case )
           case ( 0 )
             ! Constant reconstruction
             recon_field = field_local(2)
+          case ( 10 )
+            ! Constant reconstruction
+            recon_field = field_local(1)
           case ( 1 )
             ! Nirvana reconstruction
-            call horizontal_nirvana_recon_spt_edges(recon_field, frac_dist,    &
-                                                    field_local, ipanel_local, &
-                                                    monotone)
+            ! Get special edge case
+            call horizontal_nirvana_case(ipanel_local(2:4), special_edge_case)
+
+            ! Compute edge values using shifted stencil Nirvana at panel edges
+            call nirvana_special_edge(field_local, special_edge_case,          &
+                                      field_edge_left, field_edge_right)
+
+            ! Apply monotonicity to edges if required
+            if (special_edge_case==1_i_def) then
+              mono_option = monotone
+            else
+              mono_option = edge_monotone
+            end if
+            call monotonic_horizontal_edge(field_local(2:4), mono_option,      &
+                                           min_val, field_edge_left, field_edge_right)
+
+            ! Compute reconstruction using field edge values
+            ! and quadratic subgrid reconstruction
+            call subgrid_quadratic_recon(recon_field, frac_dist,               &
+                                         field_local(3), field_edge_left,      &
+                                         field_edge_right, mono_option)
+          case ( 11 )
+            ! Nirvana reconstruction reverting to linear edges at panel boundaries
+            ! Get special edge case
+            call horizontal_nirvana_case(ipanel_local(1:3), special_edge_case)
+
+            ! Compute edge values reverting to linear interpolation at panel edges
+            call linear_special_edge(field_local, special_edge_case,           &
+                                     field_edge_left, field_edge_right)
+
+            ! Apply monotonicity to edges if required
+            if (special_edge_case==1_i_def) then
+              mono_option = monotone
+            else
+              mono_option = edge_monotone
+            end if
+            call monotonic_horizontal_edge(field_local(1:3), mono_option,      &
+                                          min_val, field_edge_left, field_edge_right)
+
+            ! Compute reconstruction using field edge values
+            ! and quadratic subgrid reconstruction
+            call subgrid_quadratic_recon(recon_field, frac_dist,               &
+                                         field_local(2), field_edge_left,      &
+                                         field_edge_right, mono_option)
           case ( 2 )
-            ! PPM
-            call horizontal_ppm_recon_spt_edges(recon_field, frac_dist,        &
-                                                field_local, ipanel_local,     &
-                                                monotone)
+            ! PPM reconstruction
+            ! Get special edge case
+            call horizontal_ppm_case(ipanel_local(2:6), special_edge_case)
+
+            ! Compute edge values using shifted stencil PPM at panel edges
+            call fourth_order_special_edge(field_local, special_edge_case,     &
+                                           field_edge_left, field_edge_right)
+
+            ! Apply monotonicity to edges if required
+            if (special_edge_case==1_i_def) then
+              mono_option = monotone
+            else
+              mono_option = edge_monotone
+            end if
+            call monotonic_horizontal_edge(field_local(3:5), mono_option,      &
+                                           min_val, field_edge_left, field_edge_right)
+
+            ! Compute reconstruction using field edge values
+            ! and quadratic subgrid reconstruction
+            call subgrid_quadratic_recon(recon_field, frac_dist,               &
+                                         field_local(4), field_edge_left,      &
+                                         field_edge_right, mono_option)
+
+          case ( 12 )
+            ! PPM reconstruction reverting to Nirvana edges at panel boundaries
+            ! Get special edge case
+            call horizontal_ppm_case(ipanel_local(1:5), special_edge_case)
+
+            ! Compute edge values reverting to Nirvana at panel edges
+            call fourth_nirvana_special_edge(field_local, special_edge_case,   &
+                                             field_edge_left, field_edge_right)
+
+            ! Apply monotonicity to edges if required
+            if (special_edge_case==1_i_def) then
+              mono_option = monotone
+            else
+              mono_option = edge_monotone
+            end if
+            call monotonic_horizontal_edge(field_local(2:4), mono_option,      &
+                                           min_val, field_edge_left, field_edge_right)
+
+            ! Compute reconstruction using field edge values
+            ! and quadratic subgrid reconstruction
+            call subgrid_quadratic_recon(recon_field, frac_dist,               &
+                                         field_local(3), field_edge_left,      &
+                                         field_edge_right, mono_option)
           end select
 
           ! Assign flux ========================================================
@@ -426,7 +545,7 @@ contains
           do j = 1, recon_size
             ! If this column has idx 0, find relative index along column of
             ! the departure cell, between - stencil_half and stencil_half
-            rel_idx = rel_dep_cell_idx + j - order - 2
+            rel_idx = rel_dep_cell_idx + j - order - edge_offset
 
             ! Determine the index in the stencil from rel_idx
             ! e.g. for extent 4:
@@ -441,25 +560,108 @@ contains
             field_local(j) = field_for_y(col_idx + k)
             ipanel_local(j) = int(panel_id_y(pid_idx), i_def)
 
-            ! Store index of departure cell for later
-            if (j == order + 2) dep_cell_idx = col_idx
-
           end do
 
-          select case ( order )
+          select case ( order_case )
           case ( 0 )
             ! Constant reconstruction
             recon_field = field_local(2)
+          case ( 10 )
+            ! Constant reconstruction
+            recon_field = field_local(1)
           case ( 1 )
             ! Nirvana reconstruction
-            call horizontal_nirvana_recon_spt_edges(recon_field, frac_dist,    &
-                                                    field_local, ipanel_local, &
-                                                    monotone)
+            ! Get special edge case
+            call horizontal_nirvana_case(ipanel_local(2:4), special_edge_case)
+
+            ! Compute edge values using shifted stencil Nirvana at panel edges
+            call nirvana_special_edge(field_local, special_edge_case,          &
+                                      field_edge_left, field_edge_right)
+
+            ! Apply monotonicity to edges if required
+            if (special_edge_case==1_i_def) then
+              mono_option = monotone
+            else
+              mono_option = edge_monotone
+            end if
+            call monotonic_horizontal_edge(field_local(2:4), mono_option,      &
+                                           min_val, field_edge_left, field_edge_right)
+
+            ! Compute reconstruction using field edge values
+            ! and quadratic subgrid reconstruction
+            call subgrid_quadratic_recon(recon_field, frac_dist,               &
+                                         field_local(3), field_edge_left,      &
+                                         field_edge_right, mono_option)
+          case ( 11 )
+            ! Nirvana reconstruction reverting to linear edges at panel boundaries
+            ! Get special edge case
+            call horizontal_nirvana_case(ipanel_local(1:3), special_edge_case)
+
+            ! Compute edge values reverting to linear interpolation at panel edges
+            call linear_special_edge(field_local, special_edge_case,           &
+                                     field_edge_left, field_edge_right)
+
+            ! Apply monotonicity to edges if required
+            if (special_edge_case==1_i_def) then
+              mono_option = monotone
+            else
+              mono_option = edge_monotone
+            end if
+            call monotonic_horizontal_edge(field_local(1:3), mono_option,      &
+                                           min_val, field_edge_left, field_edge_right)
+
+            ! Compute reconstruction using field edge values
+            ! and quadratic subgrid reconstruction
+            call subgrid_quadratic_recon(recon_field, frac_dist,               &
+                                         field_local(2), field_edge_left,      &
+                                         field_edge_right, mono_option)
           case ( 2 )
-            ! PPM
-            call horizontal_ppm_recon_spt_edges(recon_field, frac_dist,        &
-                                                field_local, ipanel_local,     &
-                                                monotone)
+            ! PPM reconstruction
+            ! Get special edge case
+            call horizontal_ppm_case(ipanel_local(2:6), special_edge_case)
+
+            ! Compute edge values using shifted stencil PPM at panel edges
+            call fourth_order_special_edge(field_local, special_edge_case,     &
+                                           field_edge_left, field_edge_right)
+
+            ! Apply monotonicity to edges if required
+            if (special_edge_case==1_i_def) then
+              mono_option = monotone
+            else
+              mono_option = edge_monotone
+            end if
+            call monotonic_horizontal_edge(field_local(3:5), mono_option,      &
+                                           min_val, field_edge_left, field_edge_right)
+
+            ! Compute reconstruction using field edge values
+            ! and quadratic subgrid reconstruction
+            call subgrid_quadratic_recon(recon_field, frac_dist,               &
+                                         field_local(4), field_edge_left,      &
+                                         field_edge_right, mono_option)
+
+          case ( 12 )
+            ! PPM reconstruction reverting to Nirvana edges at panel boundaries
+            ! Get special edge case
+            call horizontal_ppm_case(ipanel_local(1:5), special_edge_case)
+
+            ! Compute edge values reverting to Nirvana at panel edges
+            call fourth_nirvana_special_edge(field_local, special_edge_case,   &
+                                             field_edge_left, field_edge_right)
+
+            ! Apply monotonicity to edges if required
+            if (special_edge_case==1_i_def) then
+              mono_option = monotone
+            else
+              mono_option = edge_monotone
+            end if
+            call monotonic_horizontal_edge(field_local(2:4), mono_option,      &
+                                           min_val, field_edge_left, field_edge_right)
+
+            ! Compute reconstruction using field edge values
+            ! and quadratic subgrid reconstruction
+            call subgrid_quadratic_recon(recon_field, frac_dist,               &
+                                         field_local(3), field_edge_left,      &
+                                         field_edge_right, mono_option)
           end select
 
           ! Assign flux ========================================================

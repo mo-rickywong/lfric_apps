@@ -59,6 +59,10 @@ module transport_enumerated_types_mod
   integer(kind=i_def), parameter :: ffsl_splitting_swift  = 1_i_def
   integer(kind=i_def), parameter :: ffsl_splitting_cosmic = 2_i_def
 
+  integer(kind=i_def), parameter :: special_edges_monotone_none     = 0_i_def
+  integer(kind=i_def), parameter :: special_edges_monotone_full     = 1_i_def
+  integer(kind=i_def), parameter :: special_edges_monotone_positive = 2_i_def
+
 contains
 
 end module transport_enumerated_types_mod

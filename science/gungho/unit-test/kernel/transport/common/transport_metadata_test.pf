@@ -17,6 +17,7 @@ module transport_metadata_test
                                              horizontal_monotone_none,     &
                                              vertical_monotone_none,       &
                                              vertical_monotone_order_high, &
+                                             special_edges_monotone_none,  &
                                              ffsl_splitting_swift
   use transport_metadata_mod,         only : transport_metadata_type
   use pFUnit_Mod
@@ -78,6 +79,7 @@ contains
     integer(kind=i_def)           :: horizontal_monotone = horizontal_monotone_none
     integer(kind=i_def)           :: vertical_monotone = vertical_monotone_none
     integer(kind=i_def)           :: monotone_order = vertical_monotone_order_high
+    integer(kind=i_def)           :: special_edges_monotone = special_edges_monotone_none
     logical(kind=l_def)           :: enforce_min_value = .true.
     logical(kind=l_def)           :: logspace = .true.
     real(kind=r_tran)             :: min_value = 1.9_r_tran
@@ -96,6 +98,7 @@ contains
                                            horizontal_monotone,     &
                                            vertical_monotone,       &
                                            monotone_order,          &
+                                           special_edges_monotone,  &
                                            enforce_min_value,       &
                                            min_value,               &
                                            logspace,                &
@@ -112,6 +115,7 @@ contains
     @assertEqual(horizontal_monotone, our_metadata%get_horizontal_monotone())
     @assertEqual(vertical_monotone, our_metadata%get_vertical_monotone())
     @assertEqual(monotone_order, our_metadata%get_vertical_monotone_order())
+    @assertEqual(special_edges_monotone, our_metadata%get_special_edges_monotone())
     @assertEqual(enforce_min_value, our_metadata%get_enforce_min_value())
     @assertEqual(min_value, our_metadata%get_min_value())
     @assertEqual(logspace, our_metadata%get_log_space())

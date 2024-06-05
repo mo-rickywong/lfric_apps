@@ -94,7 +94,7 @@ contains
   !> @param[in]     order               Order of reconstruction
   !> @param[in]     monotone            Horizontal monotone option for FFSL
   !> @param[in]     min_val             Minimum value to enforce when using
-  !!                                    quasi-monotone limiter for PPM
+  !!                                    quasi-monotone limiter
   !> @param[in]     extent_size         Stencil extent needed for the LAM edge
   !> @param[in]     dt                  Time step
   !> @param[in]     ndf_w2h             Num of DoFs for W2h per cell
@@ -139,8 +139,10 @@ contains
                                 undf_w3_2d,          &
                                 map_w3_2d )
 
-    use subgrid_horizontal_support_mod, only: horizontal_nirvana_recon, &
-                                              horizontal_ppm_recon
+    use subgrid_horizontal_support_mod, only: fourth_order_horizontal_edge, &
+                                              nirvana_horizontal_edge,      &
+                                              monotonic_horizontal_edge,    &
+                                              subgrid_quadratic_recon
 
     implicit none
 
@@ -195,6 +197,7 @@ contains
     ! Reals
     real(kind=r_tran)   :: displacement, frac_dist
     real(kind=r_tran)   :: recon_field, int_mass
+    real(kind=r_tran)   :: field_edge_left, field_edge_right
 
     real(kind=r_tran), allocatable :: field_local(:)
 
@@ -304,12 +307,34 @@ contains
             recon_field = field_local(1)
           case ( 1 )
             ! Nirvana reconstruction
-            call horizontal_nirvana_recon(recon_field, frac_dist, &
-                                          field_local, monotone)
+            ! Compute edge values using Nirvana interpolation
+            call nirvana_horizontal_edge(field_local, field_edge_left,         &
+                                         field_edge_right)
+
+            ! Apply monotonicity to edges if required
+            call monotonic_horizontal_edge(field_local, monotone, min_val,     &
+                                           field_edge_left, field_edge_right)
+
+            ! Compute reconstruction using field edge values
+            ! and quadratic subgrid reconstruction
+            call subgrid_quadratic_recon(recon_field, frac_dist,               &
+                                         field_local(2), field_edge_left,      &
+                                         field_edge_right, monotone)
           case ( 2 )
-            ! PPM
-            call horizontal_ppm_recon(recon_field, frac_dist, &
-                                      field_local, monotone, min_val)
+            ! PPM reconstruction
+            ! Compute edge values using fourth-order interpolation
+            call fourth_order_horizontal_edge(field_local, field_edge_left,    &
+                                              field_edge_right)
+
+            ! Apply monotonicity to edges if required
+            call monotonic_horizontal_edge(field_local(2:4), monotone,         &
+                                           min_val, field_edge_left, field_edge_right)
+
+            ! Compute reconstruction using field edge values
+            ! and quadratic subgrid reconstruction
+            call subgrid_quadratic_recon(recon_field, frac_dist,               &
+                                         field_local(3), field_edge_left,      &
+                                         field_edge_right, monotone)
           end select
 
           ! Assign flux ========================================================
@@ -417,12 +442,34 @@ contains
             recon_field = field_local(1)
           case ( 1 )
             ! Nirvana reconstruction
-            call horizontal_nirvana_recon(recon_field, frac_dist, &
-                                          field_local, monotone)
+            ! Compute edge values using Nirvana interpolation
+            call nirvana_horizontal_edge(field_local, field_edge_left,         &
+                                         field_edge_right)
+
+            ! Apply monotonicity to edges if required
+            call monotonic_horizontal_edge(field_local, monotone, min_val,     &
+                                           field_edge_left, field_edge_right)
+
+            ! Compute reconstruction using field edge values
+            ! and quadratic subgrid reconstruction
+            call subgrid_quadratic_recon(recon_field, frac_dist,               &
+                                         field_local(2), field_edge_left,      &
+                                         field_edge_right, monotone)
           case ( 2 )
-            ! PPM
-            call horizontal_ppm_recon(recon_field, frac_dist, &
-                                      field_local, monotone, min_val)
+            ! PPM reconstruction
+            ! Compute edge values using fourth-order interpolation
+            call fourth_order_horizontal_edge(field_local, field_edge_left,    &
+                                              field_edge_right)
+
+            ! Apply monotonicity to edges if required
+            call monotonic_horizontal_edge(field_local(2:4), monotone,         &
+                                           min_val, field_edge_left, field_edge_right)
+
+            ! Compute reconstruction using field edge values
+            ! and quadratic subgrid reconstruction
+            call subgrid_quadratic_recon(recon_field, frac_dist,               &
+                                         field_local(3), field_edge_left,      &
+                                         field_edge_right, monotone)
           end select
 
           ! Assign flux ========================================================

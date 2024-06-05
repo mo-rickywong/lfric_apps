@@ -21,6 +21,7 @@ module transport_metadata_collection_test
                                              horizontal_monotone_none,       &
                                              vertical_monotone_none,         &
                                              vertical_monotone_order_linear, &
+                                             special_edges_monotone_none,    &
                                              ffsl_splitting_swift
   use transport_metadata_collection_mod, &
                                       only : transport_metadata_collection_type, &
@@ -113,6 +114,8 @@ contains
                                  max_vert_cfl_calc = max_vert_cfl_calc_uniform,       &
                                  reversible = (/ .false., .false., .false. /),        &
                                  extended_mesh = .false.,                             &
+                                 special_edges_high_order = .false.,                  &
+                                 special_edges_monotone = (/ 0, 0, 0 /),              &
                                  special_edges_treatment = .false.                    &
                                  )
 
@@ -169,6 +172,7 @@ contains
                                        horizontal_monotone_none,       &
                                        vertical_monotone_none,         &
                                        vertical_monotone_order_linear, &
+                                       special_edges_monotone_none,    &
                                        no_enforce_min_value,           &
                                        zero_min_value,                 &
                                        no_logspace,                    &
@@ -187,6 +191,7 @@ contains
                                        horizontal_monotone_none,       &
                                        vertical_monotone_none,         &
                                        vertical_monotone_order_linear, &
+                                       special_edges_monotone_none,    &
                                        no_enforce_min_value,           &
                                        zero_min_value,                 &
                                        no_logspace,                    &
@@ -205,6 +210,7 @@ contains
                                        horizontal_monotone_none,       &
                                        vertical_monotone_none,         &
                                        vertical_monotone_order_linear, &
+                                       special_edges_monotone_none,    &
                                        enforce_min_value,              &
                                        one_min_value,                  &
                                        logspace,                       &

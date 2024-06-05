@@ -76,6 +76,7 @@ contains
                                        horizontal_monotone,     &
                                        vertical_monotone,       &
                                        vertical_monotone_order, &
+                                       special_edges_monotone,  &
                                        ffsl_splitting
 
 
@@ -147,6 +148,7 @@ contains
                                                     horizontal_monotone(config),     &
                                                     vertical_monotone(config),       &
                                                     vertical_monotone_order(config), &
+                                                    special_edges_monotone(config),  &
                                                     enforce_min_value(config),       &
                                                     min_value(config),               &
                                                     log_space(config),               &

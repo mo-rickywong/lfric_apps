@@ -7,7 +7,7 @@
 
 module ffsl_flux_xy_spt_kernel_mod_test
 
-  use constants_mod, only : i_def, r_tran, r_def
+  use constants_mod, only : i_def, r_tran, r_def, l_def
   use pFUnit_Mod
 
   implicit none
@@ -39,6 +39,7 @@ contains
     integer(kind=i_def), parameter :: undf_w2 = ndf_w2*nlayers
     integer(kind=i_def), parameter :: undf_w3 = ndf_w3*nlayers*stencil_size
     integer(kind=i_def), parameter :: order = 2
+    real(kind=r_tran),   parameter :: min_val = 0.0_r_tran
 
     integer(kind=i_def), dimension(ndf_w3)              :: map_w3
     integer(kind=i_def), dimension(ndf_w2)              :: map_w2
@@ -56,15 +57,18 @@ contains
     integer(kind=i_def), dimension(undf_w3) :: face_selector_ns
 
     real(kind=r_tran)   :: dt
-    integer(kind=i_def) :: monotone
+    integer(kind=i_def) :: monotone, edge_monotone
+    logical(kind=l_def) :: high_order_edges
 
     ! Set up maps
     stencil_map(1,:) = (/ 6, 5, 4, 3, 2, 1, 7, 8, 9, 10, 11 /)
     map_w2(:) = (/ 1, 2, 3, 4 /)
     map_w3(1) = 1
 
-    ! Set no monotonicity
+    ! Set no monotonicity and high order special edges
     monotone = horizontal_monotone_none
+    edge_monotone = horizontal_monotone_none
+    high_order_edges = .true.
 
     ! Set up field to have quadratic profile
     field_for_x(:) = (/ 28.0_r_tran, 17.0_r_tran, 10.0_r_tran, 5.0_r_tran, &
@@ -114,8 +118,11 @@ contains
                                 stencil_map,      &
                                 face_selector_ew, &
                                 face_selector_ns, &
+                                high_order_edges, &
                                 order,            &
                                 monotone,         &
+                                edge_monotone,    &
+                                min_val,          &
                                 stencil_extent,   &
                                 dt,               &
                                 ndf_w2,           &
@@ -174,8 +181,11 @@ contains
                                 stencil_map,      &
                                 face_selector_ew, &
                                 face_selector_ns, &
+                                high_order_edges, &
                                 order,            &
                                 monotone,         &
+                                edge_monotone,    &
+                                min_val,          &
                                 stencil_extent,   &
                                 dt,               &
                                 ndf_w2,           &
@@ -228,8 +238,11 @@ contains
                                 stencil_map,      &
                                 face_selector_ew, &
                                 face_selector_ns, &
+                                high_order_edges, &
                                 order,            &
                                 monotone,         &
+                                edge_monotone,    &
+                                min_val,          &
                                 stencil_extent,   &
                                 dt,               &
                                 ndf_w2,           &

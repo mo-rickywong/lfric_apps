@@ -86,6 +86,8 @@ contains
                                  transport_ageofair=.false.,                               &
                                  ageofair_reset_level = 10,                                &
                                  extended_mesh = .false.,                                  &
+                                 special_edges_high_order = .false.,                       &
+                                 special_edges_monotone = (/1/),                           &
                                  special_edges_treatment = .false.                         &
                                  )
     call feign_base_mesh_config( file_prefix='foo',                   &

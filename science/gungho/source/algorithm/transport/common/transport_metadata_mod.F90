@@ -28,6 +28,7 @@ module transport_metadata_mod
     integer(kind=i_def)    :: horizontal_monotone      ! Horizontal monotone scheme
     integer(kind=i_def)    :: vertical_monotone        ! Vertical monotone scheme
     integer(kind=i_def)    :: vertical_monotone_order  ! Order of the vertical monotone scheme
+    integer(kind=i_def)    :: special_edges_monotone   ! Horizontal monotone at special edges
     logical(kind=l_def)    :: enforce_min_value  ! enforce a min value (=T/F)
     real(kind=r_tran)      :: min_value          ! the min value to be enforced
     logical(kind=l_def)    :: log_space ! Do interpolation in log space
@@ -49,6 +50,7 @@ module transport_metadata_mod
     procedure, public :: get_horizontal_monotone
     procedure, public :: get_vertical_monotone
     procedure, public :: get_vertical_monotone_order
+    procedure, public :: get_special_edges_monotone
     procedure, public :: get_monotone_order
     procedure, public :: get_reversible
     procedure, public :: get_ffsl_splitting
@@ -71,6 +73,7 @@ contains
                                             horizontal_monotone,             &
                                             vertical_monotone,               &
                                             vertical_monotone_order,         &
+                                            special_edges_monotone,          &
                                             enforce_min_value,               &
                                             min_value,                       &
                                             log_space,                       &
@@ -91,6 +94,7 @@ contains
     integer(kind=i_def),    intent(in) :: horizontal_monotone
     integer(kind=i_def),    intent(in) :: vertical_monotone
     integer(kind=i_def),    intent(in) :: vertical_monotone_order
+    integer(kind=i_def),    intent(in) :: special_edges_monotone
     logical(kind=l_def),    intent(in) :: enforce_min_value
     real(kind=r_tran),      intent(in) :: min_value
     logical(kind=l_def),    intent(in) :: log_space
@@ -106,6 +110,7 @@ contains
     self%horizontal_monotone     = horizontal_monotone
     self%vertical_monotone       = vertical_monotone
     self%vertical_monotone_order = vertical_monotone_order
+    self%special_edges_monotone  = special_edges_monotone
     self%enforce_min_value       = enforce_min_value
     self%min_value               = min_value
     self%log_space               = log_space
@@ -273,6 +278,20 @@ contains
     vertical_monotone_order = self%vertical_monotone_order
 
   end function get_vertical_monotone_order
+
+  !> @brief Get the special_edges_monotone option
+  !> @param[in] self     The transport_metadata object
+  !> @return             The special_edges_monotone option
+  function get_special_edges_monotone(self) result(special_edges_monotone)
+
+    implicit none
+
+    class(transport_metadata_type), intent(in) :: self
+    integer(kind=i_def)                        :: special_edges_monotone
+
+    special_edges_monotone = self%special_edges_monotone
+
+  end function get_special_edges_monotone
 
   !> @brief Get the enforce_min_value option
   !> @param[in] self     The transport_metadata object

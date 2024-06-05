@@ -31,6 +31,7 @@ module check_configuration_mod
                                   equation_form,                   &
                                   extended_mesh,                   &
                                   special_edges_treatment,         &
+                                  special_edges_high_order,        &
                                   dry_field_name,                  &
                                   field_names,                     &
                                   use_density_predictor,           &
@@ -426,8 +427,7 @@ contains
         end if
 
         if ( (horizontal_monotone(i) == horizontal_monotone_qm_pos) .and. &
-              .not. (horizontal_method(i) == split_method_ffsl)     .and. &
-              .not. (outer_order == 2) ) then
+              .not. (horizontal_method(i) == split_method_ffsl) ) then
           write( log_scratch_space, '(A)') trim(field_names(i)) // ' variable ' // &
             'is set to use quasi-monotone positive horizontal monotonicity, but this is ' // &
             'incompatible with the choice of horizontal method'
@@ -574,12 +574,12 @@ contains
       ! For SL schemes minimum stencil depth of
       ! order + 1 is required. This is then extended
       ! by the dep_pt_stencil_extent (effectively the
-      ! maximum CFL number we want the scheme to work for
+      ! maximum CFL number we want the scheme to work for)
       sl_reconstruction_depth = max( inner_order, outer_order ) + 1
       stencil_depth = max( stencil_depth,          &
                            dep_pt_stencil_extent + &
                            sl_reconstruction_depth )
-      if ( special_edges_treatment ) then
+      if ( special_edges_treatment .AND. special_edges_high_order ) then
          stencil_depth = stencil_depth + 1_i_def
       end if
     end if
