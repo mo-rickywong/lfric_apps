@@ -22,15 +22,16 @@
     {# For the extract checker need to make sure an lfric_atm #}
     {# intel, fast-debug, 64 bit build will occur #}
     {% set lfric_atm = namespace(build_task="") %}
-    {% for task in expanded_task_list %}
+    {% for t in expanded_task_list %}
         {% if not lfric_atm.build_task %}
-            {% if task.startswith("build") and
-                  "lfric_atm" in task and
-                  site_vars["scripts_platform"] in task and
-                  "intel" in task and
-                  "fast-debug" in task and
-                  "64bit" in task %}
-                {% set lfric_atm.build_task = task %}
+            {% if "lfric_atm" in t and
+                  site_vars["scripts_platform"] in t and
+                  "intel" in t and
+                  "fast-debug" in t and
+                  "64bit" in t %}
+                {% set lfric_atm.build_task = "build_lfric_atm_"~
+                                              site_vars["scripts_platform"]~
+                                              "_intel_fast-debug-64bit" %}
             {% endif %}
         {% endif %}
     {% endfor %}
