@@ -1,0 +1,3 @@
+Inner product checksum wind = 43246522E397AD84
+Inner product checksum buoyancy = 3FB196F99C2F07A9
+Inner product checksum pressure = 413AD2EC449AEED7

@@ -51,6 +51,26 @@
     ],
     }) %}
 
+
+{# EX1A Groups #}
+{% do site_groups.update({
+    "solver_ex1a_developer": [
+        "solver_bicgstab-C24_ex1a_gnu_fast-debug-64bit",
+        "solver_cg-C24_ex1a_gnu_fast-debug-64bit",
+        "solver_fgmres-C24_ex1a_gnu_fast-debug-64bit",
+        "solver_gcr-C24_ex1a_gnu_fast-debug-64bit",
+        "solver_gmres-C24_ex1a_gnu_fast-debug-64bit",
+        "solver_jacobi-C24_ex1a_gnu_fast-debug-64bit",
+        "solver_prec_only-C24_ex1a_gnu_fast-debug-64bit",
+    ],
+    "solver_ex1a": [
+        "solver_ex1a_developer",
+    ],
+    "solver_ex1a_build": [
+        "build_solver_ex1a_gnu_fast-debug-64bit",
+    ],
+    }) %}
+
 {# Platform Generic Groups #}
 {% do site_groups.update({
     "solver_developer": [
@@ -83,5 +103,10 @@
 {% do site_groups.xc40_developer.extend(site_groups.solver_xc40_developer) %}
 {% do site_groups.xc40.extend(site_groups.solver_xc40) %}
 {% do site_groups.xc40_build.extend(site_groups.solver_xc40_build) %}
+
+{# EX1A Extends #}
+{% do site_groups.ex1a_developer.extend(site_groups.solver_ex1a_developer) %}
+{% do site_groups.ex1a.extend(site_groups.solver_ex1a) %}
+{% do site_groups.ex1a_build.extend(site_groups.solver_ex1a_build) %}
 
 {% do LOG.debug("Finished in site/meto/groups/groups_solver.cylc") %}

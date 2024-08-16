@@ -65,6 +65,31 @@
     ],
     }) %}
 
+{# EX1A Groups #}
+{% do site_groups.update({
+    "gravity_wave_ex1a_developer": [
+        "gravity_wave_default-C24_ex1a_gnu_fast-debug-64bit",
+        "gravity_wave_multigrid-C24_MG_ex1a_gnu_fast-debug-64bit",
+        "gravity_wave_limited_300x4-BiP300x4-1000x2000_ex1a_gnu_fast-debug-64bit",
+        "gravity_wave_limited_spherical_50x50_LAM50x50-2x2_ex1a_gnu_fast-debug-64bit",
+        "gravity_wave_limited_c24-C24_ex1a_gnu_fast-debug-64bit",
+        "gravity_wave_limited_c24_rec-C24_ex1a_gnu_fast-debug-64bit",
+        "gravity_wave_ex1a_canned",
+    ],
+    "gravity_wave_ex1a": [
+        "gravity_wave_ex1a_developer",
+    ],
+    "gravity_wave_ex1a_unit_tests": [
+        "gravity_wave_unit_tests_ex1a_gnu_64bit",
+    ],
+    "gravity_wave_ex1a_canned": [
+        "gravity_wave_canned_ex1a_gnu_fast-debug-64bit",
+    ],
+    "gravity_wave_ex1a_build": [
+        "build_gravity_wave_ex1a_gnu_fast-debug-64bit",
+    ],
+    }) %}
+
 {# Platform Generic Groups #}
 {% do site_groups.update({
     "gravity_wave_developer": [
@@ -109,5 +134,11 @@
 {% do site_groups.xc40.extend(site_groups.gravity_wave_xc40) %}
 {% do site_groups.xc40_unit_tests.extend(site_groups.gravity_wave_xc40_unit_tests) %}
 {% do site_groups.xc40_build.extend(site_groups.gravity_wave_xc40_build) %}
+
+{# EX1A Extends #}
+{% do site_groups.ex1a_developer.extend(site_groups.gravity_wave_ex1a_developer) %}
+{% do site_groups.ex1a.extend(site_groups.gravity_wave_ex1a) %}
+{% do site_groups.ex1a_unit_tests.extend(site_groups.gravity_wave_ex1a_unit_tests) %}
+{% do site_groups.ex1a_build.extend(site_groups.gravity_wave_ex1a_build) %}
 
 {% do LOG.debug("Finished iin site/meto/groups/groups_gravity_wave.cylc") %}

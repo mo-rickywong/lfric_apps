@@ -17,4 +17,4 @@
     {% endif %}
 {% endif %}
 
-{% do LOG.debug("Finised in site/meto/solver/tasks_solver_xc40.cylc") %}
+{% do LOG.debug("Finished in site/meto/solver/tasks_solver_xc40.cylc") %}

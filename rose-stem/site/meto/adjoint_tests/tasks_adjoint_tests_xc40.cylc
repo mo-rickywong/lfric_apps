@@ -17,4 +17,4 @@
     {% endif %}
 {% endif %}
 
-{% do LOG.debug("Finised in site/meto/adjoint_tests/tasks_adjoint_tests_xc40.cylc") %}
+{% do LOG.debug("Finished in site/meto/adjoint_tests/tasks_adjoint_tests_xc40.cylc") %}

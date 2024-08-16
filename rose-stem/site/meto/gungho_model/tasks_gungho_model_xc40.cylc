@@ -67,4 +67,4 @@
     {% endif %}
 {% endif %}
 
-{% do LOG.debug("Finised in site/meto/gungho_model/tasks_gungho_model_xc40.cylc") %}
+{% do LOG.debug("Finished in site/meto/gungho_model/tasks_gungho_model_xc40.cylc") %}

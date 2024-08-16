@@ -17,4 +17,4 @@
     {% endif %}
 {% endif %}
 
-{% do LOG.debug("Finised in site/meto/gravity_wave/tasks_gravity_wave_xc40.cylc") %}
+{% do LOG.debug("Finished in site/meto/gravity_wave/tasks_gravity_wave_xc40.cylc") %}

@@ -5,6 +5,74 @@
 {# ########################################################################### #}
 {% do LOG.debug("Entered site/meto/gungho_model/tasks_gungho_model_ex1a.cylc") %}
 
+{% if task_ns.conf_name == "deep-hot-jupiter-C24_MG" %}
+
+    {% do task_dict.update({
+        "wallclock": 30,
+    }) %}
+
+{% elif task_ns.conf_name == "dcmip301-C24" %}
+
+    {% do task_dict.update({
+        "wallclock": 15,
+    }) %}
+
+{% elif task_ns.conf_name == "lfric-real-domain-C48_MG" %}
+
+    {% do task_dict.update({
+        "wallclock": 25,
+    }) %}
+
+{% elif task_ns.conf_name == "rk-dcmip301-C24" %}
+
+    {% do task_dict.update({
+        "wallclock": 30,
+    }) %}
+
+{% elif task_ns.conf_name == "robert-moist-lam-BiP100x4-10x10" %}
+
+    {% do task_dict.update({
+        "wallclock": 25,
+    }) %}
+
+{% elif task_ns.conf_name == "robert-moist-smag-BiP100x4-10x10" %}
+
+    {% do task_dict.update({
+        "wallclock": 30,
+    }) %}
+
+{% elif task_ns.conf_name == "sbr-alt1-C24_MG_op" %}
+
+    {% do task_dict.update({
+        "wallclock": 25,
+    }) %}
+
+{% elif task_ns.conf_name == "sbr-alt2-C24s_MG" %}
+
+    {% do task_dict.update({
+        "wallclock": 25,
+    }) %}
+
+{% elif task_ns.conf_name == "schar_cart_8s_lagged_orog-BiP200x4-500x500" %}
+
+    {% do task_dict.update({
+        "wallclock": 20,
+    }) %}
+
+{% elif task_ns.conf_name == "schar_cart_8s-BiP200x4-500x500" %}
+
+    {% do task_dict.update({
+        "wallclock": 20,
+    }) %}
+
+{% elif task_ns.conf_name == "shallow-hot-jupiter-C24_MG" %}
+
+    {% do task_dict.update({
+        "wallclock": 20,
+    }) %}
+
+{% endif %}
+
 {# Set default values #}
 {% if task_dict %}
     {% if "full-debug" in task %}
@@ -17,4 +85,4 @@
     {% endif %}
 {% endif %}
 
-{% do LOG.debug("Finised in site/meto/gungho_model/tasks_gungho_model_ex1a.cylc") %}
+{% do LOG.debug("Finished in site/meto/gungho_model/tasks_gungho_model_ex1a.cylc") %}

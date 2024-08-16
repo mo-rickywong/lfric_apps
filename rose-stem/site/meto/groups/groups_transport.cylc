@@ -274,7 +274,39 @@
         "transport_xc40_comparison",
     ],
     }) %}
-
+{# EX1A groups #}
+{% do site_groups.update({
+    "transport_ex1a_developer": [
+        "transport_cylinder_xz_ffsl-BiP100x10-20x20_ex1a_gnu_fast-debug-64bit",
+        "transport_cylinder_xz_mol-BiP100x10-20x20_ex1a_gnu_fast-debug-64bit",
+        "transport_cylinder_xz_split-BiP100x10-20x20_ex1a_gnu_fast-debug-64bit",
+        "transport_eternal_fountain_xz_split_vhv-BiP100x10-20x20_ex1a_gnu_fast-debug-64bit",
+        "transport_hadley_dcmip_ffsl-C48_ex1a_gnu_fast-debug-64bit",
+        "transport_hadley_dcmip_ffsl_overset-C48_ex1a_gnu_fast-debug-64bit",
+        "transport_hadley_dcmip_ffsl_3d_overset-C48_ex1a_gnu_fast-debug-64bit",
+        "transport_hadley_dcmip_mol-C48_ex1a_gnu_fast-debug-64bit",
+        "transport_hadley_dcmip_mol1d_overset-C48_ex1a_gnu_fast-debug-64bit",
+        "transport_hadley_dcmip_split-C48_ex1a_gnu_fast-debug-64bit",
+        "transport_sbr_hori_cosine_ffsl-C32_ex1a_gnu_fast-debug-64bit",
+        "transport_sbr_hori_cosine_mol-C32_ex1a_gnu_fast-debug-64bit",
+        "transport_sbr_hori_cosine_mol-C32_ex1a_gnu_full-debug-64bit",
+        "transport_sbr_hori_cos_phi_ffsl_nirv_spt_edges-C32_ex1a_gnu_fast-debug-64bit",
+        "transport_sbr_hori_cos_phi_ffsl_ppm_spt_edges-C32_ex1a_gnu_fast-debug-64bit",
+        "transport_ex1a_canned",
+    ],
+    "transport_ex1a_unit_tests": [
+        "transport_unit_tests_ex1a_gnu_64bit",
+    ],
+    "transport_ex1a": [
+        "transport_ex1a_developer",
+    ],
+    "transport_ex1a_build": [
+        "build_transport_ex1a_gnu_fast-debug-64bit",
+    ],
+    "transport_ex1a_canned": [
+        "transport_canned_ex1a_gnu_fast-debug-64bit",
+    ],
+  }) %}
 {# Platform Generic Extends #}
 {% do site_groups.developer.extend(site_groups.transport_developer) %}
 {% do site_groups.all.extend(site_groups.transport) %}
@@ -292,5 +324,11 @@
 {% do site_groups.xc40.extend(site_groups.transport_xc40) %}
 {% do site_groups.xc40_unit_tests.extend(site_groups.transport_xc40_unit_tests) %}
 {% do site_groups.xc40_build.extend(site_groups.transport_xc40_build) %}
+
+{# EX1A Extends #}
+{% do site_groups.ex1a_developer.extend(site_groups.transport_ex1a_developer) %}
+{% do site_groups.ex1a.extend(site_groups.transport_ex1a) %}
+{% do site_groups.ex1a_unit_tests.extend(site_groups.transport_ex1a_unit_tests) %}
+{% do site_groups.ex1a_build.extend(site_groups.transport_ex1a_build) %}
 
 {% do LOG.debug("Finished in site/meto/groups/groups_transport.cylc") %}

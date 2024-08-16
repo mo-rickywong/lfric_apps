@@ -48,6 +48,25 @@
     ],
     })  %}
 
+{# EX1A Groups #}
+{% do site_groups.update({
+    "adjoint_tests_ex1a_developer": [
+        "adjoint_tests_default-C12_ex1a_gnu_fast-debug-64bit",
+        "adjoint_tests_default-C12_ex1a_gnu_full-debug-64bit",
+        "adjoint_tests_ex1a_canned",
+    ],
+    "adjoint_tests_ex1a": [
+        "adjoint_tests_ex1a_developer",
+    ],
+    "adjoint_tests_ex1a_canned": [
+        "adjoint_tests_canned_ex1a_gnu_fast-debug-64bit",
+    ],
+    "adjoint_tests_ex1a_build": [
+        "build_adjoint_tests_ex1a_gnu_fast-debug-64bit",
+        "build_adjoint_tests_ex1a_gnu_full-debug-64bit",
+    ],
+    })  %}
+
 {# Platform Generic Groups #}
 {% do site_groups.update({
     "adjoint_tests_developer": [
