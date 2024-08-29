@@ -70,7 +70,10 @@ document-latex: ALWAYS
 #
 unit-tests/%: export BIN_DIR ?= $(PROJECT_DIR)/test
 unit-tests/%: export EXTERNAL_STATIC_LIBRARIES += pfunit
-unit-tests/%: export IMPORT_PARTS  = $(CORE_ROOT_DIR)/infrastructure
+unit-tests/%: export IMPORT_PARTS  = $(CORE_ROOT_DIR)/infrastructure \
+                                     $(CORE_ROOT_DIR)/components/science \
+                                     $(APPS_ROOT_DIR)/science/gungho \
+                                     $(APPS_ROOT_DIR)/science/linear
 unit-tests/%: export PROGRAMS = adjoint_unit_tests
 unit-tests/%: export PROJECT = adjoint
 unit-tests/%: export SOURCE_DIR = source

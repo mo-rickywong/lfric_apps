@@ -95,10 +95,7 @@ build: export BIN_DIR       ?= $(PROJECT_DIR)/bin
 build: export CXX_LINK       = TRUE
 build: export PROGRAMS      := $(basename $(notdir $(shell find source -maxdepth 1 -name '*.[Ff]90' -print)))
 build: export PROJECT        = $(PROJECT_NAME)
-build: export PSYAD_WDIR    := $(WORKING_DIR)/../psyad
 build: export WORKING_DIR   := $(WORKING_DIR)
-build: export ADJOINT_BUILD := $(APPS_ROOT_DIR)/science/adjoint/build
-build: export PATCH_DIR     := $(APPS_ROOT_DIR)/science/adjoint/patches
 
 ifeq "$(PROFILE)" "full-debug"
 build: export FFLAG_GROUPS = DEBUG WARNINGS INIT RUNTIME NO_OPTIMISATION FORTRAN_STANDARD
@@ -110,14 +107,6 @@ else
   $(error Unrecognised profile "$(PROFILE)". Must be one of full-debug, fast-debug or production)
 endif
 build: ALWAYS
-	$(call MESSAGE,========================================)
-	$(call MESSAGE,Building PSyAD kernels...)
-	$(call MESSAGE,========================================)
-	$Q$(MAKE) $(QUIET_ARG) -f $(ADJOINT_BUILD)/build_psyad.mk
-	$(call MESSAGE,========================================)
-	$(call MESSAGE,Generating PSyAD driver module file...)
-	$(call MESSAGE,========================================)
-	$Q$(MAKE) $(QUIET_ARG) -f $(ADJOINT_BUILD)/psyad_driver.mk
 	$(call MESSAGE,========================================)
 	$(call MESSAGE,Importing internal dependencies...)
 	$(call MESSAGE,========================================)
