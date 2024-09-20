@@ -82,7 +82,10 @@ module gungho_model_mod
   use setup_orography_alg_mod,    only : setup_orography_alg
   use derived_config_mod,         only : l_esm_couple
 #ifdef COUPLED
-  use coupler_mod,                only : cpl_define, cpl_fields
+  use coupler_mod,                only : create_coupling_fields, &
+                                         generate_coupling_field_collections
+  use coupling_mod,               only : coupling_type,       &
+                                         get_coupling_from_collection
 #endif
 
 #ifdef UM_PHYSICS
@@ -353,7 +356,10 @@ contains
 
 #ifdef COUPLED
     type(field_collection_type), pointer :: depository
-    type(field_collection_type), pointer :: prognostic_fields
+    type(field_collection_type), pointer :: cpl_snd_2d
+    type(field_collection_type), pointer :: cpl_rcv_2d
+    type(field_collection_type), pointer :: cpl_snd_0d
+    type(coupling_type), pointer         :: coupling_ptr
 #endif
     type(inventory_by_mesh_type), pointer :: chi_inventory      => null()
     type(inventory_by_mesh_type), pointer :: panel_id_inventory => null()
@@ -675,28 +681,43 @@ contains
     !=======================================================================
     ! 3.0 Initialise coupling
     !=======================================================================
-!> @todo this must be done in infrastructure for now (before XIOS context
-!>       initialization). With XIOS 3 it will be possible to move it outside
-!>       infrastructure and remove change in gungho_prognostics_mod.f90
 #ifdef COUPLED
     if( l_esm_couple ) then
        call log_event("Initialising coupler", LOG_LEVEL_INFO)
        ! Add fields used in coupling
        depository => modeldb%fields%get_field_collection("depository")
-       prognostic_fields => modeldb%fields%get_field_collection( &
-                                                         "prognostic_fields")
-       call cpl_fields( mesh, twod_mesh, depository, &
-                        prognostic_fields )
+
+       call create_coupling_fields( mesh,       &
+                                    twod_mesh,  &
+                                    modeldb )
        ! Define coupling interface
+
        ! Set up collections to hold 2d coupling fields
-       call modeldb%model_data%cpl_snd_2d%initialise(name="cpl_snd_2d")
-       call modeldb%model_data%cpl_rcv_2d%initialise(name="cpl_rcv_2d")
+       call modeldb%fields%add_empty_field_collection("cpl_snd_2d" , &
+                                                 table_len = 30)
+       call modeldb%fields%add_empty_field_collection("cpl_rcv_2d" , &
+                                                 table_len = 30)
+
+       cpl_snd_2d => modeldb%fields%get_field_collection("cpl_snd_2d")
+       cpl_rcv_2d => modeldb%fields%get_field_collection("cpl_rcv_2d")
+
        ! Set up collection to hold 0d (scalar) coupling fields
-       call modeldb%model_data%cpl_snd_0d%initialise(name="cpl_snd_0d")
-       call cpl_define( twod_mesh, chi, depository,    &
-                        modeldb%model_data%cpl_snd_2d, &
-                        modeldb%model_data%cpl_rcv_2d, &
-                        modeldb%model_data%cpl_snd_0d )
+       call modeldb%fields%add_empty_field_collection("cpl_snd_0d" , &
+                                                 table_len = 30)
+
+       cpl_snd_0d => modeldb%fields%get_field_collection("cpl_snd_0d")
+
+       call generate_coupling_field_collections(cpl_snd_2d, &
+                                                cpl_rcv_2d, &
+                                                cpl_snd_0d, &
+                                                depository)
+
+       ! Extract the coupling object from the modeldb key-value pair collection
+       coupling_ptr => get_coupling_from_collection(modeldb%values, "coupling" )
+       call coupling_ptr%define_partitions(modeldb%mpi,twod_mesh)
+       call coupling_ptr%define_variables( cpl_snd_2d, &
+                                           cpl_rcv_2d, &
+                                           cpl_snd_0d )
 
     endif
 #endif

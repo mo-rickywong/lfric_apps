@@ -25,9 +25,7 @@ module accumulate_send_fields_2d_mod
                                            log_scratch_space
   use mesh_mod,                      only: mesh_type
   use sci_multi_extract_kernel_mod,  only: multi_extract_kernel_type
-  use process_send_fields_2d_mod,    only: cpl_reset_field, &
-                                           sea_frac_previous, &
-                                           sea_ice_frac_previous
+  use process_send_fields_2d_mod,    only: cpl_reset_field
 
 #if defined(UM_PHYSICS)
   use cv_run_mod,                    only: l_param_conv
@@ -78,8 +76,8 @@ module accumulate_send_fields_2d_mod
 
     character(str_def)                           :: fld_name
 
-    sea_frac_previous_ptr => sea_frac_previous
-    sea_ice_frac_previous_ptr => sea_ice_frac_previous
+    call depository%get_field("sea_ice_frac_previous",sea_ice_frac_previous_ptr)
+    call depository%get_field("sea_frac_previous",sea_frac_previous_ptr)
 
     fld_name = fld%get_name()
 
@@ -214,7 +212,6 @@ module accumulate_send_fields_2d_mod
           !10m wind
           call depository%get_field("wspd10m", fld_ptr1)
           call invoke(inc_X_plus_Y( dep_fld, fld_ptr1 ) )
-          fld_ptr1 => null()
         case ("lf_evap")
           call depository%get_field("tile_moisture_flux", fld_ptr1)
           ! Initialise temporary fields

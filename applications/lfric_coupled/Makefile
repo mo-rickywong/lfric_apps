@@ -27,6 +27,7 @@ export IGNORE_DEPENDENCIES += mod_oasis
 export EXTERNAL_STATIC_LIBRARIES += psmile.MPI1 mct mpeu scrip
 
 export INTERNAL_DEPENDENCIES = $(CORE_ROOT_DIR)/infrastructure \
+                               $(CORE_ROOT_DIR)/components/coupling \
                                $(CORE_ROOT_DIR)/components/driver \
                                $(CORE_ROOT_DIR)/components/science \
                                $(CORE_ROOT_DIR)/components/inventory \

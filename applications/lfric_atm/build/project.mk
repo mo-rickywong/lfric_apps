@@ -7,4 +7,3 @@
 $(info UM physics project specials)
 
 export PRE_PROCESS_MACROS += UM_PHYSICS
-export PRE_PROCESS_MACROS += COUPLED

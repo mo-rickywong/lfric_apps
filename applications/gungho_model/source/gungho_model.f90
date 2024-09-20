@@ -57,7 +57,7 @@ program gungho_model
 
   call modeldb%io_contexts%initialise(application_name, 100)
 
-  call init_comm( application_name, modeldb%mpi )
+  call init_comm( application_name, modeldb )
   call get_initial_filename( filename )
   call init_config( filename, gungho_required_namelists, &
                     modeldb%configuration )
@@ -94,6 +94,6 @@ program gungho_model
   call final_timers( application_name )
   call final_logger( application_name )
   call final_config()
-  call final_comm( modeldb%mpi )
+  call final_comm( modeldb )
 
 end program gungho_model

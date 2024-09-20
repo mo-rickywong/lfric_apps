@@ -36,7 +36,7 @@ program transport
 
   call modeldb%configuration%initialise( program_name, table_len=10 )
   modeldb%mpi => global_mpi
-  call init_comm( program_name, modeldb%mpi )
+  call init_comm( program_name, modeldb )
   call get_initial_filename( filename )
   call init_config( filename, transport_required_namelists, &
                     modeldb%configuration )
@@ -70,6 +70,6 @@ program transport
   call final_timers( program_name )
   call final_logger( program_name )
   call final_config()
-  call final_comm( modeldb%mpi )
+  call final_comm( modeldb )
 
 end program transport

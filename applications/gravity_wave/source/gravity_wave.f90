@@ -35,7 +35,7 @@ program gravity_wave
   call modeldb%configuration%initialise( program_name, table_len=10 )
 
   modeldb%mpi => global_mpi
-  call init_comm( program_name, modeldb%mpi )
+  call init_comm( program_name, modeldb )
   call get_initial_filename( filename )
   call init_config( filename, gravity_wave_required_namelists, &
                     modeldb%configuration )
@@ -67,6 +67,6 @@ program gravity_wave
   call final_collections()
   call final_logger( program_name )
   call final_config()
-  call final_comm( modeldb%mpi )
+  call final_comm( modeldb )
 
 end program gravity_wave

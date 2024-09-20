@@ -8,12 +8,12 @@
 
 module process_send_fields_0d_mod
 
-  use clock_mod,                     only: clock_type
   use constants_mod,                 only: str_def, l_def, i_def, r_def, imdi, &
                                            rmdi, i_timestep
   use field_collection_mod,          only: field_collection_type
   use field_mod,                     only: field_type
   use geometric_constants_mod,       only: get_latitude
+  use gungho_modeldb_mod,            only: modeldb_type
   use log_mod,                       only: log_event,       &
                                            LOG_LEVEL_INFO,  &
                                            LOG_LEVEL_ERROR, &
@@ -32,17 +32,17 @@ module process_send_fields_0d_mod
 
   !> @brief Generates scalar values to be coupled
   !> @param[inout] fld        LFRic field from which the scalar is reduced
-  !> @param[in]    depository Field collection - all fields
-  !> @param[in]    clock      Model clock
+  !> @param[inout] modeldb The working data set for a model run
   !> @param[out]   scalar     Scalar value calculated by this procedure
-  subroutine process_send_fields_0d(fld, depository, clock, scalar)
+  subroutine process_send_fields_0d(fld, modeldb, scalar)
 
   implicit none
   type( field_type ), pointer, intent(inout)   :: fld
-  type( field_collection_type ), intent(in)    :: depository
-  class(clock_type), intent(in)                :: clock
+  type( modeldb_type ),        intent(inout)   :: modeldb
   real(r_def), intent(out)                     :: scalar
 
+  ! Collection that holds all fields
+  type( field_collection_type ), pointer       :: depository
   ! Field for holding latitudes of dofs
   type( field_type ), pointer                  :: latitude
   ! Mesh that fields are held on
@@ -56,9 +56,11 @@ module process_send_fields_0d_mod
 
   fld_name = fld%get_name()
 
+  depository => modeldb%fields%get_field_collection("depository")
+
   ! We need to detect if this is the first step after a start/restart.
   ! If it is then we can initialise the coupling fields
-  if (clock%get_step() ==  clock%get_first_step() ) then
+  if (modeldb%clock%get_step() ==  modeldb%clock%get_first_step() ) then
 
     call cpl_reset_field(fld, depository)
 

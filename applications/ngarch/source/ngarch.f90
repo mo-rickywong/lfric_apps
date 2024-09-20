@@ -48,7 +48,7 @@ program ngarch
 
 
   modeldb%mpi => global_mpi
-  call init_comm( application_name, modeldb%mpi )
+  call init_comm( application_name, modeldb )
   call get_initial_filename( filename )
   call init_config( filename,                            &
                     ngarch_required_namelists, &
@@ -72,6 +72,6 @@ program ngarch
   call final_collections()
   call final_logger( application_name )
   call final_config()
-  call final_comm( modeldb%mpi )
+  call final_comm( modeldb )
 
 end program ngarch

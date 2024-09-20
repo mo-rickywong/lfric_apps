@@ -253,19 +253,13 @@ contains
        call log_event( log_scratch_space, LOG_LEVEL_INFO )
 
        depository => modeldb%fields%get_field_collection("depository")
-
        call save_sea_ice_frac_previous(depository)
 
        ! Receive all incoming (ocean/seaice fields) from the coupler
-       call cpl_rcv( modeldb%model_data%cpl_rcv_2d, &
-                     depository, &
-                     modeldb%clock )
+       call cpl_rcv( modeldb )
 
        ! Send all outgoing (ocean/seaice driving fields) to the coupler
-       call cpl_snd( modeldb%model_data%cpl_snd_2d, &
-                     modeldb%model_data%cpl_snd_0d, &
-                     depository, &
-                     modeldb%clock )
+       call cpl_snd( modeldb )
 
     endif
 #endif
@@ -364,9 +358,7 @@ contains
        ! Ensure coupling fields are updated at the end of a cycle to ensure the values
        ! stored in and recovered from checkpoint dumps are correct and reproducible
        ! when (re)starting subsequent runs!
-       call cpl_fld_update(modeldb%model_data%cpl_snd_2d, &
-                           depository,                    &
-                           modeldb%clock)
+       call cpl_fld_update(modeldb)
     endif
 #endif
 

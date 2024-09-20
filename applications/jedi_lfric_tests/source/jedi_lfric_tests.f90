@@ -52,7 +52,7 @@ program jedi_lfric_tests
 
   call modeldb%io_contexts%initialise(application_name, 100)
 
-  call init_comm( application_name, modeldb%mpi )
+  call init_comm( application_name, modeldb )
   call get_initial_filename( filename )
   call init_config( filename, gungho_required_namelists, &
                     modeldb%configuration )
@@ -76,6 +76,6 @@ program jedi_lfric_tests
   call final_collections()
   call final_logger( application_name )
   call final_config()
-  call final_comm( modeldb%mpi )
+  call final_comm( modeldb )
 
 end program jedi_lfric_tests

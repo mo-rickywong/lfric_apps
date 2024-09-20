@@ -17,6 +17,7 @@
 program lfric_coupled
 
   use cli_mod,                only : get_initial_filename
+  use coupler_mod,            only : set_cpl_name
   use driver_collections_mod, only : init_collections, final_collections
   use driver_comm_mod,        only : init_comm, final_comm
   use driver_config_mod,      only : init_config, final_config
@@ -33,21 +34,13 @@ program lfric_coupled
   type(modeldb_type) :: modeldb
 
   character(*), parameter :: application_name = "lfric_coupled"
+  character(*), parameter :: cpl_component_name = "lfric"
 
   character(:), allocatable :: filename
 
   modeldb%mpi => global_mpi
 
   call modeldb%configuration%initialise( application_name, table_len=10 )
-
-  call init_comm( application_name, modeldb%mpi )
-  call get_initial_filename( filename )
-  call init_config( filename, gungho_required_namelists, &
-                    modeldb%configuration )
-  call init_logger( modeldb%mpi%get_comm(), application_name )
-  call init_collections()
-  call init_time( modeldb )
-  deallocate(filename)
 
   call modeldb%values%initialise( 'values', 5 )
 
@@ -60,6 +53,16 @@ program lfric_coupled
 
   call modeldb%io_contexts%initialise(application_name, 100)
 
+  call set_cpl_name(modeldb, cpl_component_name)
+  call init_comm( application_name, modeldb )
+  call get_initial_filename( filename )
+  call init_config( filename, gungho_required_namelists, &
+                    modeldb%configuration )
+  call init_logger( modeldb%mpi%get_comm(), application_name )
+  call init_collections()
+  call init_time( modeldb )
+  deallocate(filename)
+
   call initialise( application_name, modeldb )
   do while (modeldb%clock%tick())
     call step( modeldb )
@@ -70,6 +73,6 @@ program lfric_coupled
   call final_collections()
   call final_logger( application_name )
   call final_config()
-  call final_comm( modeldb%mpi )
+  call final_comm( modeldb )
 
 end program lfric_coupled

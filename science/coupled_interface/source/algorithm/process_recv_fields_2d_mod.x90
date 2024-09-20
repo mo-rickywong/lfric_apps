@@ -1,5 +1,5 @@
 !-----------------------------------------------------------------------------
-! (c) Crown copyright 2021 Met Office. All rights reserved.
+! (c) Crown copyright 2024 Met Office. All rights reserved.
 ! The file LICENCE, distributed with this code, contains details of the terms
 ! under which the code may be used.
 !-----------------------------------------------------------------------------
@@ -45,24 +45,24 @@ module process_recv_fields_2d_mod
    real(kind=r_def),              intent(in)    :: therm_cond_sice_snow
 
    !local variables
-   type( field_type ), pointer        :: sea_surf_temp_ptr => null()
-   type( field_type ), pointer        :: sea_ice_fraction_ptr => null()
-   type( field_type ), pointer        :: sea_ice_thickness_ptr => null()
-   type( field_type ), pointer        :: sea_ice_layer_t_ptr => null()
-   type( field_type ), pointer        :: sea_ice_conductivity_ptr => null()
-   type( field_type ), pointer        :: sea_ice_snow_depth_ptr => null()
-   type( field_type ), pointer        :: melt_pond_fraction_ptr => null()
-   type( field_type ), pointer        :: melt_pond_depth_ptr => null()
-   type( field_type ), pointer        :: sea_u_current_ptr => null()
-   type( field_type ), pointer        :: sea_v_current_ptr => null()
-   type( field_type ), pointer        :: sea_u_w3_ptr => null()
-   type( field_type ), pointer        :: sea_v_w3_ptr => null()
-   type( field_type ), pointer        :: sea_w_w3_ptr => null()
-   type( field_type ), pointer        :: sea_current_w2_ptr => null()
-   type( field_type ), pointer        :: dA => null()
-   type( field_type ), pointer        :: theta_ptr => null()
-   type( integer_field_type ), pointer        :: ocn_cpl_point_ptr => null()
-   type(mesh_type), pointer :: mesh => null()
+   type( field_type ), pointer        :: sea_surf_temp_ptr
+   type( field_type ), pointer        :: sea_ice_fraction_ptr
+   type( field_type ), pointer        :: sea_ice_thickness_ptr
+   type( field_type ), pointer        :: sea_ice_layer_t_ptr
+   type( field_type ), pointer        :: sea_ice_conductivity_ptr
+   type( field_type ), pointer        :: sea_ice_snow_depth_ptr
+   type( field_type ), pointer        :: melt_pond_fraction_ptr
+   type( field_type ), pointer        :: melt_pond_depth_ptr
+   type( field_type ), pointer        :: sea_u_current_ptr
+   type( field_type ), pointer        :: sea_v_current_ptr
+   type( field_type ), pointer        :: sea_u_w3_ptr
+   type( field_type ), pointer        :: sea_v_w3_ptr
+   type( field_type ), pointer        :: sea_w_w3_ptr
+   type( field_type ), pointer        :: sea_current_w2_ptr
+   type( field_type ), pointer        :: dA
+   type( field_type ), pointer        :: theta_ptr
+   type( integer_field_type ), pointer        :: ocn_cpl_point_ptr
+   type(mesh_type), pointer :: mesh
 
    ! Get the pointers to the fields
    call dcpl_rcv%get_field("lf_ocn_sst", sea_surf_temp_ptr)
@@ -110,7 +110,7 @@ module process_recv_fields_2d_mod
 
    ! Save raw sea ice fractions before any post processing
    ! for use in scaling data going from atmos to ocean
-   call set_r_sea_ice_frac_raw(sea_ice_fraction_ptr)
+   call set_r_sea_ice_frac_raw(depository, sea_ice_fraction_ptr)
 
    ! Process data that has just come through the coupler
    call invoke(process_o2a_kernel_type( sea_surf_temp_ptr,        &

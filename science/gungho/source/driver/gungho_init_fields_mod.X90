@@ -79,7 +79,7 @@ module gungho_init_fields_mod
   use ageofair_alg_mod,                   only : init_ageofair
   use transport_config_mod,               only : transport_ageofair
 #ifdef COUPLED
-  use coupler_mod,                      only : cpl_init_fields
+  use coupler_mod,                      only : zero_coupling_send_fields
 #endif
   use moist_dyn_factors_alg_mod,        only : moist_dyn_factors_alg
   use init_fd_prognostics_mod,          only : init_fd_prognostics_dump
@@ -587,9 +587,9 @@ subroutine create_model_data( modeldb,      &
 
     end select
 
-    ! initialise coupling fields
 #ifdef COUPLED
-    if(l_esm_couple) call cpl_init_fields(modeldb%model_data%cpl_rcv_2d, depository)
+    ! Initialise coupling send fields to zero
+    if(l_esm_couple) call zero_coupling_send_fields(modeldb)
 #endif
 
     if (limited_area) then
@@ -822,6 +822,11 @@ subroutine create_model_data( modeldb,      &
       type(field_collection_type), pointer :: moisture_fields
       type(field_collection_type), pointer :: prognostic_fields
       type(field_collection_type), pointer :: diagnostic_fields
+#ifdef COUPLED
+      type(field_collection_type), pointer :: cpl_snd_2d
+      type(field_collection_type), pointer :: cpl_rcv_2d
+      type(field_collection_type), pointer :: cpl_snd_0d
+#endif
 
       depository => modeldb%fields%get_field_collection("depository")
       prognostic_fields => modeldb%fields%get_field_collection("prognostic_fields")
@@ -852,9 +857,12 @@ subroutine create_model_data( modeldb,      &
       call modeldb%model_data%fd_fields%clear()
 #ifdef COUPLED
       if(l_esm_couple) then
-         call modeldb%model_data%cpl_snd_2d%clear()
-         call modeldb%model_data%cpl_rcv_2d%clear()
-         call modeldb%model_data%cpl_snd_0d%clear()
+         cpl_snd_2d => modeldb%fields%get_field_collection("cpl_snd_2d")
+         cpl_rcv_2d => modeldb%fields%get_field_collection("cpl_rcv_2d")
+         cpl_snd_0d => modeldb%fields%get_field_collection("cpl_snd_0d")
+         call cpl_snd_2d%clear()
+         call cpl_rcv_2d%clear()
+         call cpl_snd_0d%clear()
       endif
 #endif
 
