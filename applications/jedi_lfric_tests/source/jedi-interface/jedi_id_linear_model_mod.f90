@@ -39,6 +39,9 @@ module jedi_id_linear_model_mod
                                             log_scratch_space, &
                                             LOG_LEVEL_ERROR
   use namelist_mod,                  only : namelist_type
+  use transform_winds_mod,           only : wind_scalar_to_vector, wind_vector_to_scalar, &
+                                            adj_wind_scalar_to_vector, adj_wind_vector_to_scalar
+  use zero_field_collection_mod,     only : zero_field_collection
 
   implicit none
 
@@ -113,7 +116,6 @@ subroutine initialise( self, jedi_geometry, config_filename )
   ! 1.1 Initialise the modeldb
   call initialise_modeldb( "linear modeldb", config_filename, &
                             jedi_geometry%get_mpi_comm(), self%modeldb )
-
 
   ! 1.2 Add scalar winds that link the Atlas fields. These are used to
   ! perform interpolation between horizontally cell-centred and
@@ -190,6 +192,9 @@ subroutine model_initTL(self, increment)
   ! Get Atlas field emulators to the model_prognostics
   call increment%get_to_field_collection( variable_names, prognostic_fields )
 
+  ! Cell-centred winds to Edge based winds
+  call wind_scalar_to_vector( prognostic_fields )
+
   ! Initialise clock and calendar
   call init_time( self%modeldb )
 
@@ -201,7 +206,6 @@ end subroutine model_initTL
 subroutine model_stepTL(self, increment)
 
   use jedi_lfric_linear_modeldb_driver_mod, only : identity_step_tl
-  use jedi_lfric_linear_fields_mod,         only : variable_names
 
   implicit none
 
@@ -224,6 +228,9 @@ subroutine model_stepTL(self, increment)
 
   ! 3. Update the Atlas fields from the LFRic prognostic fields
   prognostic_fields => self%modeldb%fields%get_field_collection("prognostic_fields")
+
+  ! Interpolate W2 vector to W3/Wtheta scalar winds
+  call wind_vector_to_scalar( prognostic_fields )
 
   ! Set model_prognostics to the Atlas field emulators
   call increment%set_from_field_collection( variable_names, prognostic_fields )
@@ -265,7 +272,7 @@ subroutine model_initAD(self, increment)
 
   ! Update the prognostic fields: zero LFRic fields
   prognostic_fields => self%modeldb%fields%get_field_collection("prognostic_fields")
-  call increment%zero_lfric_fields(variable_names, prognostic_fields)
+  call zero_field_collection(prognostic_fields)
 
   !>@todo: in ticket #267
   !>       Add call similar to init_time to setup reversable clock
@@ -303,6 +310,9 @@ subroutine model_stepAD(self, increment)
   ! Set model_prognostics to the Atlas field emulators
   call increment%set_from_field_collection_ad( variable_names, prognostic_fields )
 
+  ! Adjoint of ... Interpolate W2 vector to W3/Wtheta scalar winds
+  call adj_wind_vector_to_scalar( prognostic_fields )
+
   ! 4. Update the increment time
   call increment%update_time( self%time_step*(-1) )
 
@@ -312,8 +322,6 @@ end subroutine model_stepAD
 !>
 !> @param [inout] increment Increment object to be used in the model finalise
 subroutine model_finalAD(self, increment)
-
-  use jedi_lfric_linear_fields_mod,  only : variable_names
 
   implicit none
 
@@ -327,6 +335,9 @@ subroutine model_finalAD(self, increment)
 
   ! 1. Update the the modeldb prognostic fields
   prognostic_fields => self%modeldb%fields%get_field_collection("prognostic_fields")
+
+  ! Cell-centred winds to Edge based winds
+  call adj_wind_scalar_to_vector( prognostic_fields )
 
   ! Get Atlas field emulators to the model_prognostics
   call increment%get_to_field_collection_ad( variable_names, prognostic_fields )

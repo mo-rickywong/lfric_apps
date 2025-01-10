@@ -80,9 +80,6 @@ contains
   procedure, public :: get_to_field_collection
   procedure, public :: get_to_field_collection_ad
 
-  !> Set the input field collection to zero
-  procedure, public :: zero_lfric_fields
-
   !> Return the curent time
   procedure, public :: valid_time
 
@@ -648,41 +645,6 @@ subroutine get_to_field_collection_ad( self, variable_names, field_collection )
   end do
 
 end subroutine get_to_field_collection_ad
-
-!> @brief    Zero the internal LFRic fields in the input
-!>           field_collection
-!>
-!> @param [in]    variable_names    The list of variables to copy
-!> @param [inout] field_collection  The fields to copy to
-!>
-subroutine zero_lfric_fields( self, variable_names, field_collection )
-
-  implicit none
-
-  class( jedi_increment_type ),  intent(inout) :: self
-  character( len=str_def ),         intent(in) :: variable_names(:)
-  type( field_collection_type ), intent(inout) :: field_collection
-
-  ! Local
-  integer( kind=i_def )                           :: ivar
-  integer( kind=i_def )                           :: n_variables
-  type( atlas_field_interface_type ), allocatable :: atlas_lfric_interface_fields(:)
-
-  ! Allocate space for the interface fields
-  n_variables = size(variable_names)
-  allocate( atlas_lfric_interface_fields(n_variables) )
-
-  ! Link internal Atlas field emulators to LFRic fields
-  call self%setup_interface_to_field_collection( atlas_lfric_interface_fields, &
-                                                 variable_names, &
-                                                 field_collection )
-
-  ! Zero the LFRic fields in the field_collection
-  do ivar = 1, n_variables
-    call atlas_lfric_interface_fields(ivar)%zero_lfric()
-  end do
-
-end subroutine zero_lfric_fields
 
 !> @brief    Update the inc_time by a single time-step
 !>

@@ -1,14 +1,13 @@
 !------------------------------------------------------------------------------
-! (C) Crown copyright 2023 Met Office. All rights reserved.
+! (C) Crown copyright 2025 Met Office. All rights reserved.
 ! The file LICENCE, distributed with this code, contains details of the terms
 ! under which the code may be used.
 !------------------------------------------------------------------------------
-!> @brief  Test the zero_model_data subroutine
+!> @brief  Test the zero_field_collection subroutine
 !!
-module zero_model_data_mod_test
+module zero_field_collection_mod_test
 
   use constants_mod,                 only : i_def, r_def
-  use driver_model_data_mod,         only : model_data_type
   use field_collection_mod,          only : field_collection_type
   use field_mod,                     only : field_type, &
                                             field_proxy_type
@@ -23,18 +22,17 @@ module zero_model_data_mod_test
   use local_mesh_mod,                only : local_mesh_type
   use mesh_collection_mod,           only : mesh_collection_type, &
                                             mesh_collection
-  use pure_abstract_field_mod,       only : pure_abstract_field_type
-  use zero_model_data_mod,           only : zero_model_data
+  use zero_field_collection_mod,     only : zero_field_collection
 
   use pFUnit_Mod
 
   implicit none
 
   private
-  public :: test_zero_model_data
+  public :: test_zero_field_collection
 
   @TestCase
-  type, extends(TestCase), public :: zero_model_data_test_type
+  type, extends(TestCase), public :: zero_field_collection_test_type
     private
     type(local_mesh_type)              :: unit_test_local_mesh
     type(function_space_type), pointer :: w3_fs => null()
@@ -42,11 +40,10 @@ module zero_model_data_mod_test
     procedure setUp
     procedure tearDown
     procedure get_local_mesh_ptr
-    procedure test_zero_model_data
-  end type zero_model_data_test_type
+    procedure test_zero_field_collection
+  end type zero_field_collection_test_type
 
   integer(i_def), parameter    :: element_order = 0
-
 
 contains
 
@@ -57,7 +54,7 @@ contains
 
     implicit none
 
-    class(zero_model_data_test_type), intent(inout) :: this
+    class(zero_field_collection_test_type), intent(inout) :: this
     type(local_mesh_type), pointer :: unit_test_local_mesh_ptr => null()
     type(mesh_type) :: unit_test_mesh
     integer(i_def)  :: mesh_id
@@ -79,7 +76,6 @@ contains
     mesh_id =  mesh_collection%add_new_mesh( unit_test_mesh )
     mesh    => mesh_collection%get_mesh( mesh_id )
 
-
     this%w3_fs => function_space_collection%get_fs( mesh,          &
                                                     element_order, &
                                                     W3 )
@@ -91,7 +87,7 @@ contains
 
     implicit none
 
-    class(zero_model_data_test_type), intent(inout) :: this
+    class(zero_field_collection_test_type), intent(inout) :: this
 
     call function_space_collection%clear()
     call mesh_collection%clear()
@@ -104,22 +100,22 @@ contains
 
     implicit none
 
-    class(zero_model_data_test_type), intent(inout), target :: this
+    class(zero_field_collection_test_type), intent(inout), target :: this
     type(local_mesh_type), pointer :: unit_test_local_mesh_ptr
 
     unit_test_local_mesh_ptr => this%unit_test_local_mesh
 
   end function get_local_mesh_ptr
 
-  !> Test for zero_model_data
+  !> Test for zero_field_collection
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   @Test
-  subroutine test_zero_model_data( this )
+  subroutine test_zero_field_collection( this )
 
     implicit none
 
-    class(zero_model_data_test_type), intent(inout) :: this
-    type(model_data_type)                           :: model_data
+    class(zero_field_collection_test_type), intent(inout) :: this
+    type(field_collection_type)                     :: fields
 
     type(field_type), target                        :: test_field
     type(integer_field_type), target                :: int_test_field
@@ -129,17 +125,11 @@ contains
     type(integer_field_proxy_type)                  :: int_field_proxy
     type(integer_field_proxy_type)                  :: int_returned_field_proxy
 
-    type(field_collection_type), pointer            :: depository => null()
+    type(field_type), pointer                       :: returned_field
+    type(integer_field_type), pointer               :: int_returned_field
 
-    class(pure_abstract_field_type), pointer :: field_ptr => null()
-    type(field_type), pointer                :: test_field_ptr => null()
-    type(field_type), pointer                :: returned_field => null()
-
-    class(pure_abstract_field_type), pointer :: int_field_ptr => null()
-    type(integer_field_type), pointer        :: int_test_field_ptr => null()
-    type(integer_field_type), pointer        :: int_returned_field => null()
-
-    type(field_collection_type), pointer     :: returned_collection => null()
+    ! Nullify field pointers
+    nullify(returned_field, int_returned_field)
 
     ! Initialise a real test field and get proxy
     call test_field%initialise( this%w3_fs, name='test_field' )
@@ -153,55 +143,42 @@ contains
     field_proxy%data(1) = 1.0_r_def
     int_field_proxy%data(1) = 1_i_def
 
-    ! Initialise depository
-    call model_data%add_empty_field_collection("depository")
-    depository => model_data%get_field_collection("depository")
+    ! Initialise fields
+    call fields%initialise(name = 'fields', table_len=2)
 
-    ! Add a field collection to model data
-    call model_data%add_empty_field_collection("collection_1")
-
-    ! Add test_field to depository and a pointer to it to collection_1
-    call depository%add_field(test_field)
-    call depository%get_field("test_field", test_field_ptr)
-    returned_collection => model_data%get_field_collection("collection_1")
-    field_ptr => test_field_ptr
-    call returned_collection%add_reference_to_field(field_ptr)
-
-    ! Add int_test_field to depository and a pointer to it to collection_1
-    call depository%add_field(int_test_field)
-    call depository%get_field("int_test_field", int_test_field_ptr)
-    int_field_ptr => int_test_field_ptr
-    call returned_collection%add_reference_to_field(int_field_ptr)
+    ! Add real and integer fields test fields to the fields collection
+    call fields%add_field(test_field)
+    call fields%add_field(int_test_field)
 
     ! Test name and first dof of test_field
-    call returned_collection%get_field("test_field", returned_field)
+    call fields%get_field("test_field", returned_field)
     @assertEqual("test_field", returned_field%get_name())
     returned_field_proxy = returned_field%get_proxy()
     @assertEqual(1.0_r_def, returned_field_proxy%data(1))
 
     ! Test name and first dof of int_test_field
-    call returned_collection%get_field("int_test_field", int_returned_field)
+    call fields%get_field("int_test_field", int_returned_field)
     @assertEqual("int_test_field", int_returned_field%get_name())
     int_returned_field_proxy = int_returned_field%get_proxy()
     @assertEqual(1_i_def, int_returned_field_proxy%data(1))
 
-    ! Zero the fields in the depository
-    call zero_model_data( model_data )
+    ! Zero the fields in the fields field collection
+    call zero_field_collection( fields )
 
     ! Test name and first dof of test_field - after zeroing
-    call returned_collection%get_field("test_field", returned_field)
+    call fields%get_field("test_field", returned_field)
     @assertEqual("test_field", returned_field%get_name())
     returned_field_proxy = returned_field%get_proxy()
     @assertEqual(0.0_r_def, returned_field_proxy%data(1))
 
     ! Test name and first dof of int_test_field - after zeroing
-    call returned_collection%get_field("int_test_field", int_returned_field)
+    call fields%get_field("int_test_field", int_returned_field)
     @assertEqual("int_test_field", int_returned_field%get_name())
     int_returned_field_proxy = int_returned_field%get_proxy()
     @assertEqual(0_i_def, int_returned_field_proxy%data(1))
 
-  end subroutine test_zero_model_data
+  end subroutine test_zero_field_collection
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-end module zero_model_data_mod_test
+end module zero_field_collection_mod_test
