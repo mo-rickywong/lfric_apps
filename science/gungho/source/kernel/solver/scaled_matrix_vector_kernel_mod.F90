@@ -85,14 +85,16 @@ subroutine scaled_matrix_vector_code(cell,              &
   real(kind=r_solver), dimension(undf1),              intent(in)    :: z
 
   ! Internal variables
-  integer(kind=i_def)                  :: df, df2, k, ik
+  integer(kind=i_def) :: df, df2, ij, nl, i1, i2
 
+  ij = (cell-1)*nlayers + 1
+  nl = nlayers - 1
   do df = 1, ndf1
+    i1 = map1(df)
     do df2 = 1, ndf2
-      do k = 0, nlayers-1
-        ik = (cell-1)*nlayers + k + 1
-        lhs(map1(df)+k) = lhs(map1(df)+k) + matrix(ik,df,df2)*x(map2(df2)+k)*y(map1(df)+k)*z(map1(df)+k)
-      end do
+      i2 = map2(df2)
+      lhs(i1:i1+nl) = lhs(i1:i1+nl) &
+                    + matrix(ij:ij+nl, df, df2)*x(i2:i2+nl)*y(i1:i1+nl)*z(i1:i1+nl)
     end do
   end do
 

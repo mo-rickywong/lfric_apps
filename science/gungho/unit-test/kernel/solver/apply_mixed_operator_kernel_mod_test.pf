@@ -82,7 +82,9 @@ contains
       Mu(df,df,1) = real(df,r_solver)
       Grad(df,1,1) = (-1.0_r_solver)**df
     end do
-    P2t(:,:,1) = 0.5_r_solver
+
+    P2t(:,:,1) = 0.0_r_solver
+    P2t(3:4,:,1) = 0.5_r_solver
     Pt2 = 0.0_r_solver
     Pt2(1,3,1) = 7.0_r_solver
     Pt2(2,4,1) = 9.0_r_solver

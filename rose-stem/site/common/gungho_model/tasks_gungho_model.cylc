@@ -267,19 +267,6 @@
         "plot_str": "sbr.py $NODAL_DATA_DIR/lfric_diag.nc $PLOT_DIR um70 80 71 sbr",
     }) %}
 
-{% elif task_ns.conf_name == "sbr-alt1-C24s_MG" %}
-
-    {% do task_dict.update({
-        "opt_confs": ["sbr", "gungho-alt1-spherical"],
-        "resolution": "C24s_MG",
-        "DT": 3600,
-        "mpi_parts": 6,
-        "tsteps": 240,
-        "threads": 4,
-        "wallclock": 20,
-        "plot_str": "sbr.py $NODAL_DATA_DIR/lfric_diag.nc $PLOT_DIR um70 80 71 sbr-alt1",
-    }) %}
-
 {% elif task_ns.conf_name == "sbr-alt2-C24_MG_op" %}
 
     {% do task_dict.update({
