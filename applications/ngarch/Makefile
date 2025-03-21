@@ -37,7 +37,7 @@ export META_FILE_DIR = $(PROJECT_DIR)/rose-meta/lfric-$(PROJECT_NAME)/$(META_VN)
 # Check PSyclone transformation option is valid
 ifneq ("$(PSYCLONE_TRANSFORMATION)","none")
   export OPTIMISATION_PATH ?= $(wildcard optimisation/$(PSYCLONE_TRANSFORMATION))
-  ifeq ("$(wildcard $(OPTIMISATION_PATH)/global.py)","")
+  ifeq ("$(wildcard $(OPTIMISATION_PATH)/psykal/global.py)","")
     $(error PSyclone transformation dir "$(PSYCLONE_TRANSFORMATION)" does not have a global.py script)
   endif
 endif
