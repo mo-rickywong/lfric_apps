@@ -9,8 +9,6 @@ module bl_imp_diags_mod
 
   use constants_mod,             only: l_def
   use field_mod,                 only: field_type
-  use jules_control_init_mod,    only: n_surf_tile, n_land_tile
-  use sci_weighted_ave_kernel_mod, only: weighted_ave_kernel_type
   use bl_extra_diags_kernel_mod, only: bl_extra_diags_kernel_type
   use physics_mappings_alg_mod,  only: map_physics_winds
   use io_config_mod,             only: subroutine_timers
@@ -34,20 +32,6 @@ module bl_imp_diags_mod
   logical( l_def ) :: du_bl_flag
   logical( l_def ) :: dv_bl_flag
   logical( l_def ) :: dw_bl_flag
-  logical( l_def ) :: t1p5m_surft_flag
-  logical( l_def ) :: q1p5m_surft_flag
-  logical( l_def ) :: t1p5m_flag
-  logical( l_def ) :: q1p5m_flag
-  logical( l_def ) :: qcl1p5m_flag
-  logical( l_def ) :: rh1p5m_flag
-  logical( l_def ) :: t1p5m_ssi_flag
-  logical( l_def ) :: q1p5m_ssi_flag
-  logical( l_def ) :: qcl1p5m_ssi_flag
-  logical( l_def ) :: rh1p5m_ssi_flag
-  logical( l_def ) :: t1p5m_land_flag
-  logical( l_def ) :: q1p5m_land_flag
-  logical( l_def ) :: qcl1p5m_land_flag
-  logical( l_def ) :: rh1p5m_land_flag
   logical( l_def ) :: u10m_flag
   logical( l_def ) :: v10m_flag
   logical( l_def ) :: wind_gust_flag
@@ -60,19 +44,6 @@ module bl_imp_diags_mod
   logical( l_def ) :: tauy_flag
   logical( l_def ) :: pseudotaux_flag
   logical( l_def ) :: pseudotauy_flag
-  logical( l_def ) :: latent_heat_flag
-  logical( l_def ) :: grid_latent_heat_flag
-  logical( l_def ) :: snomlt_surf_htf_flag
-  logical( l_def ) :: soil_evap_flag
-  logical( l_def ) :: grid_canopy_evap_flag
-  logical( l_def ) :: grid_sublimation_flag
-  logical( l_def ) :: soil_surf_ht_flux_flag
-  logical( l_def ) :: surf_sw_net_flag
-  logical( l_def ) :: surf_radnet_flag
-  logical( l_def ) :: surf_lw_up_flag
-  logical( l_def ) :: surf_lw_down_flag
-  logical( l_def ) :: grid_surface_temperature_flag
-  logical( l_def ) :: land_surface_temperature_flag
   logical( l_def ) :: vis_no_precip_flag
   logical( l_def ) :: vis_with_precip_flag
   logical( l_def ) :: fog_fraction_flag
@@ -96,9 +67,6 @@ contains
   !> @param[in]     cf_area            Area cloud fraction
   !> @param[in]     cf_liq             Liquid cloud fraction
   !> @param[in]     cf_fro             Frozen cloud fraction
-  !> @param[in]     exner              Exner Pressure in the w3 space
-  !> @param[in]     zh                 Surface-based boundary layer depth
-  !> @param[in]     tile_fraction      Surface tile fractions
   !> @param[in,out] dmv_bl             BL increment to vapour mixing ratio
   !> @param[in,out] dmcl_bl            BL increment to cloud liq mixing ratio
   !> @param[in,out] dms_bl             BL increment to snow mixing ratio
@@ -106,124 +74,37 @@ contains
   !> @param[in,out] dacf_bl            BL increment to area cloud fraction
   !> @param[in,out] dcfl_bl            BL increment to liquid cloud fraction
   !> @param[in,out] dcff_bl            BL increment to frozen cloud fraction
-  !> @param[in,out] t1p5m_surft        1.5m temperature for land tiles
-  !> @param[in,out] q1p5m_surft        1.5m specific humidity for land tiles
-  !> @param[in,out] t1p5m              1.5m temperature
-  !> @param[in,out] q1p5m              1.5m specific humidity
-  !> @param[in,out] qcl1p5m            1.5m specific cloud water
-  !> @param[in,out] rh1p5m             1.5m relative humidity
-  !> @param[in,out] t1p5m_ssi          1.5m temperature over sea and sea-ice
-  !> @param[in,out] q1p5m_ssi          1.5m specific humidity over sea and sea-ice
-  !> @param[in,out] qcl1p5m_ssi        1.5m specific cloud water over sea and sea-ice
-  !> @param[in,out] rh1p5m_ssi         1.5m relative humidity over sea and sea-ice
-  !> @param[in,out] t1p5m_land         1.5m temperature over land
-  !> @param[in,out] q1p5m_land         1.5m specific humidity over land
-  !> @param[in,out] qcl1p5m_land       1.5m specific cloud water over land
-  !> @param[in,out] rh1p5m_land        1.5m relative humidity over land
   !> @param[in,out] u10m               Zonal 10m wind speed
   !> @param[in,out] v10m               Meridional 10m wind speed
-  !> @param[in,out] ustar_implicit     Implicit friction velocity
-  !> @param[in,out] wind_gust          gust wind speed at 10m
-  !> @param[in,out] scale_dep_wind_gust Scale-dependent gust wind speed at 10m
   !> @param[in,out] wspd10m_neut       neutral wind speed at 10m
   !> @param[in,out] u10m_neut          Zonal 10m neutral wind speed
   !> @param[in,out] v10m_neut          Meridional 10m neutral wind speed
-  !> @param[in,out] taux               Zonal wind stress
-  !> @param[in,out] tauy               Meridional wind stress
-  !> @param[in,out] pseudotaux         Surface zonal pseudo wind stress
-  !> @param[in,out] pseudotauy         Surface meridional pseudo wind stress
-  !> @param[in,out] latent_heat        Surface latent heat flux on tiles
-  !> @param[in,out] grid_latent_heat   Grid mean surface latent heat flux
-  !> @param[in,out] snomlt_surf_htf    Surface snow melt heat flux
-  !> @param[in,out] soil_evap          Water evaporation flux from soil
-  !> @param[in,out] grid_canopy_evap   water evaporation flux from canopy
-  !> @param[in,out] grid_sublimation   grid surface snow sublimation rate
-  !> @param[in,out] soil_surf_ht_flux  downward heat flux at ground level in soil
-  !> @param[in,out] surf_sw_net        surface net downward shortwave flux on tiles
-  !> @param[in,out] surf_radnet        surface net downward radiative flux on tiles
-  !> @param[in,out] surf_lw_up         surface upward longwave flux on tiles
-  !> @param[in,out] surf_lw_down       surface downward longwave flux on tiles
-  !> @param[in,out] grid_surface_temperature Grid mean surface temperature
-  !> @param[in,out] fog_fraction             fog fraction at screen level
-  !> @param[in,out] fog_fraction_ssi         Fog_fraction over sea/sea-ice
-  !> @param[in,out] fog_fraction_land        Fog_fraction over land
-  !> @param[in,out] vis_prob_5km             probability of vis below 5km at screen level
-  !> @param[in,out] dew_point                dew point temperature at screen level
-  !> @param[in,out] dew_point_ssi            Dew point temperature over sea/sea-ice
-  !> @param[in,out] dew_point_land           Dew point temperature over land
-  !> @param[in,out] visibility_with_precip   visibility including precipitation at screen level
-  !> @param[in,out] visibility_no_precip     visibility excluding precipitation at screen level
-
   subroutine initialise_diags_for_bl_imp(mv, mcl, mci, cf_bulk,          &
                                          cf_area, cf_liq, cf_fro,        &
-                                         exner, zh, tile_fraction,       &
                                          dmv_bl, dmcl_bl, dms_bl,        &
                                          dbcf_bl, dacf_bl,               &
                                          dcfl_bl, dcff_bl,               &
-                                         t1p5m_surft, q1p5m_surft,       &
-                                         t1p5m, q1p5m, qcl1p5m, rh1p5m,  &
-                                         t1p5m_ssi, q1p5m_ssi,           &
-                                         qcl1p5m_ssi, rh1p5m_ssi,        &
-                                         t1p5m_land, q1p5m_land,         &
-                                         qcl1p5m_land, rh1p5m_land,      &
-                                         u10m, v10m, ustar_implicit,     &
-                                         wind_gust, scale_dep_wind_gust, &
+                                         u10m, v10m,                     &
                                          wspd10m_neut, u10m_neut,        &
-                                         v10m_neut, taux, tauy,          &
-                                         pseudotaux, pseudotauy,         &
-                                         latent_heat, grid_latent_heat,  &
-                                         snomlt_surf_htf, soil_evap,     &
-                                         grid_canopy_evap,               &
-                                         grid_sublimation,               &
-                                         soil_surf_ht_flux,              &
-                                         surf_sw_net, surf_radnet,       &
-                                         surf_lw_up, surf_lw_down,       &
-                                         grid_surface_temperature,       &
-                                         fog_fraction, fog_fraction_ssi, &
-                                         fog_fraction_land, vis_prob_5km,&
-                                         dew_point,                      &
-                                         dew_point_ssi, dew_point_land,  &
-                                         visibility_with_precip,         &
-                                         visibility_no_precip)
+                                         v10m_neut)
 
     implicit none
 
     ! Fields passed in to copy properties from
     type( field_type ), intent(in)    :: mv, mcl, mci
     type( field_type ), intent(in)    :: cf_bulk, cf_area, cf_liq, cf_fro
-    type( field_type ), intent(in)    :: exner, zh, tile_fraction
 
     ! Diagnostic fields to initialise
     type( field_type ), intent(inout) :: dmv_bl, dmcl_bl, dms_bl
     type( field_type ), intent(inout) :: dbcf_bl, dacf_bl
     type( field_type ), intent(inout) :: dcfl_bl, dcff_bl
-    type( field_type ), intent(inout) :: t1p5m_surft, q1p5m_surft
-    type( field_type ), intent(inout) :: t1p5m, q1p5m, qcl1p5m, rh1p5m
-    type( field_type ), intent(inout) :: t1p5m_ssi, q1p5m_ssi, qcl1p5m_ssi, rh1p5m_ssi
-    type( field_type ), intent(inout) :: t1p5m_land, q1p5m_land, qcl1p5m_land, rh1p5m_land
-    type( field_type ), intent(inout) :: ustar_implicit
-    type( field_type ), intent(inout) :: u10m, v10m, wind_gust, scale_dep_wind_gust
-    type( field_type ), intent(inout) :: fog_fraction, vis_prob_5km
-    type( field_type ), intent(inout) :: fog_fraction_ssi, fog_fraction_land
-    type( field_type ), intent(inout) :: dew_point, dew_point_ssi, dew_point_land
-    type( field_type ), intent(inout) :: visibility_with_precip
-    type( field_type ), intent(inout) :: visibility_no_precip
+    type( field_type ), intent(inout) :: u10m, v10m
     type( field_type ), intent(inout) :: wspd10m_neut, u10m_neut
-    type( field_type ), intent(inout) :: v10m_neut, taux, tauy
-    type( field_type ), intent(inout) :: pseudotaux, pseudotauy
-    type( field_type ), intent(inout) :: latent_heat, grid_latent_heat
-    type( field_type ), intent(inout) :: snomlt_surf_htf
-    type( field_type ), intent(inout) :: soil_evap, grid_canopy_evap
-    type( field_type ), intent(inout) :: grid_sublimation
-    type( field_type ), intent(inout) :: soil_surf_ht_flux
-    type( field_type ), intent(inout) :: surf_sw_net, surf_radnet
-    type( field_type ), intent(inout) :: surf_lw_up, surf_lw_down
-    type( field_type ), intent(inout) :: grid_surface_temperature
-
-    logical( l_def ) :: ignore
+    type( field_type ), intent(inout) :: v10m_neut
 
     if ( subroutine_timers ) call timer("bl_imp_diags")
 
+    ! Genuine turbulence diagnostics
     ! 3D fields in wtheta space
     dmv_bl_flag = init_diag(dmv_bl, 'turbulence__dmv_bl')
     if (dmv_bl_flag) call invoke(a_times_X(dmv_bl, -1.0_r_def, mv))
@@ -246,105 +127,13 @@ contains
     dcff_bl_flag = init_diag(dcff_bl, 'turbulence__dcff_bl')
     if (dcff_bl_flag) call invoke(a_times_X(dcff_bl, -1.0_r_def, cf_fro))
 
-    ! 3D fields in w3 space
-    taux_flag = init_diag(taux, 'turbulence__taux', activate=.true.) ! simplify dependency handling
-    tauy_flag = init_diag(tauy, 'turbulence__tauy', activate=.true.) ! ditto
-
+    ! Surface diagnostics on staggered grid so need special treatment
     ! 2D fields
-    t1p5m_flag = init_diag(t1p5m, 'surface__t1p5m')
-    q1p5m_flag = init_diag(q1p5m, 'surface__q1p5m')
-    qcl1p5m_flag = init_diag(qcl1p5m, 'surface__qcl1p5m')
-    rh1p5m_flag = init_diag(rh1p5m, 'surface__rh1p5m')
-    t1p5m_ssi_flag = init_diag(t1p5m_ssi, 'surface__t1p5m_ssi')
-    q1p5m_ssi_flag = init_diag(q1p5m_ssi, 'surface__q1p5m_ssi')
-    qcl1p5m_ssi_flag = init_diag(qcl1p5m_ssi, 'surface__qcl1p5m_ssi')
-    rh1p5m_ssi_flag = init_diag(rh1p5m_ssi, 'surface__rh1p5m_ssi')
-    t1p5m_land_flag = init_diag(t1p5m_land, 'surface__t1p5m_land')
-    q1p5m_land_flag = init_diag(q1p5m_land, 'surface__q1p5m_land')
-    qcl1p5m_land_flag = init_diag(qcl1p5m_land, 'surface__qcl1p5m_land')
-    rh1p5m_land_flag = init_diag(rh1p5m_land, 'surface__rh1p5m_land')
-    vis_no_precip_flag = init_diag(visibility_no_precip, 'surface__visibility_no_precip')
-    vis_with_precip_flag = init_diag(visibility_with_precip, 'surface__visibility_with_precip')
-    fog_fraction_flag = init_diag(fog_fraction, 'surface__fog_fraction')
-    fog_fraction_ssi_flag = init_diag(fog_fraction_ssi, 'surface__fog_fraction_ssi')
-    fog_fraction_land_flag = init_diag(fog_fraction_land, 'surface__fog_fraction_land')
-    vis_prob_5km_flag = init_diag(vis_prob_5km, 'surface__vis_prob_5km')
-    dew_point_flag = init_diag(dew_point, 'surface__dew_point')
-    dew_point_ssi_flag = init_diag(dew_point_ssi, 'surface__dew_point_ssi')
-    dew_point_land_flag = init_diag(dew_point_land, 'surface__dew_point_land')
     u10m_flag = init_diag(u10m, 'surface__u10m', activate=.true.)
     v10m_flag = init_diag(v10m, 'surface__v10m', activate=.true.)
-    ustar_implicit_flag = init_diag(ustar_implicit, 'surface__ustar_implicit')
-    wind_gust_flag = init_diag(wind_gust, 'surface__wind_gust')
-    scale_dep_wind_gust_flag = init_diag(scale_dep_wind_gust, 'surface__scale_dep_wind_gust')
     wspd10m_neut_flag = init_diag(wspd10m_neut, 'surface__wspd10m_neut')
     u10m_neut_flag = init_diag(u10m_neut, 'surface__u10m_neut')
     v10m_neut_flag = init_diag(v10m_neut, 'surface__v10m_neut')
-    pseudotaux_flag = init_diag(pseudotaux, 'surface__pseudotaux')
-    pseudotauy_flag = init_diag(pseudotauy, 'surface__pseudotauy')
-    latent_heat_flag = init_diag(latent_heat, 'surface__latent_heat')
-    grid_latent_heat_flag = init_diag(grid_latent_heat, 'surface__grid_latent_heat')
-    snomlt_surf_htf_flag = init_diag(snomlt_surf_htf, 'surface__snomlt_surf_htf')
-    soil_evap_flag = init_diag(soil_evap, 'surface__soil_evap')
-    grid_canopy_evap_flag = init_diag(grid_canopy_evap, 'surface__grid_canopy_evap')
-    grid_sublimation_flag = init_diag(grid_sublimation, 'surface__grid_sublimation')
-    soil_surf_ht_flux_flag = init_diag(soil_surf_ht_flux, 'surface__soil_surf_ht_flux')
-    grid_surface_temperature_flag = init_diag(grid_surface_temperature, 'surface__grid_surface_temperature')
-
-    ! surface tiled fields
-    t1p5m_surft_flag = init_diag(t1p5m_surft, 'surface__t1p5m_surft')
-    if (t1p5m_surft_flag) call invoke(setval_c(t1p5m_surft,0.0_r_def))
-
-    q1p5m_surft_flag = init_diag(q1p5m_surft, 'surface__q1p5m_surft')
-    if (q1p5m_surft_flag) call invoke(setval_c(q1p5m_surft,0.0_r_def))
-
-    latent_heat_flag = init_diag(latent_heat, 'surface__latent_heat')
-    if (latent_heat_flag) call invoke(setval_c(latent_heat,0.0_r_def))
-
-    surf_sw_net_flag = init_diag(surf_sw_net, 'surface__surf_sw_net')
-    if (surf_sw_net_flag) call invoke(setval_c(surf_sw_net,0.0_r_def))
-
-    surf_radnet_flag = init_diag(surf_radnet, 'surface__surf_radnet')
-    if (surf_radnet_flag) call invoke(setval_c(surf_radnet,0.0_r_def))
-
-    surf_lw_up_flag = init_diag(surf_lw_up, 'surface__surf_lw_up')
-    if (surf_lw_up_flag) call invoke(setval_c(surf_lw_up,0.0_r_def))
-
-    surf_lw_down_flag = init_diag(surf_lw_down, 'surface__surf_lw_down')
-    if (surf_lw_down_flag) call invoke(setval_c(surf_lw_down,0.0_r_def))
-
-    ! Initialise fields where another diagnostic depends on them
-    if (grid_latent_heat_flag .and. .not. latent_heat_flag) then
-      ignore = init_diag(latent_heat, 'surface__latent_heat', activate=.true.)
-    end if
-    if (pseudotaux_flag .or. pseudotauy_flag) then
-      if (.not. pseudotaux_flag) ignore = init_diag(pseudotaux, 'surface__pseudotaux', activate=.true.)
-      if (.not. pseudotauy_flag) ignore = init_diag(pseudotauy, 'surface__pseudotauy', activate=.true.)
-    end if
-    if (wind_gust_flag .or. scale_dep_wind_gust_flag) then
-      if (.not. ustar_implicit_flag) ignore = init_diag(ustar_implicit, 'surface__ustar_implicit', activate=.true.)
-    end if
-    if (ustar_implicit_flag .or. wind_gust_flag .or. scale_dep_wind_gust_flag .or. vis_no_precip_flag .or. &
-         vis_with_precip_flag .or. fog_fraction_flag .or. vis_prob_5km_flag .or. dew_point_flag) then
-      if (.not. t1p5m_flag) ignore = init_diag(t1p5m, 'surface__t1p5m', activate=.true.)
-      if (.not. q1p5m_flag) ignore = init_diag(q1p5m, 'surface__q1p5m', activate=.true.)
-      if (.not. qcl1p5m_flag) ignore = init_diag(qcl1p5m, 'surface__qcl1p5m', activate=.true.)
-      ! visibility_with_precip requires visibility_no_precip
-      if (vis_with_precip_flag .and. .not. vis_no_precip_flag) ignore = &
-        init_diag(visibility_no_precip, 'surface__visibility_no_precip', activate=.true.)
-    end if
-    ! sea and sea-ice derived diags
-    if (fog_fraction_ssi_flag .or. dew_point_ssi_flag) then
-      if (.not. t1p5m_ssi_flag) ignore = init_diag(t1p5m_ssi, 'surface__t1p5m_ssi', activate=.true.)
-      if (.not. q1p5m_ssi_flag) ignore = init_diag(q1p5m_ssi, 'surface__q1p5m_ssi', activate=.true.)
-      if (.not. qcl1p5m_ssi_flag) ignore = init_diag(qcl1p5m_ssi, 'surface__qcl1p5m_ssi', activate=.true.)
-    end if
-    ! land derived diags
-    if (fog_fraction_land_flag .or. dew_point_land_flag) then
-      if (.not. t1p5m_land_flag) ignore = init_diag(t1p5m_land, 'surface__t1p5m_land', activate=.true.)
-      if (.not. q1p5m_land_flag) ignore = init_diag(q1p5m_land, 'surface__q1p5m_land', activate=.true.)
-      if (.not. qcl1p5m_land_flag) ignore = init_diag(qcl1p5m_land, 'surface__qcl1p5m_land', activate=.true.)
-    end if
 
     if ( subroutine_timers ) call timer("bl_imp_diags")
 
@@ -353,34 +142,20 @@ contains
   !> @brief Output diagnostics from bl_imp_alg
   !> @param[in]     zh                       Surface-based boundary layer depth
   !> @param[in]     du_bl_w2                 3D wind increment
-  !> @param[in]     tile_heat_flux           surface sensible heat flux on tiles
-  !> @param[in]     tile_moisture_flux       surface moisture flux on tiles
-  !> @param[in]     tile_temperature         surface temperature on tiles
-  !> @param[in]     grid_surface_temperature Grid mean surface temperature
-  !> @param[in]     snowice_sublimation      surface snow and ice sublimation rate on tiles
-  !> @param[in]     canopy_evap              canopy evaporation on tiles
   !> @param[in]     wspd10m                  10m wind speed
   !> @param[in]     u10m                     Zonal 10m wind speed
   !> @param[in]     v10m                     Meridional 10m wind speed
-  !> @param[in]     ustar_implicit           implicit friction velocity
-  !> @param[in]     wind_gust                gust wind speed at 10m
-  !> @param[in]     scale_dep_wind_gust      scale-dependent gust wind speed at 10m
   !> @param[in]     wind10m_neut_w2          neutral 10m wind at w2 dofs
   !> @param[in]     wspd10m_neut             neutral wind speed at 10m
   !> @param[in]     u10m_neut                Zonal 10m neutral wind speed
   !> @param[in]     v10m_neut                Meridional 10m neutral wind speed
-  !> @param[in,out] taux                     Zonal wind stress
-  !> @param[in,out] tauy                     Meridional wind stress
   !> @param[in]     tau_w2                   Wind stress in w2
   !> @param[in]     taux_ssi                 Surface zonal wind stress over sea, seaice
   !> @param[in]     tauy_ssi                 Surface meridional wind stress over sea, seaice
-  !> @param[in,out] pseudotaux               Surface zonal pseudo wind stress
-  !> @param[in,out] pseudotauy               Surface meridional pseudo wind stress
   !> @param[in]     pseudotau_w2             pseudo wind stress in w2
   !> @param[in]     z0m_eff                  Gridbox mean effective roughness length for momentum
   !> @param[in]     rho_in_w3                Density field in density space
   !> @param[in]     wetrho_in_w3             Wet density field in w3 space
-  !> @param[in]     tile_fraction            Surface tile fractions
   !> @param[in]     mv                       Vapour mixing ratio
   !> @param[in]     mcl                      Cloud liq mixing ratio
   !> @param[in]     mci                      Cloud ice mixing ratio
@@ -394,32 +169,15 @@ contains
   !> @param[in]     dtheta_bl                potential temperature increment from bl scheme
   !> @param[in]     exner_in_wth             Exner Pressure in the wth space
   !> @param[in]     dt_conv                  temperature increment from convection scheme
-  !> @param[in]     t1p5m_surft              1.5m temperature for land tiles
-  !> @param[in]     q1p5m_surft              1.5m specific humidity for land tiles
   !> @param[in]     t1p5m                    1.5m temperature
   !> @param[in]     q1p5m                    1.5m specific humidity
   !> @param[in]     qcl1p5m                  1.5m specific cloud water
-  !> @param[in]     rh1p5m                   1.5m relative humidity
   !> @param[in]     t1p5m_ssi                1.5m temperature over sea and sea-ice
   !> @param[in]     q1p5m_ssi                1.5m specific humidity over sea and sea-ice
   !> @param[in]     qcl1p5m_ssi              1.5m specific cloud water over sea and sea-ice
-  !> @param[in]     rh1p5m_ssi               1.5m relative humidity over sea and sea-ice
   !> @param[in]     t1p5m_land               1.5m temperature over land
   !> @param[in]     q1p5m_land               1.5m specific humidity over land
   !> @param[in]     qcl1p5m_land             1.5m specific cloud water over land
-  !> @param[in]     rh1p5m_land              1.5m relative humidity over land
-  !> @param[in]     latent_heat              Surface latent heat flux on tiles
-  !> @param[in]     grid_latent_heat         Grid mean surface latent heat flux
-  !> @param[in]     snomlt_surf_htf          Surface snow melt heat flux
-  !> @param[in]     soil_evap                Water evaporation flux from soil
-  !> @param[in]     grid_canopy_evap         water evaporation flux from canopy
-  !> @param[in]     grid_sublimation         grid surface snow sublimation rate
-  !> @param[in]     surf_ht_flux             downward heat flux at ground level on tiles
-  !> @param[in]     soil_surf_ht_flux        downward heat flux at ground level in soil
-  !> @param[in]     surf_sw_net              surface net downward shortwave flux on tiles
-  !> @param[in]     surf_radnet              surface net downward radiative flux on tiles
-  !> @param[in]     surf_lw_up               surface upward longwave flux on tiles
-  !> @param[in]     surf_lw_down             surface downward longwave flux on tiles
   !> @param[in]     heat_flux_bl             upward turbulent heat flux
   !> @param[in]     moist_flux_bl            upward turbulent moisture flux
   !> @param[in]     bl_weight_1dbl           Blending weight to 1D BL scheme in the BL
@@ -431,61 +189,30 @@ contains
   !> @param[in]     cca_2d                   2D convective cloud fraction
   !> @param[in,out] dmv_bl                   BL increment to vapour mixing ratio
   !> @param[in,out] dmcl_bl                  BL increment to cloud liq mixing ratio
-  !> @param[in,out] dms_bl                   BL increment to cloud ice mixing ratio
+  !> @param[in,out] dms_bl                   BL increment to snow mixing ratio
   !> @param[in,out] dbcf_bl                  BL increment to bulk cloud fraction
   !> @param[in,out] dacf_bl                  BL increment to area cloud fraction
   !> @param[in,out] dcfl_bl                  BL increment to liquid cloud fraction
   !> @param[in,out] dcff_bl                  BL increment to frozen cloud fraction
-  !> @param[in,out] fog_fraction             fog fraction at screen level
-  !> @param[in,out] fog_fraction_ssi         Fog_fraction over sea/sea-ice
-  !> @param[in,out] fog_fraction_land        Fog_fraction over land
-  !> @param[in,out] vis_prob_5km             probability of vis below 5km at screen level
-  !> @param[in,out] dew_point                dew point temperature at screen level
-  !> @param[in,out] dew_point                Dew point temperature
-  !> @param[in,out] dew_point_ssi            Dew point temperature over sea/sea-ice
-  !> @param[in,out] visibility_with_precip   visibility including precipitation at screen level
-  !> @param[in,out] visibility_no_precip     visibility excluding precipitation at screen level
-
-  subroutine output_diags_for_bl_imp(zh, du_bl_w2, tile_heat_flux,             &
-                                     tile_moisture_flux, tile_temperature,     &
-                                     grid_surface_temperature,                 &
-                                     snowice_sublimation, canopy_evap,         &
-                                     wspd10m, u10m, v10m, ustar_implicit,      &
-                                     wind_gust, scale_dep_wind_gust,           &
+  subroutine output_diags_for_bl_imp(zh, du_bl_w2,                             &
+                                     wspd10m, u10m, v10m,                      &
                                      wind10m_neut_w2,                          &
                                      wspd10m_neut, u10m_neut, v10m_neut,       &
-                                     taux, tauy, tau_w2, taux_ssi, tauy_ssi,   &
-                                     pseudotaux, pseudotauy, pseudotau_w2,     &
+                                     tau_w2, taux_ssi, tauy_ssi,               &
+                                     pseudotau_w2,                             &
                                      z0m_eff, rho_in_w3, wetrho_in_w3,         &
-                                     tile_fraction, mv, mcl, mci, mr,          &
+                                     mv, mcl, mci, mr,                         &
                                      nr_mphys, ns_mphys, murk,                 &
                                      cf_bulk, cf_area, cf_liq, cf_fro,         &
                                      dtheta_bl, exner_in_wth, dt_conv,         &
-                                     t1p5m_surft, q1p5m_surft,                 &
-                                     t1p5m, q1p5m, qcl1p5m, rh1p5m,            &
+                                     t1p5m, q1p5m, qcl1p5m,                    &
                                      t1p5m_ssi, q1p5m_ssi, qcl1p5m_ssi,        &
-                                     rh1p5m_ssi,                               &
                                      t1p5m_land, q1p5m_land, qcl1p5m_land,     &
-                                     rh1p5m_land,                              &
-                                     latent_heat,                              &
-                                     grid_latent_heat, snomlt_surf_htf,        &
-                                     soil_evap, grid_canopy_evap,              &
-                                     grid_sublimation, surf_ht_flux,           &
-                                     soil_surf_ht_flux, surf_sw_net,           &
-                                     surf_radnet, surf_lw_up,                  &
-                                     surf_lw_down,                             &
                                      heat_flux_bl, moist_flux_bl,              &
                                      bl_weight_1dbl, ls_rain, ls_snow, lsca_2d,&
                                      conv_rain, conv_snow, cca_2d,             &
                                      dmv_bl, dmcl_bl, dms_bl, dbcf_bl,         &
-                                     dacf_bl, dcfl_bl, dcff_bl,                &
-                                     fog_fraction, fog_fraction_ssi,           &
-                                     fog_fraction_land, vis_prob_5km,          &
-                                     dew_point, dew_point_ssi, dew_point_land, &
-                                     visibility_with_precip,                   &
-                                     visibility_no_precip )
-
-    use jules_control_init_mod, only : n_surf_tile
+                                     dacf_bl, dcfl_bl, dcff_bl)
 
     implicit none
 
@@ -500,28 +227,17 @@ contains
                                          pseudotau_w2
 
     ! Prognostic fields to output
-    type( field_type ), intent(in)    :: zh, tile_heat_flux, tile_fraction,    &
-                                         tile_moisture_flux, tile_temperature, &
-                                         snowice_sublimation,                  &
-                                         canopy_evap, wspd10m, taux_ssi,       &
+    type( field_type ), intent(in)    :: zh, wspd10m, taux_ssi,                &
                                          tauy_ssi, du_bl_w2, dtheta_bl,        &
                                          heat_flux_bl, moist_flux_bl, dt_conv
 
-    ! Diagnostics computed within the kernel
-    type( field_type ), intent(in)    :: t1p5m_surft, q1p5m_surft
-    type( field_type ), intent(in)    :: t1p5m, q1p5m, qcl1p5m, rh1p5m
-    type( field_type ), intent(in)    :: t1p5m_ssi, q1p5m_ssi, qcl1p5m_ssi, rh1p5m_ssi
-    type( field_type ), intent(in)    :: t1p5m_land, q1p5m_land, qcl1p5m_land, rh1p5m_land
+    ! Diagnostics computed within the kernels
+    type( field_type ), intent(in)    :: t1p5m, q1p5m, qcl1p5m
+    type( field_type ), intent(in)    :: t1p5m_ssi, q1p5m_ssi, qcl1p5m_ssi
+    type( field_type ), intent(in)    :: t1p5m_land, q1p5m_land, qcl1p5m_land
     type( field_type ), intent(in)    :: u10m, v10m
     type( field_type ), intent(inout) :: u10m_neut, v10m_neut, wspd10m_neut
     type( field_type ), intent(in)    :: wind10m_neut_w2
-    type( field_type ), intent(inout) :: taux, tauy, pseudotaux, pseudotauy
-    type( field_type ), intent(in)    :: latent_heat, snomlt_surf_htf
-    type( field_type ), intent(in)    :: soil_evap, grid_canopy_evap
-    type( field_type ), intent(in)    :: grid_sublimation
-    type( field_type ), intent(in)    :: surf_ht_flux, soil_surf_ht_flux
-    type( field_type ), intent(in)    :: surf_sw_net, surf_radnet
-    type( field_type ), intent(in)    :: surf_lw_up, surf_lw_down
 
     ! Diagnostics locally computed here from other fields
     type( field_type ), intent(inout) :: dmv_bl
@@ -531,25 +247,24 @@ contains
     type( field_type ), intent(inout) :: dacf_bl
     type( field_type ), intent(inout) :: dcfl_bl
     type( field_type ), intent(inout) :: dcff_bl
-    type( field_type ), intent(inout) :: grid_surface_temperature
-    type( field_type ), intent(inout) :: grid_latent_heat
-    type( field_type ), intent(inout) :: ustar_implicit
-    type( field_type ), intent(inout) :: wind_gust
-    type( field_type ), intent(inout) :: scale_dep_wind_gust
-    type( field_type ), intent(inout) :: visibility_with_precip
-    type( field_type ), intent(inout) :: visibility_no_precip
-    type( field_type ), intent(inout) :: fog_fraction
-    type( field_type ), intent(inout) :: fog_fraction_ssi
-    type( field_type ), intent(inout) :: fog_fraction_land
-    type( field_type ), intent(inout) :: vis_prob_5km
-    type( field_type ), intent(inout) :: dew_point
-    type( field_type ), intent(inout) :: dew_point_ssi
-    type( field_type ), intent(inout) :: dew_point_land
 
     ! Local variables
+    type( field_type ) :: ustar_implicit
+    type( field_type ) :: wind_gust
+    type( field_type ) :: scale_dep_wind_gust
+    type( field_type ) :: visibility_with_precip
+    type( field_type ) :: visibility_no_precip
+    type( field_type ) :: fog_fraction
+    type( field_type ) :: fog_fraction_ssi
+    type( field_type ) :: fog_fraction_land
+    type( field_type ) :: vis_prob_5km
+    type( field_type ) :: dew_point
+    type( field_type ) :: dew_point_ssi
+    type( field_type ) :: dew_point_land
+
     type( field_type ) :: dt_bl, tauz, pseudotauz, du_bl, dv_bl, dw_bl, &
          w10m_neut, u10m2, v10m2
-    type( field_type ) :: land_surface_temperature
+    type( field_type ) :: taux, tauy, pseudotaux, pseudotauy
 
     logical( l_def ) :: ignore
 
@@ -560,6 +275,10 @@ contains
 
     call dtheta_bl%write_field('turbulence__dtheta_blcnv')
     call zh%write_field('turbulence__zh')
+    call heat_flux_bl%write_field('turbulence__heat_flux_bl')
+    call moist_flux_bl%write_field('turbulence__moist_flux_bl')
+
+    ! Diagnostic fields for BL locally computed here
     du_bl_flag = init_diag(du_bl, 'turbulence__du_bl')
     dv_bl_flag = init_diag(dv_bl, 'turbulence__dv_bl')
     dw_bl_flag = init_diag(dw_bl, 'turbulence__dw_bl')
@@ -573,18 +292,7 @@ contains
     if (du_bl_flag) call du_bl%write_field()
     if (dv_bl_flag) call dv_bl%write_field()
     if (dw_bl_flag) call dw_bl%write_field()
-    call heat_flux_bl%write_field('turbulence__heat_flux_bl')
-    call moist_flux_bl%write_field('turbulence__moist_flux_bl')
-    call tile_heat_flux%write_field('surface__tile_heat_flux')
-    call tile_moisture_flux%write_field('surface__tile_moisture_flux')
-    call tile_temperature%write_field('surface__tile_temperature')
-    call canopy_evap%write_field('surface__canopy_evap')
-    call wspd10m%write_field('surface__wspd10m')
-    call taux_ssi%write_field('surface__taux_ssi')
-    call tauy_ssi%write_field('surface__tauy_ssi')
-    call snowice_sublimation%write_field('surface__snowice_sublimation')
 
-    ! Diagnostics locally computed here from other fields
     dt_bl_flag = init_diag(dt_bl, 'turbulence__dt_bl')
     if (dt_bl_flag) then
       call invoke(    X_times_Y(dt_bl,dtheta_bl,exner_in_wth), &
@@ -619,66 +327,28 @@ contains
       call invoke(inc_X_plus_Y(dcff_bl, cf_fro))
       call dcff_bl%write_field()
     end if
-    if (grid_surface_temperature_flag) then
-      call invoke(weighted_ave_kernel_type(grid_surface_temperature,           &
-                                           tile_temperature, tile_fraction,    &
-                                           1, n_surf_tile))
-      call grid_surface_temperature%write_field()
-    end if
-    land_surface_temperature_flag = init_diag(land_surface_temperature, 'surface__land_surface_temperature')
-    if (land_surface_temperature_flag) then
-      call invoke(weighted_ave_kernel_type(land_surface_temperature,           &
-                                           tile_temperature, tile_fraction,    &
-                                           1, n_land_tile))
-      call land_surface_temperature%write_field()
-    end if
-    if (grid_latent_heat_flag) then
-      call invoke(weighted_ave_kernel_type(grid_latent_heat,                   &
-                                           latent_heat, tile_fraction,         &
-                                           1, n_surf_tile))
-      call grid_latent_heat%write_field()
-    end if
-    if (grid_canopy_evap_flag) then
-      call invoke(weighted_ave_kernel_type(grid_canopy_evap,                   &
-                                            canopy_evap, tile_fraction,        &
-                                            1, n_surf_tile))
-      call grid_canopy_evap%write_field()
-    end if
-    if (grid_sublimation_flag) then
-      call invoke(weighted_ave_kernel_type(grid_sublimation,                   &
-                                           snowice_sublimation, tile_fraction, &
-                                           1, n_surf_tile) )
-      call grid_sublimation%write_field()
-    end if
-    if (.true.) then                                 ! simplify dependency handling
+
+    taux_flag = init_diag(taux, 'turbulence__taux')
+    tauy_flag = init_diag(tauy, 'turbulence__tauy')
+    if (taux_flag .or. tauy_flag) then
+      if (.not. taux_flag) ignore = init_diag(taux, 'turbulence__taux', activate=.true.)
+      if (.not. tauy_flag) ignore = init_diag(tauy, 'turbulence__tauy', activate=.true.)
       call taux%copy_field_properties(tauz)
       call map_physics_winds(taux, tauy, tauz, tau_w2)
     end if
-    if (pseudotaux_flag .or. pseudotauy_flag) then
-      call pseudotaux%copy_field_properties(pseudotauz)
-      call map_physics_winds(pseudotaux, pseudotauy, pseudotauz, pseudotau_w2)
-    end if
-
-    ! Diagnostics computed within the kernel
     if (taux_flag) call taux%write_field()
     if (tauy_flag) call tauy%write_field()
-    if (t1p5m_surft_flag) call t1p5m_surft%write_field()
-    if (q1p5m_surft_flag) call q1p5m_surft%write_field()
-    if (t1p5m_flag) call t1p5m%write_field()
-    if (q1p5m_flag) call q1p5m%write_field()
-    if (qcl1p5m_flag) call qcl1p5m%write_field()
-    if (rh1p5m_flag) call rh1p5m%write_field()
-    if (t1p5m_ssi_flag) call t1p5m_ssi%write_field()
-    if (q1p5m_ssi_flag) call q1p5m_ssi%write_field()
-    if (qcl1p5m_ssi_flag) call qcl1p5m_ssi%write_field()
-    if (rh1p5m_ssi_flag) call rh1p5m_ssi%write_field()
-    if (t1p5m_land_flag) call t1p5m_land%write_field()
-    if (q1p5m_land_flag) call q1p5m_land%write_field()
-    if (qcl1p5m_land_flag) call qcl1p5m_land%write_field()
-    if (rh1p5m_land_flag) call rh1p5m_land%write_field()
+
+    ! prognostic fields for surface but mapped from staggered atmosphere grid
+    call wspd10m%write_field('surface__wspd10m')
+    call taux_ssi%write_field('surface__taux_ssi')
+    call tauy_ssi%write_field('surface__tauy_ssi')
+
+    ! diagnostic fields for surface but mapped from staggered atmosphere grid
     if (u10m_flag) call u10m%write_field()
     if (v10m_flag) call v10m%write_field()
 
+    ! diagnostic fields for surface but on staggered atmosphere grid
     if (wspd10m_neut_flag .or. u10m_neut_flag .or. v10m_neut_flag) then
       if (.not. u10m_neut_flag) ignore = init_diag(u10m_neut, 'surface__u10m_neut', activate=.true.)
       if (.not. v10m_neut_flag) ignore = init_diag(v10m_neut, 'surface__v10m_neut', activate=.true.)
@@ -699,17 +369,40 @@ contains
     end if
     if (u10m_neut_flag) call u10m_neut%write_field()
     if (v10m_neut_flag) call v10m_neut%write_field()
+
+    pseudotaux_flag = init_diag(pseudotaux, 'surface__pseudotaux')
+    pseudotauy_flag = init_diag(pseudotauy, 'surface__pseudotauy')
+    if (pseudotaux_flag .or. pseudotauy_flag) then
+      if (.not. pseudotaux_flag) ignore = init_diag(pseudotaux, 'surface__pseudotaux', activate=.true.)
+      if (.not. pseudotauy_flag) ignore = init_diag(pseudotauy, 'surface__pseudotauy', activate=.true.)
+      call pseudotaux%copy_field_properties(pseudotauz)
+      call map_physics_winds(pseudotaux, pseudotauy, pseudotauz, pseudotau_w2)
+    end if
     if (pseudotaux_flag) call pseudotaux%write_field()
     if (pseudotauy_flag) call pseudotauy%write_field()
-    if (latent_heat_flag) call latent_heat%write_field()
-    if (snomlt_surf_htf_flag) call snomlt_surf_htf%write_field()
-    if (soil_evap_flag) call soil_evap%write_field()
-    call surf_ht_flux%write_field('surface__surf_ht_flux')
-    if (soil_surf_ht_flux_flag) call soil_surf_ht_flux%write_field()
-    if (surf_sw_net_flag) call surf_sw_net%write_field()
-    if (surf_radnet_flag) call surf_radnet%write_field()
-    if (surf_lw_up_flag) call surf_lw_up%write_field()
-    if (surf_lw_down_flag) call surf_lw_down%write_field()
+
+    ! Local diagnostic calculated here
+    ustar_implicit_flag = init_diag(ustar_implicit, 'surface__ustar_implicit')
+    wind_gust_flag = init_diag(wind_gust, 'surface__wind_gust')
+    scale_dep_wind_gust_flag = init_diag(scale_dep_wind_gust, 'surface__scale_dep_wind_gust')
+    vis_no_precip_flag = init_diag(visibility_no_precip, 'surface__visibility_no_precip')
+    vis_with_precip_flag = init_diag(visibility_with_precip, 'surface__visibility_with_precip')
+    fog_fraction_flag = init_diag(fog_fraction, 'surface__fog_fraction')
+    fog_fraction_ssi_flag = init_diag(fog_fraction_ssi, 'surface__fog_fraction_ssi')
+    fog_fraction_land_flag = init_diag(fog_fraction_land, 'surface__fog_fraction_land')
+    vis_prob_5km_flag = init_diag(vis_prob_5km, 'surface__vis_prob_5km')
+    dew_point_flag = init_diag(dew_point, 'surface__dew_point')
+    dew_point_ssi_flag = init_diag(dew_point_ssi, 'surface__dew_point_ssi')
+    dew_point_land_flag = init_diag(dew_point_land, 'surface__dew_point_land')
+
+    ! Initialise fields where another diagnostic depends on them
+    if (wind_gust_flag .or. scale_dep_wind_gust_flag) then
+      if (.not. ustar_implicit_flag) ignore = init_diag(ustar_implicit, 'surface__ustar_implicit', activate=.true.)
+    end if
+    ! visibility_with_precip requires visibility_no_precip
+    if (vis_with_precip_flag .and. .not. vis_no_precip_flag) then
+      ignore = init_diag(visibility_no_precip, 'surface__visibility_no_precip', activate=.true.)
+    end if
 
     if ( ustar_implicit_flag .or. wind_gust_flag .or. scale_dep_wind_gust_flag &
          .or. vis_no_precip_flag .or. vis_with_precip_flag .or.                &
