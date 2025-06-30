@@ -96,7 +96,7 @@ contains
                                            scaled_radius = scaled_radius ) )
 
     @assertEqual( 'geometric',    trim( identify_extrusion( unit_under_test ) ) )
-    @assertEqual( 318550.0_r_def, unit_under_test%get_atmosphere_bottom() )
+    @assertEqual( scaled_radius,  unit_under_test%get_atmosphere_bottom() )
     @assertEqual( 600000.0_r_def, unit_under_test%get_atmosphere_top() )
     @assertEqual( 7_i_def,        unit_under_test%get_number_of_layers() )
 

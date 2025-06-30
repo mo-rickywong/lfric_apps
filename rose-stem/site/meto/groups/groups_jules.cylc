@@ -53,13 +53,13 @@
 {# Platform Generic Extends #}
 {% do site_groups.developer.extend(site_groups.jules_developer) %}
 {% do site_groups.all.extend(site_groups.jules) %}
-{% do site_groups.unit_tests.extend(site_groups.jules_unit_tests) %}
+{# % do site_groups.unit_tests.extend(site_groups.jules_unit_tests) % #}
 {% do site_groups.build.extend(site_groups.jules_build) %}
 
 {# Azspice Extends #}
 {% do site_groups.azspice_developer.extend(site_groups.jules_azspice_developer) %}
 {% do site_groups.azspice.extend(site_groups.jules_azspice) %}
-{% do site_groups.azspice_unit_tests.extend(site_groups.jules_azspice_unit_tests) %}
+{# % do site_groups.azspice_unit_tests.extend(site_groups.jules_azspice_unit_tests) % #}
 {% do site_groups.azspice_build.extend(site_groups.jules_azspice_build) %}
 
 {% do LOG.debug("Finished in site/meto/groups/groups_jules.cylc") %}
