@@ -525,3 +525,54 @@ class vn21_t207(MacroUpgrade):
         self.add_setting(config, ["namelist:io", "multifile_io"], ".false.")
 
         return config, self.reports
+
+
+class vn21_t756(MacroUpgrade):
+    """Upgrade macro for ticket #756 by Adrian Lock."""
+
+    BEFORE_TAG = "vn2.1_t207"
+    AFTER_TAG = "vn2.1_t756"
+
+    def upgrade(self, config, meta_config=None):
+        # Commands From: rose-meta/socrates-radiation
+        self.add_setting(
+            config, ["namelist:radiative_gases", "o3_profile_data"], "0"
+        )
+        self.add_setting(
+            config, ["namelist:radiative_gases", "o3_profile_heights"], "0.0"
+        )
+        self.add_setting(
+            config, ["namelist:radiative_gases", "o3_profile_size"], "0"
+        )
+
+        # Commands From: rose-meta/lfric-gungho
+        # Commands From: rose-meta/lfric-gungho
+        """Add vertadvect namelist to configuration source list"""
+        source = self.get_setting_value(
+            config, ["file:configuration.nml", "source"]
+        )
+        source = re.sub(
+            r"\(namelist:vapour_forcing\)",
+            r"(namelist:vapour_forcing)" + "\n" + " (namelist:vertadvect)",
+            source,
+        )
+        self.change_setting_value(
+            config, ["file:configuration.nml", "source"], source
+        )
+        """Add vertadvect_forcing setting to external_forcing namelist"""
+        self.add_setting(
+            config,
+            ["namelist:external_forcing", "vertadvect_forcing"],
+            ".false.",
+        )
+        """Data for vertadvect namelist"""
+        self.add_setting(config, ["namelist:vertadvect"])
+        self.add_setting(config, ["namelist:vertadvect", "heights"], "0.0")
+        self.add_setting(config, ["namelist:vertadvect", "number_heights"], "1")
+        self.add_setting(config, ["namelist:vertadvect", "number_times"], "1")
+        self.add_setting(
+            config, ["namelist:vertadvect", "profile_data_w"], "0.0"
+        )
+        self.add_setting(config, ["namelist:vertadvect", "times"], "0.0")
+
+        return config, self.reports

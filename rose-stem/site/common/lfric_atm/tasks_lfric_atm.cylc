@@ -682,6 +682,71 @@
         "plot_str": "profile_plot.py $NODAL_DATA_DIR/lfric_diag.nc theta:u_in_w3:v_in_w3:w_in_wth umL70 70 40  $PLOT_DIR",
     }) %}
 
+{% elif task_ns.conf_name == "comp_tran_ref_gal9_3d-BiP64x64-10000x10000_MG" %}
+
+    {% do task_dict.update({
+        "opt_confs": ["l70_40km","hh_solve","no_aerosol","comp_tran_ref","3dIdeal"],
+        "resolution": "BiP64x64-10000x10000_MG",
+        "DT": 180,
+        "tsteps": 1440,
+        "mpi_parts": 64,
+        "wallclock": 180,
+        "log_level": "info",
+        "plot_str": "profile_plot.py $NODAL_DATA_DIR/lfric_diag.nc theta:u_in_w3:v_in_w3:w_in_wth umL70 70 40  $PLOT_DIR",
+    }) %}
+
+{% elif task_ns.conf_name == "comp_tran_ref_coma9_3d-BiP64x64-10000x10000_MG" %}
+
+    {% do task_dict.update({
+        "opt_confs": ["l70_40km","coma9","hh_solve","no_aerosol","comp_tran_ref","3dIdeal"],
+        "resolution": "BiP64x64-10000x10000_MG",
+        "DT": 180,
+        "tsteps": 1440,
+        "mpi_parts": 64,
+        "wallclock": 180,
+        "log_level": "info",
+        "plot_str": "profile_plot.py $NODAL_DATA_DIR/lfric_diag.nc theta:u_in_w3:v_in_w3:w_in_wth umL70 70 40  $PLOT_DIR",
+    }) %}
+
+{% elif task_ns.conf_name == "comp_tran_ref_3d-BiP64x64-1500x1500_MG" %}
+
+    {% do task_dict.update({
+        "opt_confs": ["l70_40km","ral3","hh_solve","no_aerosol","comp_tran_ref","3dIdeal"],
+        "resolution": "BiP64x64-1500x1500_MG",
+        "DT": 60,
+        "tsteps": 1440,
+        "mpi_parts": 64,
+        "wallclock": 180,
+        "kgo_checks": ["checksum"],
+        "log_level": "info",
+        "plot_str": "profile_plot.py $NODAL_DATA_DIR/lfric_diag.nc theta:u_in_w3:v_in_w3:w_in_wth umL70 70 40  $PLOT_DIR",
+    }) %}
+
+{% elif task_ns.conf_name == "comp_tran_ref_3d_l120-BiP64x64-1500x1500_MG" %}
+
+    {% do task_dict.update({
+        "opt_confs": ["l120_40km","ral3","hh_solve","no_aerosol","comp_tran_ref","3dIdeal"],
+        "resolution": "BiP64x64-1500x1500_MG",
+        "DT": 60,
+        "tsteps": 1440,
+        "mpi_parts": 64,
+        "wallclock": 180,
+        "log_level": "info",
+    }) %}
+
+{% elif task_ns.conf_name == "comp_tran_ref_3d-BiP64x64-250x250_MG" %}
+
+    {% do task_dict.update({
+        "opt_confs": ["l70_40km","ral3","hh_solve","no_aerosol","comp_tran_ref","3dIdeal"],
+        "resolution": "BiP64x64-250x250_MG",
+        "DT": 10,
+        "tsteps": 2160,
+        "mpi_parts": 64,
+        "wallclock": 20,
+        "log_level": "info",
+        "plot_str": "profile_plot.py $NODAL_DATA_DIR/lfric_diag.nc theta:u_in_w3:v_in_w3:w_in_wth umL70 70 40  $PLOT_DIR",
+    }) %}
+
 {% elif task_ns.conf_name == "arm-BiP64x64-100x100_MG" %}
 
     {% do task_dict.update({

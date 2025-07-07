@@ -102,7 +102,7 @@ module gas_calc_all_mod
     o3_clim_fcg_years, o3_clim_fcg_rates, &
     o3_mix_ratio, o3_rad_opt, o3_rad_opt_off, &
     o3_rad_opt_constant, o3_rad_opt_time_varying, &
-    o3_rad_opt_prognostic, o3_rad_opt_ancil, &
+    o3_rad_opt_profile, o3_rad_opt_prognostic, o3_rad_opt_ancil, &
     rb_clim_fcg_levls, rb_clim_fcg_nyears, &
     rb_clim_fcg_years, rb_clim_fcg_rates, &
     rb_mix_ratio, rb_rad_opt, rb_rad_opt_off, &
@@ -551,7 +551,7 @@ contains
                      o3_clim_fcg_levls,   &
                      o3_clim_fcg_rates )
       o3_well_mixed = .true.
-    case ( o3_rad_opt_prognostic, o3_rad_opt_ancil )
+    case ( o3_rad_opt_prognostic, o3_rad_opt_profile, o3_rad_opt_ancil )
       o3_well_mixed = .false.
     end select
 

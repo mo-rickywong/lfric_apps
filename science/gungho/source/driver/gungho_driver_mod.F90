@@ -95,9 +95,10 @@ module gungho_driver_mod
   use update_tile_temperature_alg_mod, &
                                   only: update_tile_temperature_alg
   use blayer_config_mod,          only: flux_bc_opt,                   &
-                                        flux_bc_opt_specified_tstar,   &
                                         flux_bc_opt_specified_scalars, &
                                         flux_bc_opt_specified_scalars_tstar
+  use specified_surface_config_mod, only: function_name_sst,               &
+                                          function_name_sst_time_interpolated
 #endif
 #ifdef COUPLED
   use esm_couple_config_mod,      only : l_esm_couple_test
@@ -354,8 +355,7 @@ contains
     end if
 
     ! Specified surface temperatures
-    if ( flux_bc_opt == flux_bc_opt_specified_tstar .or. &
-         flux_bc_opt == flux_bc_opt_specified_scalars_tstar ) then
+    if ( function_name_sst == function_name_sst_time_interpolated ) then
       surface_fields => modeldb%fields%get_field_collection("surface_fields")
       call update_tile_temperature_alg ( modeldb%clock, &
                                          surface_fields )

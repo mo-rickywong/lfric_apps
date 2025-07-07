@@ -37,6 +37,13 @@
         "lfric_atm_ral3_ens-seuk_MG_azspice_gnu_fast-debug-64bit",
         "lfric_atm_ral3_mixmol-seuk_MG_azspice_gnu_fast-debug-64bit",
     ],
+    "lfric_atm_azspice_comp_trans": [
+        "lfric_atm_scm_gal9_comp_tran_ref-BiP2x2-50000x50000_azspice_gnu_fast-debug-64bit",
+        "lfric_atm_comp_tran_ref_3d-BiP64x64-1500x1500_MG_azspice_gnu_fast-debug-64bit",
+        "lfric_atm_comp_tran_ref_3d_l120-BiP64x64-1500x1500_MG_azspice_gnu_fast-debug-64bit",
+        "lfric_atm_comp_tran_ref_gal9_3d-BiP64x64-10000x10000_MG_azspice_gnu_fast-debug-64bit",
+        "lfric_atm_comp_tran_ref_coma9_3d-BiP64x64-10000x10000_MG_azspice_gnu_fast-debug-64bit",
+    ],
     "lfric_atm_scm_azspice_developer": [
         "lfric_atm_scm_gal9_bomex-BiP2x2-50000x50000_azspice_gnu_fast-debug-64bit",
         "lfric_atm_scm_coma9_bomex-BiP2x2-50000x50000_azspice_gnu_fast-debug-64bit",
@@ -69,6 +76,7 @@
     ],
     "lfric_atm_azspice_extra": [
         "lfric_atm_nwp_azspice_extra",
+        "lfric_atm_azspice_comp_trans",
         "lfric_atm_clim_gal9_chem-C12_azspice_gnu_fast-debug-64bit",
         "lfric_atm_aquaplanet-C12_azspice_gnu_fast-debug-64bit",
         "lfric_atm_thai_ben1-C48_MG_azspice_gnu_fast-debug-64bit",

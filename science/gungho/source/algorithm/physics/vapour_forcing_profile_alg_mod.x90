@@ -4,7 +4,7 @@
 ! under which the code may be used.
 !-------------------------------------------------------------------------------
 !
-!> @brief Apply temperature tendency forcing to the potential temperature field
+!> @brief Apply water vapour tendency forcing to the water vapour field
 module vapour_forcing_profile_alg_mod
 
 use constants_mod,               only: i_def, l_def, r_def
@@ -33,10 +33,10 @@ contains
 !>          input profile may be either height, in metres, or pressure in
 !>          Pascals. Linear interpolation is used to map the input profile
 !>          onto finite element nodal points in Wtheta.
-!> @param[in,out] dmr_v        Forcing increment for vapour mixing ratio (kg/kg)
+!> @param[in,out] dmv_forcing  Forcing increment for vapour mixing ratio (kg/kg)
 !> @param[in]     exner_in_wth Exner field mapped into Wtheta space
 !> @param[in]     time_now     Current model time (s)
-subroutine vapour_forcing_profile_alg( dmr_v, exner_in_wth, time_now )
+subroutine vapour_forcing_profile_alg( dmv_forcing, exner_in_wth, time_now )
 
 use vapour_forcing_config_mod, only: number_times,                 &
                                      number_heights,               &
@@ -59,7 +59,7 @@ use prof_temporal_interp_mod,    only: prof_temporal_interp
 implicit none
 
 ! Arguments
-type(field_type), intent(inout)      :: dmr_v
+type(field_type), intent(inout)      :: dmv_forcing
 type(field_type), intent(in), target :: exner_in_wth
 real(kind=r_def), intent(in)         :: time_now
 
@@ -69,10 +69,12 @@ real(kind=r_def)    :: vapour_forcing_now(number_heights)
 integer(kind=i_def) :: mesh_id, k
 logical(kind=l_def) :: pressure_coord, profile_extrap
 
+type(field_type)    :: dmr_v
 type( field_type ), pointer :: height_wth => null()
 
 ! dt is r_second, and must be needs casting to r_def in invokes
 dt_rdef = real( dt, kind=r_def)
+call dmr_v%initialise( vector_space = dmv_forcing%get_function_space() )
 
 if ( number_times == 1 ) then
   vapour_forcing_now(:) = forcing_data(:)
@@ -123,6 +125,8 @@ else
   end if
   call invoke( inc_a_times_X(dt_rdef, dmr_v) )
 end if
+! Add water vapour tendency forcing to the total forcing increment field
+call invoke( inc_X_plus_Y( dmv_forcing, dmr_v ) )
 
 end subroutine vapour_forcing_profile_alg
 

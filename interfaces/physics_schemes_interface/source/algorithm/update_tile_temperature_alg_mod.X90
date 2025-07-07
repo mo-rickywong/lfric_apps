@@ -41,9 +41,7 @@ subroutine update_tile_temperature_alg ( clock, surface_fields )
                                           time_units_sst_seconds,          &
                                           time_units_sst_minutes,          &
                                           time_units_sst_hours,            &
-                                          time_units_sst_days,             &
-                                          function_name_sst,               &
-                                          function_name_sst_time_interpolated
+                                          time_units_sst_days
   use jules_control_init_mod, only: first_sea_tile
   use sci_time_interp_mod,    only: time_interpolate_list
   use clock_mod,              only: clock_type
@@ -66,42 +64,38 @@ subroutine update_tile_temperature_alg ( clock, surface_fields )
 
   nullify(fs, tile_temperature, mesh)
 
-  if ( function_name_sst == function_name_sst_time_interpolated ) then
+  time_now = real( clock%get_step(), r_def ) * &
+	     real( clock%get_seconds_per_step(), r_def )
 
-    time_now = real( clock%get_step(), r_def ) * &
-               real( clock%get_seconds_per_step(), r_def )
+  ! Select time units
+  select case ( time_units_sst )
+    case( time_units_sst_seconds )
+      time_now = time_now
+    case( time_units_sst_minutes )
+      time_now = time_now / 60
+    case( time_units_sst_hours )
+      time_now = time_now / 3600
+    case( time_units_sst_days )
+      time_now = time_now / 86400
+    case default
+      call log_event( 'Unknown time_units_sst', LOG_LEVEL_ERROR )
+  end select
 
-    ! Select time units
-    select case ( time_units_sst )
-      case( time_units_sst_seconds )
-        time_now = time_now
-      case( time_units_sst_minutes )
-        time_now = time_now / 60
-      case( time_units_sst_hours )
-        time_now = time_now / 3600
-      case( time_units_sst_days )
-        time_now = time_now / 86400
-      case default
-        call log_event( 'Unknown time_units_sst', LOG_LEVEL_ERROR )
-    end select
+  call surface_fields%get_field( 'tile_temperature', tile_temperature )
 
-    call surface_fields%get_field( 'tile_temperature', tile_temperature )
+  mesh_idx = tile_temperature%get_mesh_id()
+  mesh => mesh_collection%get_mesh( mesh_idx )
+  fs_idx = tile_temperature%which_function_space()
+  fs => function_space_collection%get_fs( mesh, 0, 0, fs_idx )
 
-    mesh_idx = tile_temperature%get_mesh_id()
-    mesh => mesh_collection%get_mesh( mesh_idx )
-    fs_idx = tile_temperature%which_function_space()
-    fs => function_space_collection%get_fs( mesh, 0, 0, fs_idx )
+  call input_field%initialise( vector_space = fs)
 
-    call input_field%initialise( vector_space = fs)
+  call time_interpolate_list( profile_now, time_data_sst, &
+			      sea_surf_temps, time_now )
 
-    call time_interpolate_list( profile_now, time_data_sst, &
-                                sea_surf_temps, time_now )
-
-    call invoke( setval_C ( input_field, profile_now ) )
-    call invoke( multi_insert_kernel_type( tile_temperature, input_field, &
-                                           first_sea_tile, 1 ) )
-
-  end if
+  call invoke( setval_C ( input_field, profile_now ) )
+  call invoke( multi_insert_kernel_type( tile_temperature, input_field, &
+					 first_sea_tile, 1 ) )
 
 end subroutine update_tile_temperature_alg
 

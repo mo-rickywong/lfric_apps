@@ -398,7 +398,8 @@ contains
     if ( external_forcing ) then
       time_now = real( clock%get_step(), r_def ) * dt
       call external_forcing_alg(derived_fields, u, theta, exner, exner_in_wth, &
-                                mr_n, cloud_fields, twod_mesh, dt, time_now,   &
+                                rho, mr_n, cloud_fields, twod_mesh, dt,        &
+                                time_now,                                      &
                                 dtheta_forcing, du_forcing, dmv_forcing,       &
                                 dmcl_forcing, dcfl_forcing, dbcf_forcing,      &
                                 theta_forcing_done, vapour_forcing_done,       &

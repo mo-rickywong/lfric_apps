@@ -39,6 +39,8 @@ module gungho_extrusion_mod
                                    method_um_L38_29t_9s_40km,  &
                                    method_um_L85_50t_35s_85km, &
                                    method_um_L70_61t_9s_40km,  &
+                                   method_um_L120_99t_21s_40km,&
+                                   method_um_L140_122t_18s_40km,&
                                    method_um_L70_50t_20s_80km
   use log_mod,              only : log_event,       &
                                    log_level_error, &
@@ -95,7 +97,7 @@ module gungho_extrusion_mod
     module procedure um_L85_50t_35s_85km_extrusion_constructor
   end interface um_L85_50t_35s_85km_extrusion_type
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !> @brief Extrudes with specific UM configuration L70_61t_9s_40km
   !>
   type, public, extends(extrusion_type) :: um_L70_61t_9s_40km_extrusion_type
@@ -108,6 +110,34 @@ module gungho_extrusion_mod
   interface um_L70_61t_9s_40km_extrusion_type
     module procedure um_L70_61t_9s_40km_extrusion_constructor
   end interface um_L70_61t_9s_40km_extrusion_type
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !> @brief Extrudes with specific UM configuration L120_99t_21s_40km
+  !>
+  type, public, extends(extrusion_type) :: um_L120_99t_21s_40km_extrusion_type
+    private
+  contains
+    private
+    procedure, public :: extrude => um_L120_99t_21s_40km_extrude
+  end type um_L120_99t_21s_40km_extrusion_type
+
+  interface um_L120_99t_21s_40km_extrusion_type
+    module procedure um_L120_99t_21s_40km_extrusion_constructor
+  end interface um_L120_99t_21s_40km_extrusion_type
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !> @brief Extrudes with specific UM configuration L140_122t_18s_40km
+  !>
+  type, public, extends(extrusion_type) :: um_L140_122t_18s_40km_extrusion_type
+    private
+  contains
+    private
+    procedure, public :: extrude => um_L140_122t_18s_40km_extrude
+  end type um_L140_122t_18s_40km_extrusion_type
+
+  interface um_L140_122t_18s_40km_extrusion_type
+    module procedure um_L140_122t_18s_40km_extrusion_constructor
+  end interface um_L140_122t_18s_40km_extrusion_type
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !> @brief Extrudes using DCMIP scheme.
@@ -365,7 +395,101 @@ contains
 
   end subroutine um_L70_61t_9s_40km_extrude
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !> @brief Extrudes the mesh with specific UM configuration L120_99t_21s_40km
+  !>
+  !> @param[out] eta Nondimensional vertical coordinate.
+  !>
+  subroutine um_L120_99t_21s_40km_extrude( this, eta )
+
+    implicit none
+
+    class(um_L120_99t_21s_40km_extrusion_type), intent(in)  :: this
+    real(r_def),                   intent(out) :: eta(0:)
+
+    if (this%get_number_of_layers() /= 120)then
+      call log_event( "Extrusion L120_99t_21s_40km reqires 120 levels", log_level_error )
+    end if
+
+    eta(0:this%get_number_of_layers()) = (/ &
+       0.0000000E+00_r_def,   0.1250000E-03_r_def,   0.3000000E-03_r_def,   0.5250000E-03_r_def,   0.8000000E-03_r_def, &
+       0.1125000E-02_r_def,   0.1500000E-02_r_def,   0.1925000E-02_r_def,   0.2400000E-02_r_def,   0.2925000E-02_r_def, &
+       0.3500000E-02_r_def,   0.4125000E-02_r_def,   0.4800000E-02_r_def,   0.5525000E-02_r_def,   0.6300000E-02_r_def, &
+       0.7125000E-02_r_def,   0.8000000E-02_r_def,   0.8925000E-02_r_def,   0.9900000E-02_r_def,   0.1092500E-01_r_def, &
+       0.1200000E-01_r_def,   0.1312500E-01_r_def,   0.1430000E-01_r_def,   0.1552500E-01_r_def,   0.1680000E-01_r_def, &
+       0.1812500E-01_r_def,   0.1950000E-01_r_def,   0.2092500E-01_r_def,   0.2240000E-01_r_def,   0.2392500E-01_r_def, &
+       0.2550000E-01_r_def,   0.2712500E-01_r_def,   0.2880000E-01_r_def,   0.3052500E-01_r_def,   0.3230000E-01_r_def, &
+       0.3412500E-01_r_def,   0.3600000E-01_r_def,   0.3792500E-01_r_def,   0.3990000E-01_r_def,   0.4192500E-01_r_def, &
+       0.4400000E-01_r_def,   0.4612500E-01_r_def,   0.4830000E-01_r_def,   0.5052500E-01_r_def,   0.5280000E-01_r_def, &
+       0.5512500E-01_r_def,   0.5750000E-01_r_def,   0.5992500E-01_r_def,   0.6240000E-01_r_def,   0.6492500E-01_r_def, &
+       0.6750000E-01_r_def,   0.7012500E-01_r_def,   0.7280000E-01_r_def,   0.7554308E-01_r_def,   0.7838037E-01_r_def, &
+       0.8132010E-01_r_def,   0.8436962E-01_r_def,   0.8753612E-01_r_def,   0.9082688E-01_r_def,   0.9424930E-01_r_def, &
+       0.9781096E-01_r_def,   0.1015196E+00_r_def,   0.1053834E+00_r_def,   0.1094103E+00_r_def,   0.1136090E+00_r_def, &
+       0.1179882E+00_r_def,   0.1225567E+00_r_def,   0.1273237E+00_r_def,   0.1322988E+00_r_def,   0.1374915E+00_r_def, &
+       0.1429119E+00_r_def,   0.1485701E+00_r_def,   0.1544765E+00_r_def,   0.1606420E+00_r_def,   0.1670773E+00_r_def, &
+       0.1737938E+00_r_def,   0.1808028E+00_r_def,   0.1881162E+00_r_def,   0.1957460E+00_r_def,   0.2037043E+00_r_def, &
+       0.2120037E+00_r_def,   0.2206570E+00_r_def,   0.2296771E+00_r_def,   0.2390774E+00_r_def,   0.2488715E+00_r_def, &
+       0.2590731E+00_r_def,   0.2696964E+00_r_def,   0.2807557E+00_r_def,   0.2922657E+00_r_def,   0.3042411E+00_r_def, &
+       0.3166971E+00_r_def,   0.3296493E+00_r_def,   0.3431131E+00_r_def,   0.3571047E+00_r_def,   0.3716401E+00_r_def, &
+       0.3867360E+00_r_def,   0.4024089E+00_r_def,   0.4186760E+00_r_def,   0.4355546E+00_r_def,   0.4530622E+00_r_def, &
+       0.4712166E+00_r_def,   0.4900359E+00_r_def,   0.5095385E+00_r_def,   0.5297430E+00_r_def,   0.5506685E+00_r_def, &
+       0.5723339E+00_r_def,   0.5947588E+00_r_def,   0.6179630E+00_r_def,   0.6419664E+00_r_def,   0.6667892E+00_r_def, &
+       0.6924521E+00_r_def,   0.7189759E+00_r_def,   0.7463816E+00_r_def,   0.7746907E+00_r_def,   0.8039246E+00_r_def, &
+       0.8341056E+00_r_def,   0.8652556E+00_r_def,   0.8973972E+00_r_def,   0.9305530E+00_r_def,   0.9647462E+00_r_def, &
+       0.1000000E+01_r_def &
+       /)
+
+  end subroutine um_L120_99t_21s_40km_extrude
+
+  !> @brief Extrudes the mesh with specific UM configuration L140_122t_18s_40km
+  !>
+  !> @param[out] eta Nondimensional vertical coordinate.
+  !>
+  subroutine um_L140_122t_18s_40km_extrude( this, eta )
+
+    implicit none
+
+    class(um_L140_122t_18s_40km_extrusion_type), intent(in)  :: this
+    real(r_def),                   intent(out) :: eta(0:)
+
+    if (this%get_number_of_layers() /= 140)then
+      call log_event( "Extrusion L140_122t_18s_40km reqires 140 levels", log_level_error )
+    end if
+
+    eta(0:this%get_number_of_layers()) = (/ &
+       0.0000000E+00_r_def,   0.5000001E-04_r_def,   0.1333334E-03_r_def,   0.2500001E-03_r_def,   0.4000001E-03_r_def, &
+       0.5833335E-03_r_def,   0.8000002E-03_r_def,   0.1050000E-02_r_def,   0.1333334E-02_r_def,   0.1650000E-02_r_def, &
+       0.2000001E-02_r_def,   0.2383334E-02_r_def,   0.2800001E-02_r_def,   0.3250001E-02_r_def,   0.3733334E-02_r_def, &
+       0.4250001E-02_r_def,   0.4800001E-02_r_def,   0.5383335E-02_r_def,   0.6000001E-02_r_def,   0.6650002E-02_r_def, &
+       0.7333335E-02_r_def,   0.8050002E-02_r_def,   0.8800002E-02_r_def,   0.9583336E-02_r_def,   0.1040000E-01_r_def, &
+       0.1125000E-01_r_def,   0.1213334E-01_r_def,   0.1305000E-01_r_def,   0.1400000E-01_r_def,   0.1498334E-01_r_def, &
+       0.1600000E-01_r_def,   0.1705000E-01_r_def,   0.1813334E-01_r_def,   0.1925001E-01_r_def,   0.2040001E-01_r_def, &
+       0.2158334E-01_r_def,   0.2280001E-01_r_def,   0.2405001E-01_r_def,   0.2533334E-01_r_def,   0.2665001E-01_r_def, &
+       0.2800001E-01_r_def,   0.2938334E-01_r_def,   0.3080001E-01_r_def,   0.3225001E-01_r_def,   0.3373334E-01_r_def, &
+       0.3525001E-01_r_def,   0.3680001E-01_r_def,   0.3838334E-01_r_def,   0.4000001E-01_r_def,   0.4165001E-01_r_def, &
+       0.4333334E-01_r_def,   0.4505001E-01_r_def,   0.4680001E-01_r_def,   0.4858335E-01_r_def,   0.5040001E-01_r_def, &
+       0.5225001E-01_r_def,   0.5413335E-01_r_def,   0.5605002E-01_r_def,   0.5800001E-01_r_def,   0.5998335E-01_r_def, &
+       0.6200002E-01_r_def,   0.6405002E-01_r_def,   0.6613335E-01_r_def,   0.6825002E-01_r_def,   0.7040001E-01_r_def, &
+       0.7258336E-01_r_def,   0.7480001E-01_r_def,   0.7705002E-01_r_def,   0.7933335E-01_r_def,   0.8165002E-01_r_def, &
+       0.8400003E-01_r_def,   0.8638336E-01_r_def,   0.8880002E-01_r_def,   0.9125002E-01_r_def,   0.9373336E-01_r_def, &
+       0.9625003E-01_r_def,   0.9880003E-01_r_def,   0.1013834E+00_r_def,   0.1040000E+00_r_def,   0.1066500E+00_r_def, &
+       0.1093334E+00_r_def,   0.1120500E+00_r_def,   0.1148000E+00_r_def,   0.1175834E+00_r_def,   0.1204000E+00_r_def, &
+       0.1232500E+00_r_def,   0.1261334E+00_r_def,   0.1290500E+00_r_def,   0.1320000E+00_r_def,   0.1349834E+00_r_def, &
+       0.1380000E+00_r_def,   0.1410500E+00_r_def,   0.1441334E+00_r_def,   0.1472500E+00_r_def,   0.1504001E+00_r_def, &
+       0.1535837E+00_r_def,   0.1568019E+00_r_def,   0.1600566E+00_r_def,   0.1633512E+00_r_def,   0.1666905E+00_r_def, &
+       0.1700811E+00_r_def,   0.1735319E+00_r_def,   0.1770539E+00_r_def,   0.1806609E+00_r_def,   0.1843694E+00_r_def, &
+       0.1881994E+00_r_def,   0.1921741E+00_r_def,   0.1963207E+00_r_def,   0.2006706E+00_r_def,   0.2052595E+00_r_def, &
+       0.2101280E+00_r_def,   0.2153219E+00_r_def,   0.2208926E+00_r_def,   0.2268972E+00_r_def,   0.2333995E+00_r_def, &
+       0.2404696E+00_r_def,   0.2481849E+00_r_def,   0.2566306E+00_r_def,   0.2658995E+00_r_def,   0.2760931E+00_r_def, &
+       0.2873217E+00_r_def,   0.2997051E+00_r_def,   0.3133729E+00_r_def,   0.3284651E+00_r_def,   0.3451325E+00_r_def, &
+       0.3635374E+00_r_def,   0.3838541E+00_r_def,   0.4062692E+00_r_def,   0.4309826E+00_r_def,   0.4582078E+00_r_def, &
+       0.4881724E+00_r_def,   0.5211188E+00_r_def,   0.5573052E+00_r_def,   0.5970055E+00_r_def,   0.6405105E+00_r_def, &
+       0.6881285E+00_r_def,   0.7401855E+00_r_def,   0.7970266E+00_r_def,   0.8590163E+00_r_def,   0.9265389E+00_r_def, &
+       0.1000000E+01_r_def &
+       /)
+
+  end subroutine um_L140_122t_18s_40km_extrude
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !> @brief Creates a um_L70_61t_9s_40km_extrusion_type object.
   !>
   !> @param[in] atmosphere_bottom Bottom of the atmosphere in meters.
@@ -391,6 +515,62 @@ contains
                                     number_of_layers, extrusion_id )
 
   end function um_L70_61t_9s_40km_extrusion_constructor
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !> @brief Creates a um_L120_99t_21s_40km_extrusion_type object.
+  !>
+  !> @param[in] atmosphere_bottom Bottom of the atmosphere in meters.
+  !> @param[in] atmosphere_top Top of the atmosphere in meters.
+  !> @param[in] number_of_layers Number of layers in the atmosphere.
+  !> @param[in] extrusion_id Identifier of extrusion type.
+  !>
+  !> @return New uniform_extrusion_type object.
+  !>
+  function um_L120_99t_21s_40km_extrusion_constructor( atmosphere_bottom, &
+                                                       atmosphere_top,    &
+                                                       number_of_layers,   &
+                                                       extrusion_id ) result(new)
+    implicit none
+
+    real(r_def),    intent(in) :: atmosphere_bottom
+    real(r_def),    intent(in) :: atmosphere_top
+    integer(i_def), intent(in) :: number_of_layers
+    integer(i_def), intent(in) :: extrusion_id
+
+    type(um_L120_99t_21s_40km_extrusion_type) :: new
+
+    call new%extrusion_constructor( atmosphere_bottom, atmosphere_top, &
+                                    number_of_layers, extrusion_id )
+
+  end function um_L120_99t_21s_40km_extrusion_constructor
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !> @brief Creates a um_L140_122t_18s_40km_extrusion_type object.
+  !>
+  !> @param[in] atmosphere_bottom Bottom of the atmosphere in meters.
+  !> @param[in] atmosphere_top Top of the atmosphere in meters.
+  !> @param[in] number_of_layers Number of layers in the atmosphere.
+  !> @param[in] extrusion_id Identifier of extrusion type.
+  !>
+  !> @return New uniform_extrusion_type object.
+  !>
+  function um_L140_122t_18s_40km_extrusion_constructor( atmosphere_bottom, &
+                                                       atmosphere_top,    &
+                                                       number_of_layers,   &
+                                                       extrusion_id ) result(new)
+    implicit none
+
+    real(r_def),    intent(in) :: atmosphere_bottom
+    real(r_def),    intent(in) :: atmosphere_top
+    integer(i_def), intent(in) :: number_of_layers
+    integer(i_def), intent(in) :: extrusion_id
+
+    type(um_L140_122t_18s_40km_extrusion_type) :: new
+
+    call new%extrusion_constructor( atmosphere_bottom, atmosphere_top, &
+                                    number_of_layers, extrusion_id )
+
+  end function um_L140_122t_18s_40km_extrusion_constructor
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !> @brief Creates a dcmip_extrusion_type object.
@@ -528,7 +708,16 @@ contains
                                        number_of_layers, prime_extrusion ) )
 
       case (method_um_l70_61t_9s_40km)
-       allocate( extrusion, source=um_l70_61t_9s_40km_extrusion_type(    &
+        allocate( extrusion, source=um_l70_61t_9s_40km_extrusion_type(   &
+                                       atmosphere_bottom, domain_height, &
+                                       number_of_layers, prime_extrusion ) )
+
+      case (method_um_L120_99t_21s_40km)
+        allocate( extrusion, source=um_L120_99t_21s_40km_extrusion_type( &
+                                       atmosphere_bottom, domain_height, &
+                                       number_of_layers, prime_extrusion ) )
+      case (method_um_L140_122t_18s_40km)
+        allocate( extrusion, source=um_L140_122t_18s_40km_extrusion_type(&
                                        atmosphere_bottom, domain_height, &
                                        number_of_layers, prime_extrusion ) )
       case (method_quadratic)

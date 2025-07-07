@@ -24,6 +24,7 @@ module external_forcing_alg_mod
                                              wind_forcing_filtering,             &
                                              wind_forcing_diffusion,             &
                                              wind_forcing_profile,               &
+                                             vertadvect_forcing,                 &
                                              geostrophic_forcing,                &
                                              filtering_order,                    &
                                              diffusion_order,                    &
@@ -67,6 +68,7 @@ module external_forcing_alg_mod
   use reference_element_mod,           only: T
   use sci_set_any_dof_kernel_mod,      only: set_any_dof_kernel_type
 
+  use vertadvect_forcing_alg_mod,      only: vertadvect_forcing_alg
   use temp_tend_profile_alg_mod,       only: temp_tend_profile_alg
   use theta_relax_alg_mod,             only: theta_relax_alg
   use geostrophic_forcing_alg_mod,     only: geostrophic_forcing_alg
@@ -96,6 +98,7 @@ contains
   !> @param[in]     theta              Theta field
   !> @param[in]     exner              Exner pressure
   !> @param[in]     exner_in_wth       Exner pressure on Wtheta space
+  !> @param[in]     rho                Dry air density
   !> @param[in]     mr_n               Mixing ratios at start of timestep
   !> @param[in]     cloud_fields       Group of cloud fields
   !> @param[in]     twod_mesh          2d mesh
@@ -111,17 +114,17 @@ contains
   !> @param[in,out] vapour_forcing_done Flag to say if vapour code run
   !> @param[in,out] wind_forcing_done  Flag to say if wind code run
   subroutine external_forcing_alg(derived_fields, u, theta, exner,             &
-                                  exner_in_wth, mr_n, cloud_fields, twod_mesh, &
-                                  dt, time_now, dtheta_forcing, du_forcing,    &
-                                  dmv_forcing, dmcl_forcing, dcfl_forcing,     &
-                                  dbcf_forcing,                                &
+                                  exner_in_wth, rho, mr_n, cloud_fields,       &
+                                  twod_mesh, dt, time_now, dtheta_forcing,     &
+                                  du_forcing, dmv_forcing, dmcl_forcing,       &
+                                  dcfl_forcing, dbcf_forcing,                  &
                                   theta_forcing_done, vapour_forcing_done,     &
                                   wind_forcing_done)
 
     implicit none
 
     type( field_collection_type ), intent( in ) :: derived_fields, cloud_fields
-    type( field_type ), intent( in )            :: u, theta, exner, exner_in_wth
+    type( field_type ), intent( in )            :: u, theta, exner, exner_in_wth, rho
     type( field_type ), intent( in )            :: mr_n(nummr)
     type( field_type ), intent( out )           :: dtheta_forcing, du_forcing
     type( field_type ), intent( out )           :: dmv_forcing, dmcl_forcing, &
@@ -156,7 +159,8 @@ contains
     mesh => theta%get_mesh()
     height_wth => get_height_fv( Wtheta, mesh%get_id() )
 
-    if ( theta_forcing /= theta_forcing_none .or. theta_relaxation ) then
+    if ( theta_forcing /= theta_forcing_none .or. theta_relaxation .or.           &
+         vertadvect_forcing ) then
       call dtheta_forcing%initialise( vector_space = theta%get_function_space() )
       call invoke( setval_c(dtheta_forcing, 0.0_r_def) )
     end if
@@ -231,7 +235,6 @@ contains
         call dtheta_forcing%write_field('forcing__dtheta_force')
       end if
 
-
       nullify( chi, panel_id )
 
     end if
@@ -242,51 +245,6 @@ contains
                             twod_mesh, time_now, nlayers )
       theta_forcing_done = .true.
     end if
-
-#ifdef UM_PHYSICS
-    call dmv_forcing%initialise( vector_space = theta%get_function_space() )
-    call invoke( setval_c(dmv_forcing, 0.0_r_def) )
-#else
-    if (vapour_forcing /= vapour_forcing_none) then
-        call dmv_forcing%initialise( vector_space = theta%get_function_space() )
-        call invoke( setval_c(dmv_forcing, 0.0_r_def) )
-    end if
-#endif
-
-    if (vapour_forcing /= vapour_forcing_none) then
-
-      select case(vapour_forcing)
-
-        case(vapour_forcing_profile)
-
-          call vapour_forcing_profile_alg( dmv_forcing, exner_in_wth, time_now )
-
-        case default
-
-          call log_event( 'slow_physics: Incorrect vapour_forcing option', &
-                          LOG_LEVEL_ERROR )
-
-      end select
-
-      vapour_forcing_done = .true. ! Collect this increment later on
-
-    end if
-
-#ifdef UM_PHYSICS
-    if ( theta_forcing_done .or. vapour_forcing_done ) then
-      ! pc2 response to forcing if requested
-      if (cloud == cloud_um .and. scheme == scheme_pc2 .and. &
-           pc2_force_response) then
-
-        call pc2_force_response_alg(mr_n, theta, derived_fields, cloud_fields, &
-                                    dtheta_forcing, dmv_forcing, dmcl_forcing, &
-                                    dcfl_forcing, dbcf_forcing, dt)
-
-        vapour_forcing_done = .true.
-
-      end if
-    end if
-#endif
 
     if (wind_forcing /= wind_forcing_none) then
 
@@ -420,12 +378,85 @@ contains
 
     nullify( mesh )
 
+    if ( vertadvect_forcing ) then
+      if ( .not.vapour_forcing_done) then
+        call dmv_forcing%initialise( vector_space = theta%get_function_space() )
+        call invoke( setval_c(dmv_forcing, 0.0_r_def) )
+        call dmcl_forcing%initialise( vector_space = theta%get_function_space() )
+        call invoke( setval_c(dmcl_forcing, 0.0_r_def) )
+      end if
+
+      if ( .not.wind_forcing_done) then
+        call du_forcing%initialise( vector_space = u%get_function_space() )
+        call invoke(setval_c(du_forcing, 0.0_r_def))
+      end if
+
+      call vertadvect_forcing_alg( dtheta_forcing, dmv_forcing, dmcl_forcing,    &
+                                   du_forcing, theta, mr_n, rho, derived_fields, &
+                                   twod_mesh, dt, time_now )
+      theta_forcing_done  = .true.
+      vapour_forcing_done = .true.
+      wind_forcing_done   = .true.
+    end if
+
+#ifdef UM_PHYSICS
+    if ( .not. vapour_forcing_done ) then
+      call dmv_forcing%initialise( vector_space = theta%get_function_space() )
+      call invoke( setval_c(dmv_forcing, 0.0_r_def) )
+      call dmcl_forcing%initialise( vector_space = theta%get_function_space() )
+      call invoke( setval_c(dmcl_forcing, 0.0_r_def) )
+    end if
+#else
+    if (vapour_forcing /= vapour_forcing_none .and. .not. vapour_forcing_done ) then
+      call dmv_forcing%initialise( vector_space = theta%get_function_space() )
+      call invoke( setval_c(dmv_forcing, 0.0_r_def) )
+      call dmcl_forcing%initialise( vector_space = theta%get_function_space() )
+      call invoke( setval_c(dmcl_forcing, 0.0_r_def) )
+    end if
+#endif
+
+    if (vapour_forcing /= vapour_forcing_none) then
+
+      select case(vapour_forcing)
+
+        case(vapour_forcing_profile)
+
+          call vapour_forcing_profile_alg( dmv_forcing, exner_in_wth, time_now )
+
+        case default
+
+          call log_event( 'slow_physics: Incorrect vapour_forcing option', &
+                          LOG_LEVEL_ERROR )
+
+      end select
+
+      vapour_forcing_done = .true. ! Collect this increment later on
+
+    end if
+
+#ifdef UM_PHYSICS
+    if ( theta_forcing_done .or. vapour_forcing_done ) then
+      ! pc2 response to forcing if requested
+      if (cloud == cloud_um .and. scheme == scheme_pc2 .and. &
+           pc2_force_response) then
+
+        call pc2_force_response_alg(mr_n, theta, derived_fields, cloud_fields, &
+                                    dtheta_forcing, dmv_forcing, dmcl_forcing, &
+                                    dcfl_forcing, dbcf_forcing, dt)
+
+        vapour_forcing_done = .true.
+
+      end if
+    end if
+#endif
+
     !
     ! Write out diagnostics (if available)
     !
     if (write_diag .and. use_xios_io) then
       call write_forcing_diagnostics(du_forcing=du_forcing, output_wind_inc=wind_forcing_done)
     end if
+
 
     if ( subroutine_timers ) call timer("external_forcing_alg")
 

@@ -126,9 +126,9 @@ function day_side_temp(exner) result(t_day)
 
    pressure = pressure_from_exner(exner)
 
-   if (pressure >= p_high) THEN
+   if (pressure >= p_high) then
      log_sigma = log10(p_high / 1.0e5_r_def)
-   else if (pressure < p_low) THEN
+   else if (pressure < p_low) then
      log_sigma = log10(p_low / 1.0e5_r_def)
    else
      log_sigma = log10(pressure / 1.0e5_r_def)
@@ -177,9 +177,9 @@ function night_side_temp(exner) result(t_night)
 
    pressure = pressure_from_exner(exner)
 
-   if (pressure >= p_high) THEN
+   if (pressure >= p_high) then
      log_sigma = log10(p_high / 1.0e5_r_def)
-   else if (pressure < p_low) THEN
+   else if (pressure < p_low) then
      log_sigma = log10(p_low / 1.0e5_r_def)
    else
      log_sigma = log10(pressure / 1.0e5_r_def)

@@ -1,3 +1,4 @@
+import re
 import sys
 
 from metomi.rose.upgrade import MacroUpgrade
@@ -18,16 +19,22 @@ class UpgradeError(Exception):
     __str__ = __repr__
 
 
-"""
-Copy this template and complete to add your macro
+class vn21_t756(MacroUpgrade):
+    """Upgrade macro for ticket TTTT by Unknown."""
 
-class vnXX_txxx(MacroUpgrade):
-    # Upgrade macro for <TICKET> by <Author>
-
-    BEFORE_TAG = "vnX.X"
-    AFTER_TAG = "vnX.X_txxx"
+    BEFORE_TAG = "vn2.1"
+    AFTER_TAG = "vn2.1_t756"
 
     def upgrade(self, config, meta_config=None):
-        # Add settings
+        # Commands From: rose-meta/socrates-radiation
+        self.add_setting(
+            config, ["namelist:radiative_gases", "o3_profile_data"], "0"
+        )
+        self.add_setting(
+            config, ["namelist:radiative_gases", "o3_profile_heights"], "0.0"
+        )
+        self.add_setting(
+            config, ["namelist:radiative_gases", "o3_profile_size"], "0"
+        )
+
         return config, self.reports
-"""
