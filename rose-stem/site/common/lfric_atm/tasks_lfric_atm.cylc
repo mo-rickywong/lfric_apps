@@ -77,15 +77,66 @@
                           theta",
     }) %}
 
-{% elif task_ns.conf_name == "nwp_gal9_mgnoukca-C48_MG" %}
+{% elif task_ns.conf_name == "nwp_gal9_mgnoukca_1T-C12" %}
     {% do task_dict.update({
-        "opt_confs": ["no_dust","um_dump","no_diags","physics_segmentation"],
+        "opt_confs": ["physics_segmentation","no_dust","um_dump","no_diags"],
+        "resolution": "C12",
+        "DT": 1800,
+        "tsteps": 36,
+        "mpi_parts": 24,
+        "threads": 1,
+        "wallclock": 20,
+        "kgo_checks": ["checksum"],
+    }) %}
+
+{% elif task_ns.conf_name == "nwp_gal9_mgnoukca_2T-C12" %}
+    {% do task_dict.update({
+        "opt_confs": ["physics_segmentation","no_dust","um_dump","no_diags"],
+        "resolution": "C12",
+        "DT": 1800,
+        "tsteps": 36,
+        "mpi_parts": 12,
+        "threads": 2,
+        "wallclock": 20,
+        "kgo_checks": ["checksum"],
+    }) %}
+
+{% elif task_ns.conf_name == "nwp_gal9_mgnoukca_1T-C48_MG" %}
+    {% do task_dict.update({
+        "opt_confs": ["physics_segmentation","no_dust","um_dump","no_diags"],
+        "resolution": "C48_MG",
+        "DT": 1800,
+        "tsteps": 36,
+        "mpi_parts": 24,
+        "threads": 1,
+        "wallclock": 20,
+        "memory": [40, "GB"],
+        "kgo_checks": ["checksum"],
+    }) %}
+
+{% elif task_ns.conf_name == "nwp_gal9_mgnoukca_2T-C48_MG" %}
+    {% do task_dict.update({
+        "opt_confs": ["physics_segmentation","no_dust","um_dump","no_diags"],
         "resolution": "C48_MG",
         "DT": 1800,
         "tsteps": 36,
         "mpi_parts": 12,
         "threads": 2,
         "wallclock": 20,
+        "memory": [40, "GB"],
+        "kgo_checks": ["checksum"],
+    }) %}
+
+{% elif task_ns.conf_name == "nwp_gal9_mgnoukca_4T-C48_MG" %}
+    {% do task_dict.update({
+        "opt_confs": ["physics_segmentation","no_dust","um_dump","no_diags"],
+        "resolution": "C48_MG",
+        "DT": 1800,
+        "tsteps": 36,
+        "mpi_parts": 6,
+        "threads": 4,
+        "wallclock": 20,
+        "memory": [40, "GB"],
         "kgo_checks": ["checksum"],
     }) %}
 
@@ -109,6 +160,47 @@
         "tsteps": 120,
         "mpi_parts": 864,
         "wallclock": 10,
+    }) %}
+
+{% elif task_ns.conf_name == "nwp_gal9_mgnoukca_3n_1T-C192_MG" %}
+
+    {% do task_dict.update({
+        "opt_confs": ["physics_segmentation","no_dust","um_dump","no_diags"],
+        "resolution": "C192_MG",
+        "DT": 720,
+        "tsteps": 120,
+        "mpi_parts": 384,
+        "wallclock": 60,
+        "threads": 1,
+        "kgo_checks": ["checksum"],
+    }) %}
+
+{% elif task_ns.conf_name == "nwp_gal9_mgnoukca_3n_2T-C192_MG" %}
+
+    {% do task_dict.update({
+        "opt_confs": ["physics_segmentation","no_dust","um_dump","no_diags"],
+        "resolution": "C192_MG",
+        "DT": 720,
+        "tsteps": 120,
+        "mpi_parts": 192,
+        "task_ranks_per_node": 64,
+        "wallclock": 60,
+        "threads": 2,
+        "kgo_checks": ["checksum"],
+    }) %}
+
+{% elif task_ns.conf_name == "nwp_gal9_mgnoukca_3n_4T-C192_MG" %}
+
+    {% do task_dict.update({
+        "opt_confs": ["physics_segmentation","no_dust","um_dump","no_diags"],
+        "resolution": "C192_MG",
+        "DT": 720,
+        "tsteps": 120,
+        "mpi_parts": 96,
+        "task_ranks_per_node": 32,
+        "wallclock": 60,
+        "threads": 4,
+        "kgo_checks": ["checksum"],
     }) %}
 
 {% elif task_ns.conf_name == "nwp_gal9-C224_MG" %}
