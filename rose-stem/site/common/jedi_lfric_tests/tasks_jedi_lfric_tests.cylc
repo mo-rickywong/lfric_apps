@@ -132,6 +132,28 @@
         "mpi_parts": 1,
     }) %}
 
+{% elif task_ns.conf_name == "tlm_tests_default-relaxed_solver-C12" %}
+
+    {% do task_dict.update({
+        "app_name": "jedi_tlm_tests",
+        "opt_confs": ["default", "relaxed_solver"],
+        "resolution": "C12",
+        "DT": 3600,
+        "tsteps": 13,
+        "mpi_parts": 6,
+    }) %}
+
+{% elif task_ns.conf_name == "tlm_tests_default-relaxed_solver-1PE-C12" %}
+
+    {% do task_dict.update({
+        "app_name": "jedi_tlm_tests",
+        "opt_confs": ["default", "relaxed_solver"],
+        "resolution": "C12",
+        "DT": 3600,
+        "tsteps": 13,
+        "mpi_parts": 1,
+    }) %}
+
 {% elif task_ns.conf_name == "integration_tests" %}
 
     {% do task_dict.update({
@@ -161,7 +183,9 @@
         "tlm_tests_default-C12",
         "tlm_tests_default-1PE-C12",
         "tlm_tests_default-dry-C12",
-        "tlm_tests_default-dry-1PE-C12"
+        "tlm_tests_default-dry-1PE-C12",
+        "tlm_tests_default-relaxed_solver-C12",
+        "tlm_tests_default-relaxed_solver-1PE-C12"
     ] %}
 
     {% if task_ns.conf_name not in no_kgo %}
