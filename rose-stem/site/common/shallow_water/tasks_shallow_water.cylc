@@ -134,6 +134,7 @@
         "threads": 3,
         "use_xios": false,
         "kgo_checks": [],
+        "wallclock": 30,
         "plot_str": "plot_swe_shallow_water.py diagShallowWater $NODAL_DATA_DIR C q:tracer_const:tracer_pv:tracer_step 288:1152 $PLOT_DIR",
     }) %}
 
@@ -148,6 +149,7 @@
         "threads": 3,
         "use_xios": false,
         "kgo_checks": [],
+        "wallclock": 30,
         "plot_str": "plot_swe_shallow_water.py diagShallowWater $NODAL_DATA_DIR C q:tracer_const:tracer_pv:tracer_step 288:1152 $PLOT_DIR",
     }) %}
 
@@ -162,6 +164,7 @@
         "threads": 3,
         "use_xios": false,
         "kgo_checks": [],
+        "wallclock": 30,
         "plot_str": "plot_swe_shallow_water.py diagShallowWater $NODAL_DATA_DIR C q:tracer_const:tracer_pv:tracer_step 288:1152 $PLOT_DIR",
     }) %}
 
@@ -176,6 +179,7 @@
         "threads": 3,
         "use_xios": false,
         "kgo_checks": [],
+        "wallclock": 30,
         "plot_str": "plot_swe_shallow_water.py diagShallowWater $NODAL_DATA_DIR C q:tracer_const:tracer_pv:tracer_step 288:1152 $PLOT_DIR",
     }) %}
 
@@ -249,7 +253,7 @@
 
 {# Set default values for Shallow Water tasks #}
 {% if task_dict %}
-    {% do task_dict.update({"application_dir": "apps/applications/shallow_water"}) %}
+    {% do task_dict.update({"application_dir": "lfric_apps/applications/shallow_water"}) %}
     {% if "app_name" not in task_dict %}
         {% do task_dict.update({"app_name": "shallow_water"}) %}
     {% endif %}
