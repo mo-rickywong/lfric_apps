@@ -45,6 +45,7 @@ program shallow_water
   modeldb%mpi => global_mpi
 
   call modeldb%configuration%initialise( program_name, table_len=10 )
+  call modeldb%config%initialise( program_name )
 
   ! Create the depository and prognostics field collections
   call modeldb%fields%add_empty_field_collection("depository", &
@@ -58,8 +59,11 @@ program shallow_water
   call modeldb%io_contexts%initialise(program_name, 100)
 
   call init_comm( program_name, modeldb )
+
   call init_config( filename, shallow_water_required_namelists, &
-                    modeldb%configuration )
+                    configuration=modeldb%configuration,        &
+                    config=modeldb%config )
+
   call init_logger( global_mpi%get_comm(), program_name )
   call init_timers( program_name )
   call init_counters( program_name )

@@ -28,7 +28,6 @@ program lfric_atm
   use driver_modeldb_mod,     only: modeldb_type
   use gungho_driver_mod,      only: initialise, step, finalise
   use lfric_mpi_mod,          only: global_mpi
-  use namelist_mod,           only: namelist_type
 
   use timing_mod,             only: init_timing, start_timing, stop_timing, final_timing, tik, LPROF
 
@@ -40,7 +39,6 @@ program lfric_atm
   character(*), parameter :: application_name = "lfric_atm"
   character(:), allocatable :: filename
   integer(tik)              :: timing_handle_global
-  type(namelist_type), pointer :: io_nml
   logical :: lsubroutine_timers
 
   call parse_command_line( filename )
@@ -49,6 +47,7 @@ program lfric_atm
 
   call modeldb%configuration%initialise( application_name, &
                                          table_len=10 )
+  call modeldb%config%initialise( application_name )
   call modeldb%values%initialise( 'values', 5 )
 
   ! Create the depository, prognostics and diagnostics field collections
@@ -72,14 +71,15 @@ program lfric_atm
   call init_comm( application_name, modeldb )
 
   call init_config( filename, gungho_required_namelists, &
-                    modeldb%configuration )
+                    configuration=modeldb%configuration, &
+                    config=modeldb%config )
+
   call init_logger( modeldb%mpi%get_comm(), application_name )
   call init_timers( application_name )
 
-  io_nml => modeldb%configuration%get_namelist('io')
-  call io_nml%get_value('subroutine_timers', lsubroutine_timers)
+  lsubroutine_timers = modeldb%config%io%subroutine_timers()
   call init_timing( modeldb%mpi%get_comm(), lsubroutine_timers )
-  nullify( io_nml )
+
   if ( LPROF ) call start_timing( timing_handle_global, '__lfric_atm__ ')
 
   call init_collections()
