@@ -49,7 +49,6 @@ class vn31_t192(MacroUpgrade):
             ["namelist:partitioning(destination)", "mesh_type"],
             ["namelist:partitioning(destination)", "mesh_target"],
         )
-
         return config, self.reports
 
 
@@ -76,7 +75,6 @@ class vn31_t363(MacroUpgrade):
         """Set segmentation size limit for short and long wave radiation kernels"""
         self.add_setting(config, ["namelist:physics", "sw_segment_limit"], "32")
         self.add_setting(config, ["namelist:physics", "lw_segment_limit"], "32")
-
         return config, self.reports
 
 
@@ -92,7 +90,6 @@ class vn31_t348(MacroUpgrade):
         self.add_setting(
             config, ["namelist:physics", "pmsl_halo_calcs"], ".true."
         )
-
         return config, self.reports
 
 
@@ -107,7 +104,6 @@ class vn31_t368(MacroUpgrade):
         self.add_setting(
             config, ["namelist:convection", "llcs_first_outer"], ".false."
         )
-
         return config, self.reports
 
 
@@ -130,7 +126,6 @@ class vn31_t238(MacroUpgrade):
             ["namelist:finite_element", "coord_order_nonprime"],
             coord_order,
         )
-
         return config, self.reports
 
 
@@ -156,7 +151,6 @@ class vn31_t443(MacroUpgrade):
         self.add_setting(
             config, ["namelist:iau_bcorr_io(bcorr1)", "name"], "''"
         )
-
         return config, self.reports
 
 
@@ -167,7 +161,31 @@ class vn31_t324(MacroUpgrade):
     AFTER_TAG = "vn3.1_t324"
 
     def upgrade(self, config, meta_config=None):
+        # Commands From: rose-meta/lfric-driver
+        # Only add in new configuration settings if the namelists
+        # are already present
+        #
+        if config.get(["namelist:partitioning"]) is not None:
+            self.add_setting(
+                config, ["namelist:partitioning", "inner_halo_tiles"], ".false."
+            )
+            self.add_setting(
+                config, ["namelist:partitioning", "tile_size_x"], "1"
+            )
+            self.add_setting(
+                config, ["namelist:partitioning", "tile_size_y"], "1"
+            )
+        if config.get(["namelist:multigrid"]) is not None:
+            self.add_setting(
+                config,
+                ["namelist:multigrid", "coarsen_multigrid_tiles"],
+                ".false.",
+            )
+            self.add_setting(
+                config, ["namelist:multigrid", "max_tiled_multigrid_level"], "1"
+            )
 
+        # Commands From: rose-meta/lfric-lfric2lfric
         if config.get(["namelist:partitioning(source)"]) is not None:
             self.add_setting(
                 config,
@@ -180,7 +198,6 @@ class vn31_t324(MacroUpgrade):
             self.add_setting(
                 config, ["namelist:partitioning(source)", "tile_size_y"], "1"
             )
-
         if config.get(["namelist:partitioning(destination)"]) is not None:
             self.add_setting(
                 config,
