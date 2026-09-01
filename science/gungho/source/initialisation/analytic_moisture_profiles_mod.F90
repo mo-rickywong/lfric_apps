@@ -19,8 +19,8 @@ use idealised_config_mod,         only : test_grabowski_clark,      &
 use physics_common_mod,           only : qsaturation
 use planet_config_mod,            only : recip_epsilon, scaled_radius
 use coord_transform_mod,          only : xyz2llr, central_angle
-use base_mesh_config_mod,         only : geometry, &
-                                         geometry_spherical
+use sci_mesh_enums_mod,           only : geometry_spherical
+use base_mesh_config_mod,         only : geometry
 use initial_density_config_mod,   only : r1, x1, y1, z1, r2, x2, y2, z2
 use deep_baroclinic_wave_mod,     only : deep_baroclinic_wave
 

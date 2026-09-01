@@ -38,11 +38,11 @@ module assign_orography_field_mod
   use fs_continuity_mod,              only : W0, Wchi
   use function_space_mod,             only : BASIS
 
+  use sci_mesh_enums_mod, only: geometry_spherical, &
+                                topology_fully_periodic
+
   ! Configuration modules
-  use base_mesh_config_mod,      only: geometry,           &
-                                       geometry_spherical, &
-                                       topology,           &
-                                       topology_fully_periodic
+  use base_mesh_config_mod,      only: geometry, topology
   use finite_element_config_mod, only: coord_system, &
                                        coord_order,  &
                                        coord_system_xyz

@@ -45,9 +45,10 @@ module physics_mappings_alg_mod
                                         only: nodal_xyz_coordinates_kernel_type
   use sci_field_minmax_alg_mod,         only: log_field_minmax
 
+  use sci_mesh_enums_mod, only: geometry_spherical, topology_fully_periodic
+
   ! Configuration modules
-  use base_mesh_config_mod,      only: geometry, topology, &
-                                       geometry_spherical
+  use base_mesh_config_mod,      only: geometry, topology
   use finite_element_config_mod, only: coord_system, &
                                        coord_system_native
   use planet_config_mod,         only: scaled_radius

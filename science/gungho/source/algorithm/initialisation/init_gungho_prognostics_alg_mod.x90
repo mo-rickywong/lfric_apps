@@ -81,10 +81,11 @@ module init_gungho_prognostics_alg_mod
   use mr_indices_mod,                  only: nummr, mr_names, imr_v
   use moist_dyn_mod,                   only: num_moist_factors, gas_law
 
+  use sci_mesh_enums_mod, only: geometry_spherical, &
+                                geometry_planar
+
   ! Configuration modules
-  use base_mesh_config_mod,      only: geometry,           &
-                                       geometry_spherical, &
-                                       geometry_planar
+  use base_mesh_config_mod,      only: geometry
   use planet_config_mod,         only: gravity, cp, rd, &
                                        p_zero, kappa, recip_epsilon
 

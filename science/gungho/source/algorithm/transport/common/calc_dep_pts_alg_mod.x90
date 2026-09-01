@@ -32,9 +32,10 @@ module calc_dep_pts_alg_mod
   use timing_mod,                        only: start_timing, stop_timing, &
                                                tik, LPROF
 
+  use sci_mesh_enums_mod, only: geometry_spherical, topology_fully_periodic
+
   ! Configs
-  use base_mesh_config_mod,              only: geometry, geometry_spherical,   &
-                                               topology, topology_fully_periodic
+  use base_mesh_config_mod,              only: geometry, topology
   use departure_points_config_mod,       only: horizontal_method,              &
                                                horizontal_method_euler,        &
                                                horizontal_method_timeaverage,  &

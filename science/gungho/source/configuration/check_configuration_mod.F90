@@ -146,12 +146,14 @@ contains
                                            alpha,                              &
                                            outer_iterations,                   &
                                            inner_iterations
-    use base_mesh_config_mod,        only: geometry,                           &
-                                           geometry_spherical,                 &
-                                           geometry_planar,                    &
-                                           topology,                           &
-                                           topology_fully_periodic,            &
-                                           topology_non_periodic,              &
+
+    use sci_mesh_enums_mod, only: geometry_spherical,      &
+                                  geometry_planar,         &
+                                  topology_fully_periodic, &
+                                  topology_non_periodic
+
+
+    use base_mesh_config_mod,        only: geometry, topology,                 &
                                            prime_mesh_name
     use departure_points_config_mod, only: horizontal_limit,                   &
                                            horizontal_limit_none,              &

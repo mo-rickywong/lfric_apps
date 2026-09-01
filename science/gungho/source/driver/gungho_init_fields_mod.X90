@@ -35,8 +35,8 @@ module gungho_init_fields_mod
                                                  LOG_LEVEL_ERROR, &
                                                  LOG_LEVEL_DEBUG, &
                                                  log_scratch_space
-  use base_mesh_config_mod,               only : geometry,          &
-                                                 geometry_spherical
+  use sci_mesh_enums_mod,                 only : geometry_spherical
+  use base_mesh_config_mod,               only : geometry
   use mesh_mod,                           only : mesh_type
   use files_config_mod,                   only : checkpoint_stem_name
   use formulation_config_mod,             only : use_physics

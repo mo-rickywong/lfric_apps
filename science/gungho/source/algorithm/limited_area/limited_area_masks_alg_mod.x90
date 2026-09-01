@@ -195,9 +195,11 @@ contains
                                              domain )
 
     use boundaries_config_mod,        only: edge_cells_ns, edge_cells_ew
-    use base_mesh_config_mod,         only: geometry, geometry_spherical, &
-                                            geometry_planar, topology,    &
-                                            topology_non_periodic
+    use base_mesh_config_mod,         only: geometry, topology
+
+    use sci_mesh_enums_mod, only: geometry_spherical, &
+                                  geometry_planar, &
+                                  topology_non_periodic
 
     implicit none
 

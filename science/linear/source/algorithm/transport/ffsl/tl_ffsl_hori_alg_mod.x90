@@ -47,10 +47,10 @@ module tl_ffsl_hori_alg_mod
   use fv_divergence_y_kernel_mod,       only: fv_divergence_y_kernel_type
   use fv_divergence_2d_kernel_mod,      only: fv_divergence_2d_kernel_type
 
+  use sci_mesh_enums_mod, only: topology_fully_periodic, geometry_spherical
+
   ! Configuration options
-  use base_mesh_config_mod,             only: topology,                        &
-                                              topology_fully_periodic,         &
-                                              geometry, geometry_spherical
+  use base_mesh_config_mod,             only: topology, geometry
   use linear_config_mod,                only: transport_efficiency
   use transport_config_mod,             only:                                  &
                                           panel_edge_treatment,                &

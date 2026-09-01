@@ -16,7 +16,8 @@ module adj_pressure_operator_alg_mod
                                                              LOG_LEVEL_ERROR,   &
                                                              LOG_LEVEL_DEBUG
   use boundaries_config_mod,                           only: limited_area
-  use base_mesh_config_mod,                            only: topology, topology_non_periodic
+  use sci_mesh_enums_mod,                              only: topology_non_periodic
+  use base_mesh_config_mod,                            only: topology
 
   use invoke_adj_a_h_o_lookup_kernel_mod,              only: invoke_adj_a_h_o_lookup_kernel
   use adj_solver_lookup_cache_mod,                     only: adj_solver_lookup_cache_type

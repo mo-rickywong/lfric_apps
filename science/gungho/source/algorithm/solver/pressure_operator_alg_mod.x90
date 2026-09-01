@@ -45,7 +45,8 @@ module pressure_operator_alg_mod
                                                 get_helm_diag, &
                                                 get_hb_lumped_inv
   use boundaries_config_mod,              only: limited_area
-  use base_mesh_config_mod,               only: topology, topology_non_periodic
+  use sci_mesh_enums_mod,                 only: topology_non_periodic
+  use base_mesh_config_mod,               only: topology
   use function_space_mod,                 only: function_space_type
   use multigrid_mod,                      only: multigrid_function_space_chain
 

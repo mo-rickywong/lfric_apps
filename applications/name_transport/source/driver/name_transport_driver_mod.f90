@@ -56,8 +56,8 @@ module name_transport_driver_mod
                                                 name_transport_final
 
   ! Configuration modules
-  use base_mesh_config_mod,      only: geometry_planar, &
-                                       geometry_spherical
+  use sci_mesh_enums_mod,      only: geometry_planar, &
+                                     geometry_spherical
   use finite_element_config_mod, only: coord_system,    &
                                        element_order_h, &
                                        element_order_v

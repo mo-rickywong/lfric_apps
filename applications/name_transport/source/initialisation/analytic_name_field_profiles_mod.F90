@@ -39,6 +39,8 @@ use base_mesh_config_mod,       only : geometry, &
 use planet_config_mod,          only : p_zero, Rd, kappa, scaled_radius
 use extrusion_config_mod,       only : domain_height
 
+use sci_mesh_enums_mod, only: geometry_spherical
+
 implicit none
 
 private

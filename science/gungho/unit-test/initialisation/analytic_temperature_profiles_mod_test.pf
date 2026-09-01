@@ -51,7 +51,7 @@ contains
                                         feign_initial_density_config,     &
                                         feign_initial_pressure_config
 
-    use base_mesh_config_mod, only : geometry_planar, &
+    use sci_mesh_enums_mod,   only : geometry_planar, &
                                      topology_fully_periodic
     use extrusion_config_mod,         only : method_uniform, &
                                              stretching_method_linear

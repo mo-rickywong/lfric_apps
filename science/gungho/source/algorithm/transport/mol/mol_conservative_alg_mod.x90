@@ -38,8 +38,10 @@ module mol_conservative_alg_mod
   ! Kernels
   use dg_matrix_vector_kernel_mod,    only: dg_matrix_vector_kernel_type
 
+  use sci_mesh_enums_mod, only: topology_non_periodic
+
   ! Configuration modules
-  use base_mesh_config_mod,  only: topology, topology_non_periodic
+  use base_mesh_config_mod,  only: topology
   use boundaries_config_mod, only: limited_area, transport_boundary_depth
   use transport_config_mod,  only: runge_kutta_method, &
                                    dry_field_name,     &
