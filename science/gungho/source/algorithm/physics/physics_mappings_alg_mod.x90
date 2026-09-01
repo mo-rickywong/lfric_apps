@@ -137,6 +137,7 @@ contains
 
   !> @details An algorithm to map native FE wind fields to the appropriate
   !>          location for the FD physics codes
+  !> @param[in]    config   Application configuration object
   !> @param[inout] u1_field Component of wind in the target space
   !> @param[inout] u2_field Component of wind in the target space
   !> @param[inout] u3_field Component of wind in the target space
@@ -237,7 +238,7 @@ contains
 
     type(field_type), intent(inout)  :: u1_wind, u2_wind, u3_wind
     type(field_type), intent(in)     :: wind
-    type(mesh_type),  intent(in), pointer :: mesh
+    type(mesh_type),  intent(in)     :: mesh
 
     type(field_type), pointer    :: chi(:)
     type(field_type), pointer    :: panel_id

@@ -161,6 +161,7 @@ contains
 
   !> @brief Initialisation procedure for the tangent linear timestepping
   !>          algorithm
+  !> @param[in]     config    Application configuration object
   !> @param[in]     mesh      Mesh object on which the model runs
   !> @param[in,out] u         Change in 3D wind field
   !> @param[in,out] rho       Change in Density
@@ -180,8 +181,8 @@ contains
     implicit none
 
     ! Mesh
-    type(config_type),  intent( in )          :: config
-    type(mesh_type),    intent( in ), pointer :: mesh
+    type(config_type),  intent( in ) :: config
+    type(mesh_type),    intent( in ) :: mesh
 
     ! Prognostic fields
     type( field_type ), intent( inout ) :: u, rho, theta, exner

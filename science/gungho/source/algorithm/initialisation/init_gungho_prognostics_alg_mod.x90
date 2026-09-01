@@ -327,6 +327,7 @@ contains
 
   !> @details This routine initialises the Exner pressure field. It is callable
   !>          so that it can be used by other modules.
+  !> @param[in]     config     Application configuration object
   !> @param[in,out] rho        dry density field
   !> @param[in]     theta      potential temperature field
   !> @param[in]     exner      Exner pressure field

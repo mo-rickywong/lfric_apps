@@ -10,14 +10,13 @@
 
 module fem_advective_update_alg_mod
 
+  use config_mod,                  only: config_type
   use constants_mod,               only: r_tran, i_def
   use dg_matrix_vector_kernel_mod, only: dg_matrix_vector_kernel_type
   use function_space_mod,          only: function_space_type
   use r_tran_field_mod,            only: r_tran_field_type
   use r_tran_operator_mod,         only: r_tran_operator_type
   use transport_constants_mod,     only: get_directional_im3_div_r_tran
-
-  use config_mod, only: config_type
 
   implicit none
 
@@ -28,6 +27,7 @@ contains
 
   !----------------------------------------------------------------------------
   !> @brief Compute the finite-element advective increment
+  !> @param[in]      config     Application configuration object
   !> @param[in,out]  increment  The advective increment
   !> @param[in]      field      The advecting field
   !> @param[in]      recon      The reconstruction of the field

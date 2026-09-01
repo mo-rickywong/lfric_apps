@@ -9,6 +9,7 @@
 module swe_rhs_alg_mod
 
   ! Constants
+  use config_mod,                     only: config_type
   use constants_mod,                  only: r_def, l_def, i_def
   use sci_fem_constants_mod,          only: get_mass_matrix_fe, &
                                             get_div
@@ -48,7 +49,6 @@ module swe_rhs_alg_mod
   ! Other
   use field_indices_mod,              only: isw_u, isw_g, isw_b
 
-use config_mod, only: config_type
   implicit none
 
   private
@@ -66,7 +66,8 @@ contains
   !> @param[in]     alpha_dt The offcentering parameter multiplied by the time step
   !> @param[in]     state    The current model prognostic state
   !> @param[in]     s_geopot The surface geopotential
-  subroutine swe_rhs_alg( config, rhs,      &
+  subroutine swe_rhs_alg( config,   &
+                          rhs,      &
                           alpha_dt, &
                           state,    &
                           s_geopot )

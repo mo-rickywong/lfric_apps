@@ -6,11 +6,13 @@
 !> @brief Module containing adjoint test for atl_w3h_advective_update_kernel
 module atlt_w3h_advective_update_alg_mod
 
-  use field_mod, only : field_type
+  use config_mod,                    only : config_type
+  use field_mod,                     only : field_type
   use function_space_mod,            only : function_space_type
   use function_space_collection_mod, only : function_space_collection
   use finite_element_config_mod,     only : element_order_h, element_order_v
   use fs_continuity_mod,             only : W2, W3
+  use mesh_mod,                      only : mesh_type
   use operator_mod,                  only : operator_type
   use constants_mod,                 only : i_def, r_def, EPS
   use log_mod,                       only : log_event,       &
@@ -19,10 +21,6 @@ module atlt_w3h_advective_update_alg_mod
                                             LOG_LEVEL_DEBUG, &
                                             log_scratch_space
   use sci_fem_constants_mod,         only : get_inverse_mass_matrix_fe
-
-  ! Objects types
-  use config_mod, only: config_type
-  use mesh_mod,   only: mesh_type
 
   implicit none
 
@@ -34,6 +32,7 @@ module atlt_w3h_advective_update_alg_mod
   !> @details Passes if adjoint is transpose of tangent linear.
   !>          Determined by testing the equality of inner products <Mx, Mx> and <AMx, x>,
   !>          where M is the tangent linear and A is the adjoint.
+  !> @param[in]  config       Application configuration object
   !> @param[in]  mesh         The model mesh
   subroutine atlt_w3h_advective_update_alg( config, mesh )
 
@@ -43,8 +42,8 @@ module atlt_w3h_advective_update_alg_mod
     implicit none
 
     ! Arguments
-    type(config_type), intent(in)          :: config
-    type(mesh_type),   intent(in), pointer :: mesh
+    type(config_type), intent(in) :: config
+    type(mesh_type),   intent(in) :: mesh
 
     ! Internal arguments for kernels
     type(field_type)             :: advective_increment

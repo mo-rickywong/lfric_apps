@@ -556,6 +556,8 @@ contains
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !> @brief Performs a time step.
+  !> @param[in]  config       Application configuration object
+  !> @param[in]  model_clock  Model clock object
   !>
   subroutine step_transport( config, model_clock )
 

@@ -74,6 +74,7 @@ contains
   !>         \f[ R_\theta = \theta + d_{adv}\alpha\Delta t\mathbf{u}.\nabla\theta \f]
   !>         This can be given either timelevel n or n+1 fields to compute
   !>         the appropriate part of the full right hand side
+  !> @param[in]     config       Application configuration object
   !> @param[in,out] rhs          The state vector to compute
   !> @param[in]     alpha_dt     The offcentering parameter times the timestep
   !> @param[in]     base_state   The model prognostic state to which increments are added

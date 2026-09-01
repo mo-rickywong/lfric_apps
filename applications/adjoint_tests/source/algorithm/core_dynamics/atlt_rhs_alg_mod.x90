@@ -6,6 +6,7 @@
 !> @brief Module containing adjoint test for atl_rhs_alg
 module atlt_rhs_alg_mod
 
+  use config_mod,                          only : config_type
   use sci_assign_field_random_range_alg_mod, &
                                            only : assign_field_random_range
   use field_mod,                           only : field_type
@@ -29,7 +30,7 @@ module atlt_rhs_alg_mod
   use adjoint_test_parameters_mod,         only : ls_u_range, ls_theta_range,   &
                                                   ls_rho_range, ls_exner_range, &
                                                   ls_md1_range, ls_md2_range, ls_md3_range
-use config_mod, only: config_type
+
   implicit none
 
   public
@@ -41,6 +42,7 @@ use config_mod, only: config_type
   !> @details Passes if adjoint is transpose of tangent linear.
   !>          Determined by testing the equality of inner products <Mx, Mx> and <AMx, x>,
   !>          where M is the tangent linear and A is the adjoint.
+  !> @param[in]  config       Application configuration object
   !> @param[in]  mesh         The model mesh
   !> @param[in]  model_clock  The model clock
   subroutine atlt_rhs_alg( config, mesh, model_clock )
@@ -51,9 +53,9 @@ use config_mod, only: config_type
     implicit none
 
     ! Arguments
-    type(config_type), intent(in) :: config
-    type(mesh_type), pointer, intent(in) :: mesh
-    type(model_clock_type),   intent(in) :: model_clock
+    type(config_type),      intent(in) :: config
+    type(mesh_type),        intent(in) :: mesh
+    type(model_clock_type), intent(in) :: model_clock
 
     ! Arguments for tl and atl calls
     ! Form of state and rhs is [u,theta,rho,exner]
@@ -207,8 +209,8 @@ use config_mod, only: config_type
 
 
     ! Tangent linear
-    call tl_rhs_alg( config, rhs, alpha_dt, base_state, state, moist_dyn,        &
-                     ls_state, ls_moist_dyn, compute_eos,                &
+    call tl_rhs_alg( config, rhs, alpha_dt, base_state, state, moist_dyn, &
+                     ls_state, ls_moist_dyn, compute_eos,                 &
                      dlayer_rhs, model_clock )
 
     ! < Mx, Mx >
@@ -311,8 +313,8 @@ use config_mod, only: config_type
     rhs_rhs_input_inner_prod(:) = 0.0_r_def
 
     ! Adjoint
-    call atl_rhs_alg( config, rhs, alpha_dt, base_state, state, moist_dyn,        &
-                      ls_state, ls_moist_dyn, compute_eos,                &
+    call atl_rhs_alg( config, rhs, alpha_dt, base_state, state, moist_dyn, &
+                      ls_state, ls_moist_dyn, compute_eos,                 &
                       dlayer_rhs, model_clock )
 
     ! < AMx, x >

@@ -7,6 +7,7 @@
 ! TODO #3059: add integration testing for these routines
 module norm_alg_mod
 
+  use config_mod,                       only: config_type
   use constants_mod,                    only: r_def, l_def, EPS
   use sci_fem_constants_mod,            only: get_mass_matrix_fe, &
                                               get_mass_matrix_fv
@@ -17,9 +18,6 @@ module norm_alg_mod
                                               LOG_LEVEL_INFO
   use matrix_vector_kernel_mod,         only: matrix_vector_kernel_type
   use operator_mod,                     only: operator_type
-
-  ! Object types
-  use config_mod, only: config_type
 
   implicit none
 
@@ -43,6 +41,7 @@ contains
   !> @brief Computes the L2-norm of a field.
   !> @details Calculate the L2-norm of a field \f$ f \f$, via
   !>          \f$ \sqrt{ \int (f \cdot f) dV } \f$.
+  !> @param[in] config   Application configuration object
   !> @param[in] field    Field for which L2-norm is computed
   !> @return The L2-norm
   function l2_norm_alg(config, field) result(l2_norm)
@@ -82,8 +81,9 @@ contains
   !> @brief Computes the absolute L2 error norm between two fields.
   !> @details Calculate the L2-norm of the difference of fields \f$ f \f$ and
   !>          \f$ g \f$ as \f$ \sqrt{\int (f - g) \cdot (f - g) dV } \f$
-  !> @param[in] field                 Field of interest
-  !> @param[in] true_field            True field to compare actual field against
+  !> @param[in] config      Application configuration object
+  !> @param[in] field       Field of interest
+  !> @param[in] true_field  True field to compare actual field against
   !> @return The absolute L2 error norm
   function abs_l2_error_alg(config, field, true_field) result(abs_l2_error)
 
@@ -131,8 +131,9 @@ contains
   !> @details Calculate the L2-norm of the difference of two fields \f$ f \f$
   !>          and \f$ g \f$ as
   !>          \f$ \sqrt{\int (f - g) \cdot (f - g) dV / \int (g \cdot g) dV} \f$
-  !> @param[in] field                 Field of interest
-  !> @param[in] true_field            True field to compare actual field against
+  !> @param[in] config      Application configuration object
+  !> @param[in] field       Field of interest
+  !> @param[in] true_field  True field to compare actual field against
   !> @return The relative L2 error norm
   function rel_l2_error_alg(config, field, true_field) result(rel_l2_error)
 
@@ -204,7 +205,8 @@ contains
   !>          elements of the mass matrix. For scalar fields (e.g. in W3)
   !>          this will return the volume of the domain, but note that this is
   !>          not the case for W1 or W2 fields.
-  !> @param[in] field  Field in whose function space to compute the volume
+  !> @param[in] config  Application configuration object
+  !> @param[in] field   Field in whose function space to compute the volume
   !> @return The volume of the domain
   function volume_normalisation_alg(config, field) result(volume)
 
@@ -229,7 +231,8 @@ contains
   !>          \f$ \bar{f} = \int (I \cdot f) dV / \int (I \cdot I) dV \f$
   !>          where \f$ I \f$ is a field in the same function space as \f$ f \f$
   !>          whose coefficients are all 1.
-  !> @param[in] field  Field for which to compute the mean
+  !> @param[in] config  Application configuration object
+  !> @param[in] field   Field for which to compute the mean
   !> @return The mean value of the field
   function mean_alg(config, field) result(mean)
 
@@ -273,7 +276,8 @@ contains
   !>          where \f$ \bar{f} \f$ is the mean of \f$ f \f$ and \f$ V \f$ is
   !>          the volume normalisation. This is thus the mean-square error of
   !>          the field.
-  !> @param[in] field  Field for which to compute the variance
+  !> @param[in] config  Application configuration object
+  !> @param[in] field   Field for which to compute the variance
   !> @return The variance of the field
   function variance_alg(config, field) result(variance)
 
@@ -300,6 +304,7 @@ contains
   !>          \f$ \int (f - \bar{f})\cdot(g - \bar{g})dV / V \f$ where
   !>          \f$ \bar{f} \f$ and \f$ \bar{g} \f$ are mean fields and \f$ V \f$
   !>          is the volume normalisation.
+  !> @param[in] config   Application configuration object
   !> @param[in] field_1  First field to use to calculate covariance
   !> @param[in] field_2  Second field to use to calculate covariance
   !> @return The covariance of the field
@@ -369,6 +374,7 @@ contains
   !> @brief Computes the bias of a field relative to some other field.
   !> @details Calculates the bias of a field \f$ f \f$ relative to a true field
   !>          \f$ f_T \f$ by computing \f$ \bar{f} - \bar{f}_T \f$
+  !> @param[in] config      Application configuration object
   !> @param[in] field       Field for which to compute the bias
   !> @param[in] true_field  The true field to compare against
   !> @return The bias statistic
@@ -393,6 +399,7 @@ contains
   !> @details Calculate the root-mean-square of a field \f$ f \f$ from
   !>          \f$ \sqrt{ \int (f \cdot f)dV / V } \f$
   !>          It is the L2-norm of \f$ f \f$, normalised by the volume \f$ V \f$.
+  !> @param[in] config  Application configuration object
   !> @param[in] field   The field to compute the root-mean-square for
   !> @return The root-mean-square statistic
   function root_mean_square_alg(config, field) result(rms)
@@ -416,6 +423,7 @@ contains
   !>          \f$ g \f$ from \f$ \sqrt{\int (f - g)\cdot(f - g) dV / V} \f$.
   !>          It is the L2 error of \f$ f \f$ against \f$ g \f$, normalised by
   !>          the domain volume \f$ V \f$.
+  !> @param[in] config       Application configuration object
   !> @param[in] field        The field to compute the root-mean-square for
   !> @param[in] true_field   The true field to compare against
   !> @return The root-mean-square statistic
@@ -442,8 +450,9 @@ contains
   !>          where \f$ \sigma \f$ is the square root of the variance.
   !>          This forms a component of the root-mean-square-error along with
   !>          the dispersion error. See for instance, Takacs (1985).
-  !> @param[in] field                 Actual field of interest
-  !> @param[in] true_field            True field to compare actual field against
+  !> @param[in] config      Application configuration object
+  !> @param[in] field       Actual field of interest
+  !> @param[in] true_field  True field to compare actual field against
   !> @return The dissipation error
   function dissipation_error_alg(config, field, true_field) result(dissipation_error)
 
@@ -473,17 +482,18 @@ contains
   !>          where \f$ \sigma \f$ is the square root of the variance.
   !>          This forms a component of the root-mean-square-error along with
   !>          the dispersion error. See for instance, Takacs (1985).
-  !> @param[in] field                 Actual field of interest
-  !> @param[in] true_field            True field to compare actual field against
+  !> @param[in] config      Application configuration object
+  !> @param[in] field       Actual field of interest
+  !> @param[in] true_field  True field to compare actual field against
   !> @return The dispersion error
   function dispersion_error_alg(config, field, true_field) result(dispersion_error)
 
     implicit none
 
     type(config_type), intent(in) :: config
-    type(field_type), intent(in) :: field, true_field
-    real(kind=r_def)             :: dispersion_error
-    real(kind=r_def)             :: cov, var_actual, var_true
+    type(field_type),  intent(in) :: field, true_field
+    real(kind=r_def)              :: dispersion_error
+    real(kind=r_def)              :: cov, var_actual, var_true
 
     ! Compute statistics
     var_actual = variance_alg(config, field)

@@ -13,7 +13,7 @@
 module compute_vorticity_alg_mod
 
   use constants_mod, only: r_def, i_def, l_def
-  use config_mod, only: config_type
+  use config_mod,    only: config_type
 
   implicit none
 
@@ -23,8 +23,9 @@ module compute_vorticity_alg_mod
 contains
 
   !> @brief Algorithm to compute the vorticity field
-  !> @param[in,out] xi Vorticity field = curl(u)
-  !> @param[in]     u Velocity field
+  !> @param[in]     config  Application configuration object
+  !> @param[in,out] xi      Vorticity field = curl(u)
+  !> @param[in]     u       Velocity field
   !> @param[in]     weak_form_u Is u in weak form or not
   subroutine compute_vorticity_alg(config, xi, u, weak_form_u, w1_flag)
 

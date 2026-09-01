@@ -15,6 +15,7 @@
 module dycore_constants_mod
 
   ! Infrastructure
+  use config_mod,                         only: config_type
   use constants_mod,                      only: i_def, r_def, l_def, str_def,  &
                                                 r_second, EPS
   use sci_geometric_constants_mod,        only: get_coordinates,               &
@@ -33,10 +34,6 @@ module dycore_constants_mod
   use quadrature_xyoz_mod,                only: quadrature_xyoz_type
   use timing_mod,                         only: start_timing, stop_timing, &
                                                 tik, LPROF
-
-  ! Object types
-  use config_mod, only: config_type
-
   ! Configuration
   use finite_element_config_mod,          only: element_order_h, &
                                                 element_order_v
@@ -255,7 +252,8 @@ contains
   end function get_geopotential
 
   !> @brief Returns a pointer to a generalised W2 mass matrix operator
-  !> @param[in] mesh_id The ID of the mesh to get the object for
+  !> @param[in] config      Application configuration object
+  !> @param[in] mesh        Mesh to get the object for
   !> @param[in] model_clock The model clock object
   !!            @TODO #490:
   !!            NB: This is currently an optional argument as it is not possible

@@ -35,13 +35,15 @@ contains
 
   !> @details The adjoint of the tangent linear for specifying exner from the equation of state
   !>
+  !> @param[in]    config               Application configuration object
   !> @param[inout] state                Change in Prognostic model state
   !> @param[in]    moist_dyn_gas_law    Change in Gas law component of moist
   !>                                    dynamics factors
   !> @param[inout] ls_state             Lin state for Prognostic model state
   !> @param[in]    ls_moist_dyn_gas_law Lin state for Gas law component of
   !>                                    moist dynamics factors
-  subroutine atl_derive_exner_from_eos( config, state,             &
+  subroutine atl_derive_exner_from_eos( config,            &
+                                        state,             &
                                         moist_dyn_gas_law, &
                                         ls_state,          &
                                         ls_moist_dyn_gas_law )

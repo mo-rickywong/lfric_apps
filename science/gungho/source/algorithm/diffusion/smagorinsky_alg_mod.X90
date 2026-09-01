@@ -400,6 +400,7 @@ subroutine smagorinsky_alg( config, dtheta_io, du_io, mr, theta, u,   &
   end subroutine smagorinsky_alg
 
   !> @details Performs Smagorinsky diffusion on a Wtheta tracer field
+  !> @param[in]     config      Application configuration object
   !> @param[in,out] increment   The diffusion increment for the tracer
   !> @param[in]     tracer      The tracer field to be diffused
   !> @param[in]     visc_h      The horizontal viscosity field

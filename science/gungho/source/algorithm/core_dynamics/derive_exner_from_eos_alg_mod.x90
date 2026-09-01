@@ -26,6 +26,7 @@ module derive_exner_from_eos_alg_mod
 contains
 
   !> @brief An algorithm for specifying exner from the equation of state
+  !> @param[in]    config              Application configuration object
   !> @param[inout] state               Prognostic model state
   !> @param[in]    moist_dyn_gas_law   Gas law component of moist dynamics factors
   subroutine derive_exner_from_eos( config, state, moist_dyn_gas_law )

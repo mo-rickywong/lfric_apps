@@ -8,6 +8,7 @@
 
 module print_meanrms_field_mod
 
+  use config_mod,                      only : config_type
   use constants_mod,                   only : i_def, str_def
   use field_mod,                       only : field_type
   use log_mod,                         only : log_event,         &
@@ -15,7 +16,7 @@ module print_meanrms_field_mod
                                               log_scratch_space
   use norm_alg_mod,                    only : mean_alg,         &
                                               root_mean_square_alg
-use config_mod, only: config_type
+
   implicit none
 
   private
@@ -24,6 +25,7 @@ use config_mod, only: config_type
   contains
 
   !> @brief Prints the mean and root mean square of a field.
+  !> @param[in] config  Application configuration object
   !> @param[in] field   Field to be printed
   !> @param[in] level   Level of logging. If the configured
   !>                    log_level is less than or equal to
@@ -33,7 +35,7 @@ use config_mod, only: config_type
 
     implicit none
 
-    type(config_type), intent(in) :: config
+    type(config_type),     intent( in )           :: config
     type( field_type ),    intent( in )           :: field
     integer( kind=i_def ), intent( in )           :: level
     character (*),         intent( in ), optional :: fname

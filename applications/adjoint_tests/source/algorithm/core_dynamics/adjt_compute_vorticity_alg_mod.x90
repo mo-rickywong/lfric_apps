@@ -41,8 +41,8 @@ module adjt_compute_vorticity_alg_mod
     implicit none
 
     ! Arguments
-    type(config_type), intent(in)          :: config
-    type(mesh_type),   intent(in), pointer :: mesh
+    type(config_type), intent(in) :: config
+    type(mesh_type),   intent(in) :: mesh
 
     ! Arguments for tl and adj calls
     type(field_type)            :: xi

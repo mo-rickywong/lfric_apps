@@ -50,6 +50,7 @@ contains
   !>          Fields in the W2 function space are not processed and are
   !>          filled with zeroes in the output. This happens because there
   !>          is not a definitive format for the W2 function space yet.
+  !> @param[in]  config       Application configuration object
   !> @param[out] field_dst    Field in the destination mesh obtained
   !>                          after regridding the field in the
   !>                          source mesh

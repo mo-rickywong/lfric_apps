@@ -68,7 +68,7 @@ module intermesh_mappings_alg_mod
 contains
 
   !> @brief Converts rho field to the shifted mesh
-  !> @param[in]     config       Application namelist configuration object
+  !> @param[in]     config       Application configuration object
   !> @param[in,out] shifted_rho  Rho in W3 on the shifted mesh
   !> @param[in]     primary_rho  Rho in W3 on the prime extrusion mesh
   subroutine obtain_shifted_rho(config, shifted_rho, primary_rho)
@@ -391,6 +391,7 @@ contains
   end subroutine map_scalar_field
 
   !> @brief Conservative restriction of a W3 field (such as a density)
+  !> @param[in]     config        Application configuration object
   !> @param[in,out] target_field  Target field, on a coarse mesh
   !> @param[in]     source_field  Source field, on a fine mesh
   subroutine restrict_rho( config, target_field, source_field )
@@ -417,6 +418,7 @@ contains
   end subroutine restrict_rho
 
   !> @brief Conservative injection (prolong) of a W3 field (such as a density)
+  !> @param[in]     config        Application configuration object
   !> @param[in,out] target_field  Target field, on a fine mesh
   !> @param[in]     source_field  Source field, on a coarse mesh
   subroutine inject_rho( config, target_field, source_field )
@@ -443,6 +445,7 @@ contains
   end subroutine inject_rho
 
   !> @brief Conservative, reversible prolongation of a W3 field (e.g. a density)
+  !> @param[in]     config        Application configuration object
   !> @param[in,out] target_field  Target field, on a fine mesh
   !> @param[in]     source_field  Source field, on a coarse mesh
   subroutine prolong_rho_reversible( config, target_field, source_field )
@@ -483,6 +486,7 @@ contains
   !!          the namelist options. Based on the mesh of the source and target
   !!          fields, this will call the appropriate restriction/prolongation
   !!          routines.
+  !> @param[in]     config        Application configuration object
   !> @param[in,out] target_field  Target field, on any mesh
   !> @param[in]     source_field  Source field, on any mesh
   subroutine map_rho_intermesh( config, target_field, source_field )
@@ -623,6 +627,7 @@ contains
   end subroutine map_w0_intermesh
 
   !> @brief Conservative restriction of a mixing ratio field
+  !> @param[in]     config           Application configuration object
   !> @param[in,out] target_field     Target mixing ratio field, on a coarse mesh
   !> @param[in]     source_field     Source mixing ratio field, on a fine mesh
   !> @param[in]     target_rho_sh_w3 Dry density in shifted W3, on the target
@@ -666,6 +671,7 @@ contains
   end subroutine restrict_mr
 
   !> @brief Conservative injection (prolong) of a mixing ratio field
+  !> @param[in]     config           Application configuration object
   !> @param[in,out] target_field     Target mixing ratio field, on a fine mesh
   !> @param[in]     source_field     Source mixing ratio field, on a coarse mesh
   !> @param[in]     target_rho_sh_w3 Dry density in shifted W3, on the target
@@ -716,6 +722,7 @@ contains
   !!          conservative or non-conservative (dependent on whether moisture
   !!          transport is also conservative). In the non-conservative case,
   !!          this is mapped like a Wtheta field.
+  !> @param[in]     config           Application configuration object
   !> @param[in,out] target_field     Target mixing ratio field, on a fine mesh
   !> @param[in,out] inject_field     Injected source field, on a fine mesh
   !> @param[in]     source_field     Source mixing ratio field, on a coarse mesh

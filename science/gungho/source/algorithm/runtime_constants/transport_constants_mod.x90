@@ -170,7 +170,7 @@ contains
   ! ROUTINES FOR CREATING CONSTANTS
   ! ========================================================================== !
   !> @brief Compute remap weights and indices to an extended cubed sphere mesh
-  !> @param[in] config Application namelist configuration object
+  !> @param[in] config Application configuration object
   !> @param[in] mesh   Mesh object to compute remapping weights on
   subroutine initialise_remap_on_extended_mesh(config, mesh)
 
@@ -956,8 +956,9 @@ contains
   ! ========================================================================== !
 
   !> @brief Returns a pointer to a mass matrix
+  !> @param[in] config  Application configuration object
+  !> @param[in] mesh    Mesh to get the object for
   !> @param[in] space   The space of the desired mass matrix
-  !> @param[in] mesh_id The ID of the mesh to get the object for
   !> @return The mass matrix operator
   function get_mass_matrix_r_tran(config, mesh, space) &
                            result(mm_r_tran)
@@ -1030,8 +1031,9 @@ contains
   end function get_mass_matrix_r_tran
 
   !> @brief Returns a pointer to the r_tran inverse mass matrix operator
+  !> @param[in] config  Application configuration object
+  !> @param[in] mesh    Mesh to get the object for
   !> @param[in] space   Enumerator for the function space of the operator
-  !> @param[in] mesh_id The ID of the mesh to get the object for
   !> @return The inverse mass matrix operator at r_tran precision
   function get_inverse_mass_matrix_r_tran(config, mesh, space) &
                                    result(mm_inv_r_tran)
@@ -1107,7 +1109,8 @@ contains
   ! implemented with r_tran precision. As it depends on transport direction,
   ! it must be in this module rather than fem_constants
   !> @brief Points to the inv_m3 * div operator for a particular direction
-  !> @param[in] mesh_id   The ID of the mesh to get the object for
+  !> @param[in] config    Application configuration object
+  !> @param[in] mesh      Mesh to get the object for
   !> @param[in] direction The enumerator for the direction
   !> @return The inv_m3 * div operator
   function get_directional_im3_div(config, mesh, direction) &
@@ -1143,7 +1146,8 @@ contains
   end function get_directional_im3_div
 
   !> @brief Returns a pointer to the inv_m3 * div operator for a particular direction
-  !> @param[in] mesh_id   The ID of the mesh to get the object for
+  !> @param[in] config    Application configuration object
+  !> @param[in] mesh      Mesh to get the object for
   !> @param[in] direction The enumerator for the direction
   !> @return The inv_m3 * div operator
   function get_directional_im3_div_r_tran(config, mesh, direction) &

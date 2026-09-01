@@ -96,13 +96,16 @@ contains
   !!          and calling the subroutine which constructs the multigrid fields,
   !!          operators and preconditioners on all levels of the multigrid hierarchy.
   !>
-  !> @param[in] p_fs Function space of the pressure field
-  !> @param[in] H_op Pressure operator on finest level
+  !> @param[in] config  Application configuration object
+  !> @param[in] p_fs    Function space of the pressure field
+  !> @param[in] H_op    Pressure operator on finest level
   !> @param[in] Hz_prec Pressure preconditioner on finest level
   !> @return self The constructed multigrid_preconditioner type
-  function multigrid_preconditioner_constructor(config,p_fs, &
-                                                H_op, &
+  function multigrid_preconditioner_constructor(config, &
+                                                p_fs,   &
+                                                H_op,   &
                                                 Hz_prec) result(self)
+
     use multigrid_config_mod, only : smooth_relaxation, &
                                      n_presmooth,       &
                                      n_postsmooth,      &
@@ -110,8 +113,9 @@ contains
                                      multigrid_chain_nitems
     implicit none
 
-type(config_type), intent(in) :: config
+    type(config_type),         intent(in) :: config
     type(function_space_type), intent(in) :: p_fs
+
     class(abstract_hierarchical_linear_operator_type) :: H_op
     class(abstract_hierarchical_preconditioner_type) :: Hz_prec
     type(multigrid_preconditioner_type) :: self
@@ -139,19 +143,22 @@ type(config_type), intent(in) :: config
   !!          guarantees that they are allocated with the correct concrete type.
   !>
   !> @param[in,out] self Instance of type multigrid_preconditioner_type
-  !> @param[in] p_fs Function space of pressure field
+  !> @param[in] config  Application configuration object
+  !> @param[in] p_fs    Function space of pressure field
   !> @param[in] H_operator_fine Pressure operator on finest level
   !> @param[in] Hz_preconditioner_fine Pressure preconditioner on finest level
-  subroutine construct_multigrid_fields(self, config,                 &
+  subroutine construct_multigrid_fields(self, config,          &
                                         p_fs,                  &
                                         H_operator_fine,       &
                                         Hz_preconditioner_fine )
+
     use limited_area_constants_mod, only: get_mask_r_solver
     use fs_continuity_mod,          only: W3
 
     implicit none
     class(multigrid_preconditioner_type),              intent(inout) :: self
-type(config_type), intent(in) :: config
+
+    type(config_type),                                 intent(in)    :: config
     type(function_space_type), target,                 intent(in)    :: p_fs
     class(abstract_hierarchical_linear_operator_type), intent(in)    :: H_operator_fine
     class(abstract_hierarchical_preconditioner_type),  intent(in)    :: Hz_preconditioner_fine
@@ -230,7 +237,8 @@ type(config_type), intent(in) :: config
   !!          multigrid fields.
   !>
   !> @param[in,out] self Instance of type multigrid_preconditioner_type
-  !> @param[in] level Current multigrid level
+  !> @param[in] config  Application configuration object
+  !> @param[in] level   Current multigrid level
   !> @param[in] initial_solution_is_zero Can we implicitly assume that the
   !!                                     solution is zero?
   recursive subroutine vcycle(self, config, level, initial_solution_is_zero)
@@ -247,7 +255,7 @@ type(config_type), intent(in) :: config
     implicit none
 
     class(multigrid_preconditioner_type), intent(inout) :: self
-    type(config_type),                  intent(in)    :: config
+    type(config_type),                    intent(in)    :: config
     integer(kind=i_def),                  intent(in)    :: level
     logical(kind=l_def),                  intent(in)    :: initial_solution_is_zero
 
@@ -318,16 +326,18 @@ type(config_type), intent(in) :: config
   !!        apply the preconditioner to x, store in y.
   !>
   !> @param[in,out] self Instance of type multigrid_preconditioner_type
-  !> @param[in] x abstract_vector_type
-  !> @param[in,out] y abstract_vector_type
+  !> @param[in]     config  Application configuration object
+  !> @param[in]     x       abstract_vector_type
+  !> @param[in,out] y       abstract_vector_type
   subroutine apply_multigrid_preconditioner(self, config, x, y)
 
     implicit none
 
     class(multigrid_preconditioner_type), intent(inout) :: self
-    type(config_type),          intent(in)    :: config
-    class(abstract_vector_type),          intent(in)    :: x
-    class(abstract_vector_type),          intent(inout) :: y
+
+    type(config_type),           intent(in)    :: config
+    class(abstract_vector_type), intent(in)    :: x
+    class(abstract_vector_type), intent(inout) :: y
 
     type(r_solver_field_type), pointer :: x_vec => null(), &
                                           y_vec => null(), &
@@ -371,16 +381,19 @@ type(config_type), intent(in) :: config
   !!          iteration to save one operator application.
   !>
   !> @param[in,out] self Instance of type multigrid_preconditioner_type
+  !> @param[in] config  Application configuration object
   !> @param[in] nsmooth Number of iterations
-  !> @param[in] level Multigrid level
+  !> @param[in] level   Multigrid level
   !> @param[in] initial_solution_is_zero Can we implicitly assume that
   !!                                     \f$ u^{(\ell)} \f$ is zero before
   !!                                     the first iteration?
   subroutine smooth(self, config, nsmooth, level, initial_solution_is_zero)
+
     implicit none
+
     class(multigrid_preconditioner_type), intent(inout) :: self
 
-    type(config_type), intent(in) :: config
+    type(config_type),   intent(in) :: config
     integer(kind=i_def), intent(in) :: nsmooth
     integer(kind=i_def), intent(in) :: level
     logical(kind=l_def), intent(in) :: initial_solution_is_zero

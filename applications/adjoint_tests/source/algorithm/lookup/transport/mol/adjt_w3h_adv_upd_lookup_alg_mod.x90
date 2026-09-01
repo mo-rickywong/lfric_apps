@@ -6,7 +6,9 @@
 !> @brief Module containing adjoint test for adj_w3h_adv_upd_lookup_lookup_kernel
 module adjt_w3h_adv_upd_lookup_alg_mod
 
+
   use adj_trans_lookup_cache_mod,      only : adj_trans_lookup_cache_type
+  use config_mod,                      only : config_type
   use integer_field_mod,               only : integer_field_type
   use r_tran_field_mod,                only : r_tran_field_type
   use fs_continuity_mod,               only : W3, W2
@@ -25,7 +27,6 @@ module adjt_w3h_adv_upd_lookup_alg_mod
   use sci_fem_constants_mod,           only : get_inverse_mass_matrix_fe
   use adj_lookup_table_mod,            only : adj_lookup_table_type
 
-use config_mod, only: config_type
   implicit none
 
   public :: adjt_w3h_adv_upd_lookup_alg
@@ -37,6 +38,7 @@ use config_mod, only: config_type
   !> @details Passes if adjoint is transpose of tangent linear.
   !>          Determined by testing the equality of inner products <Mx, Mx> and <AMx, x>,
   !>          where M is the tangent linear and A is the adjoint.
+  !> @param[in]  config                  Application configuration object
   !> @param[in]  mesh                    The model mesh
   !> @param[in]  adj_lookup_table_cache  The lookup table cache
   subroutine adjt_w3h_adv_upd_lookup_alg( config, mesh, adj_lookup_table_cache )
@@ -47,8 +49,8 @@ use config_mod, only: config_type
     implicit none
 
     ! Arguments
-    type(config_type), intent(in) :: config
-    type(mesh_type),          pointer, intent(in) :: mesh
+    type(config_type),                 intent(in) :: config
+    type(mesh_type),                   intent(in) :: mesh
     type(adj_trans_lookup_cache_type), intent(in) :: adj_lookup_table_cache
 
     ! Internal arguments for kernels
@@ -86,8 +88,9 @@ use config_mod, only: config_type
     real(kind=r_tran)            :: machine_tol
     real(kind=r_tran)            :: relative_diff
 
-    nullify(m3_inv, lookup_w3h_adv_upd, lookup_w3h_adv_upd_field, set_count_w3h_adv_upd_field, &
-            vector_space_w3_md_ptr, vector_space_w3_ptr, vector_space_w2_ptr)
+    nullify(m3_inv, lookup_w3h_adv_upd, lookup_w3h_adv_upd_field, &
+            set_count_w3h_adv_upd_field, vector_space_w3_md_ptr,  &
+            vector_space_w3_ptr, vector_space_w2_ptr)
 
     vector_space_w3_md_ptr => function_space_collection%get_fs(                &
         mesh, element_order_h, element_order_v, W3, ndata, ndata_first=.false. &

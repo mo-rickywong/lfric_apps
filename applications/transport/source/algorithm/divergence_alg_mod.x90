@@ -17,9 +17,6 @@ module divergence_alg_mod
   use mesh_mod,                        only: mesh_type
   use operator_mod,                    only: operator_type
 
-  ! Object types
-
-
   implicit none
 
   private

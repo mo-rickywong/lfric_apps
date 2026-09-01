@@ -7,6 +7,7 @@
 
 module si_diagnostics_mod
 
+  use config_mod,               only: config_type
   use constants_mod,            only: l_def
   use derived_config_mod,       only: bundle_size
   use field_mod,                only: field_type
@@ -25,9 +26,6 @@ module si_diagnostics_mod
   use timing_mod,               only: start_timing, stop_timing, tik, LPROF
 
   use initialise_diagnostics_mod, only: init_diag => init_diagnostic_field
-
-  ! Object types
-  use config_mod, only: config_type
 
   implicit none
 

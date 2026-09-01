@@ -21,10 +21,11 @@ module compute_pv_alg_mod
 contains
 
   !> @brief Algorithm to compute the vorticity field
-  !> @param[out] pv Potential vorticity field = (curl(u) + 2*Omega) dot grad(theta)/rho
-  !> @param[in]     u Velocity field
-  !> @param[in]     theta Potential temperature field
-  !> @param[in]     rho   Density field
+  !> @param[in]  config  Application configuration object
+  !> @param[out] pv      Potential vorticity field = (curl(u) + 2*Omega) dot grad(theta)/rho
+  !> @param[in]  u       Velocity field
+  !> @param[in]  theta   Potential temperature field
+  !> @param[in]  rho     Density field
   subroutine compute_pv_alg(config, pv, u, theta, rho)
 
     use field_mod,                      only: field_type

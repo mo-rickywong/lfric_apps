@@ -23,7 +23,6 @@ module tl_physics_alg_mod
   use sci_field_bundle_builtins_mod,       only: clone_bundle, copy_bundle, set_bundle_scalar
   use operator_mod,                        only: operator_type
 
-!use config_mod, only: config_type
   implicit none
 
   private

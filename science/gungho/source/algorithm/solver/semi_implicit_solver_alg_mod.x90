@@ -101,6 +101,7 @@ contains
   !> @brief Create operator and preconditioner for (Helmholtz) pressure problem
   !> @details Called by init method of this module, but also by adj_semi_implicit_solver_alg_mod,
   !!          adjt_mixed_schur_preconditioner_alg_mod and adjt_mixed_solver_alg_mod
+  !> @param[in]  config                      Application configuration object
   !> @param[in]  state                       Prognostic state for the solver
   !> @param[out] pressure_operator_out       Output (Helmholtz) pressure operator
   !> @param[out] pressure_preconditioner_out Output (Helmholtz) pressure preconditioner
@@ -437,12 +438,14 @@ contains
 
 !=============================================================================!
   !> @brief Initialisation procedure for the semi-implicit solver
-  !> @param[in] state Prognostic state for the solver
+  !> @param[in] config  Application configuration object
+  !> @param[in] state   Prognostic state for the solver
   subroutine semi_implicit_solver_alg_init(config, state)
 
     implicit none
 
-type(config_type), intent(in) :: config
+    type(config_type), intent(in) :: config
+
     ! Prognostic fields
     type( field_type ), dimension(bundle_size), intent( in ) :: state
 
@@ -490,6 +493,7 @@ type(config_type), intent(in) :: config
 
   !> @brief An algorithm for timestepping the semi-implicit equations.
   !>
+  !> @param[in]     config              Application configuration object
   !> @param[in,out] state               Prognostic model state
   !> @param[in,out] rhs                 Residuals
   !> @param[in,out] dry_flux_solver     Solver contributions to dry flux

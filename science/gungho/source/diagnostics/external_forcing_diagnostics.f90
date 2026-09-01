@@ -9,15 +9,13 @@
 !
 module external_forcing_diagnostics_mod
 
+  use config_mod,                 only: config_type
   use field_mod,                  only: field_type
   use log_mod,                    only: log_event, LOG_LEVEL_INFO
   use constants_mod,              only: l_def
   use timing_mod,                 only: start_timing, stop_timing, tik, LPROF
   use initialise_diagnostics_mod, only: init_diag => init_diagnostic_field
   use physics_mappings_alg_mod,   only: map_physics_winds
-
-  ! Object types
-  use config_mod, only: config_type
 
   implicit none
 
@@ -28,6 +26,7 @@ contains
 
   !> @brief Write external forcing increments when requested
   !> @details If any external forcing increments was requested for output then write it
+  !> @param[in]  config           Application configuration object
   !> @param[in]  du_forcing       3D wind increment from external forcing
   !> @param[in]  output_wind_inc  Logical flag to output wind increments
   subroutine write_forcing_diagnostics(config, du_forcing, output_wind_inc)

@@ -10,14 +10,13 @@
 !!          transport schemes, such as field minima and maxima and L2 errors.
 module transport_stats_mod
 
+  use config_mod,                        only: config_type
   use constants_mod,                     only: r_def, str_def, EPS
   use field_mod,                         only: field_type
   use log_mod,                           only: log_event,           &
                                                log_scratch_space,   &
                                                LOG_LEVEL_INFO
   use sci_field_minmax_alg_mod,          only: get_field_minmax
-
-use config_mod, only: config_type
 
   implicit none
 
@@ -29,6 +28,7 @@ contains
 
 
   !> @brief Routine to calculate and write out various transport statistics
+  !> @param[in] config      Application configuration object
   !> @param[in] field       The transported field
   !> @param[in] true_field  The true field to compare against
   !> @param[in] field_name  String to print out next to statistics
@@ -42,7 +42,7 @@ contains
 
     implicit none
 
-    type(config_type),       intent(in) :: config
+    type(config_type),      intent(in) :: config
     type(field_type),       intent(in) :: field, true_field
     character(len=str_def), intent(in) :: field_name
     real(kind=r_def)                   :: min_field, max_field, volume

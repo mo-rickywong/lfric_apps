@@ -7,7 +7,7 @@
 !> @brief Tangent linear deriving exner from equation of state.
 module tl_derive_exner_from_eos_alg_mod
 
-  use config_mod, only: config_type
+  use config_mod,                       only: config_type
   use constants_mod,                    only: i_def
   use field_mod,                        only: field_type
   use fs_continuity_mod,                only: W3
@@ -35,6 +35,7 @@ contains
 
   !> @details The tangent linear for specifying exner from the equation of state
   !>
+  !> @param[in]    config               Application configuration object
   !> @param[inout] state                Change in Prognostic model state
   !> @param[in]    moist_dyn_gas_law    Change in Gas law component of moist
   !>                                    dynamics factors
@@ -56,7 +57,7 @@ contains
 
     implicit none
 
-    type( config_type ),                         intent( in )    :: config
+    type( config_type ),                        intent( in )    :: config
     type( field_type ), dimension(bundle_size), intent( inout ) :: state
     type( field_type ),                         intent( in )    :: moist_dyn_gas_law
     type( field_type ), dimension(bundle_size), intent( in )    :: ls_state

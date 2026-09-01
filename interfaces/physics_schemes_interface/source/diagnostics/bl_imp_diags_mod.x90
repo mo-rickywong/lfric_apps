@@ -7,6 +7,7 @@
 
 module bl_imp_diags_mod
 
+  use config_mod,                only: config_type
   use constants_mod,             only: l_def
   use field_mod,                 only: field_type
   use physics_mappings_alg_mod,  only: map_physics_winds
@@ -14,8 +15,6 @@ module bl_imp_diags_mod
 
   use initialise_diagnostics_mod, only : init_diag => init_diagnostic_field, &
                                          samp_diag => diagnostic_to_be_sampled
-
-  use config_mod, only: config_type
 
   implicit none
 

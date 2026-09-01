@@ -449,6 +449,7 @@ contains
   !> @brief Finalises transport only run.
   !> @details Calculates final error norms for transport schemes and calls
   !!          finalising routines for transport only run.
+  !> @param[in] config      Application configuration object
   !> @param[in] rho         Transported dry density field
   !> @param[in] theta       Transported pot. temperature field
   !> @param[in] tracer_con  Transported conservative tracer field

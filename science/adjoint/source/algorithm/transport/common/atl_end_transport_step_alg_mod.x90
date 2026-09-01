@@ -10,6 +10,7 @@ module atl_end_transport_step_alg_mod
 
   use base_mesh_config_mod,           only: topology, topology_non_periodic
   use boundaries_config_mod,          only: limited_area
+  use config_mod,                     only: config_type
   use constants_mod,                  only: i_def, r_tran, l_def
   use adj_end_transport_step_alg_mod, only: adj_build_up_flux
   use finite_element_config_mod,      only: element_order_h, element_order_v
@@ -36,7 +37,6 @@ module atl_end_transport_step_alg_mod
   use transport_metadata_mod,         only: transport_metadata_type
   use adj_flux_precomputations_mod,   only: adj_initialise_step
 
-  use config_mod, only: config_type
   implicit none
 
   private

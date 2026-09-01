@@ -13,6 +13,7 @@
 
 module pressure_diag_precon_alg_mod
 
+  use config_mod,             only : config_type
   use constants_mod,          only : i_def, r_def
   use fs_continuity_mod,      only : W3
   use log_mod,                only : log_event, &
@@ -21,8 +22,6 @@ module pressure_diag_precon_alg_mod
                                      log_scratch_space
   use sci_preconditioner_mod, only : abstract_preconditioner_type
   use vector_mod,             only : abstract_vector_type
-
-  use config_mod, only: config_type
 
   implicit none
 

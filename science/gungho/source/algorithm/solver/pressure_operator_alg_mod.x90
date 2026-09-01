@@ -126,7 +126,8 @@ contains
   !> @brief Apply Helmholtz operator to a pressure field to obtain \f$y=Hx\f$.
   !>
   !> @param[in,out] self Instance of pressure_operator_type
-  !> @param[in] x Field \f$x\f$ to apply operator to
+  !> @param[in]     config  Application configuration object
+  !> @param[in]     x       Field \f$x\f$ to apply operator to
   !> @param[in,out] y Resulting field \f$y=Hx\f$ in pressure space
   subroutine apply_pressure_operator(self, config, x, y)
 
@@ -144,7 +145,7 @@ contains
     implicit none
 
     class(pressure_operator_type), intent(inout) :: self
-    type(config_type),   intent(in)    :: config
+    type(config_type),             intent(in)    :: config
     class(abstract_vector_type),   intent(in)    :: x
     class(abstract_vector_type),   intent(inout) :: y
 
@@ -167,7 +168,7 @@ contains
     real(kind=r_solver), parameter     :: one = 1.0_r_solver
     integer(kind=i_def), parameter     :: one_int = 1_i_def
     integer(kind=i_def)                :: mesh_id
-    type(mesh_type), pointer              :: mesh
+    type(mesh_type), pointer           :: mesh
     logical(kind=l_def)                :: lam_mesh
     integer(tik)                       :: id
 
@@ -270,12 +271,15 @@ contains
   !!        next level of the multigrid hierarchy.
   !>
   !>@param[in]     self            Instance of pressure_operator_type
-  !>@param[in]     fs_coarse       Coarse level function space
+  !>@param[in]     config          Application configuration object
   !>@param[in,out] coarse_operator Coarsened version of the operator on the next multigrid level
-  subroutine coarsen_pressure_operator(self,config,coarse_operator)
+  subroutine coarsen_pressure_operator(self, config, coarse_operator)
+
     implicit none
+
     class(pressure_operator_type), intent(in) :: self
-type(config_type), intent(in) :: config
+
+    type(config_type), intent(in) :: config
     class(abstract_hierarchical_linear_operator_type), allocatable, intent(inout) :: coarse_operator
 
     allocate(coarse_operator, &

@@ -195,7 +195,7 @@ module atlt_end_transport_step_alg_mod
   !> @details Passes if adjoint is transpose of tangent linear.
   !>          Determined by testing the equality of inner products <Mx, Mx> and <AMx, x>,
   !>          where M is the tangent linear and A is the adjoint.
-  !> @param[in]  config       Application namelist configuration object
+  !> @param[in]  config       Application configuration object
   !> @param[in]  mesh         The model mesh
   !> @param[in]  model_clock  The model clock
   subroutine atlt_end_con_step_alg(config, mesh, model_clock)
@@ -207,7 +207,7 @@ module atlt_end_transport_step_alg_mod
 
     ! Arguments
     type(config_type),        intent(in) :: config
-    type(mesh_type), pointer, intent(in) :: mesh
+    type(mesh_type),          intent(in) :: mesh
     type(model_clock_type),   intent(in) :: model_clock
 
     ! Arguments for tl and adj calls

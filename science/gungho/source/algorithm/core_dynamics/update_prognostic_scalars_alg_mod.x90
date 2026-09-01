@@ -18,7 +18,8 @@ contains
 
   !> @details Compute the dynamics scalars (exner, rho, theta) based upon the
   !>          the latest advection update
-  !> @param[in] state latest estimate for dynamics prognostics
+  !> @param[in] config   Application configuration object
+  !> @param[in] state    Latest estimate for dynamics prognostics
   !> @param[in] rhs_n    Timelevel n forcings
   !> @param[in] rhs_adv  Advection forcings
   !> @param[in] rhs_phys Fast physics forcings

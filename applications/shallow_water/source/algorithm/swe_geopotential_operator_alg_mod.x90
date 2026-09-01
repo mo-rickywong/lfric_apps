@@ -15,6 +15,7 @@
 
 module swe_geopot_operator_alg_mod
 
+  use config_mod,                         only: config_type
   use constants_mod,                      only: i_def, r_def
   use sci_fem_constants_mod,              only: get_mass_matrix_fe,         &
                                                 get_inverse_mass_matrix_fe, &
@@ -26,7 +27,7 @@ module swe_geopot_operator_alg_mod
                                                 LOG_LEVEL_ERROR, &
                                                 LOG_LEVEL_INFO,  &
                                                 log_scratch_space
-
+  use mesh_mod,                           only: mesh_type
   use operator_mod,                       only: operator_type
   use sci_field_vector_mod,               only: field_vector_type
   use sci_linear_operator_mod,            only: abstract_linear_operator_type
@@ -34,10 +35,6 @@ module swe_geopot_operator_alg_mod
                                                 thermal_swe
   use timestepping_config_mod,            only: dt
   use vector_mod,                         only: abstract_vector_type
-
-  ! Object types
-  use config_mod, only: config_type
-  use mesh_mod,   only: mesh_type
 
   implicit none
 
@@ -73,7 +70,7 @@ module swe_geopot_operator_alg_mod
   end type swe_geopot_operator_type
 
   interface swe_geopot_operator_type
-     module procedure swe_geopot_operator_constructor
+    module procedure swe_geopot_operator_constructor
   end interface
 
 contains
@@ -83,12 +80,12 @@ contains
   !> @details Extract function spaces and build the lumped approximate
   !!          inverse \f$ \tilde{H}_b^{-1} \f$ as well as other operators
   !!          such as div and grad for the Helmholtz operator application.
-  !>
-  !> @param[in] state Field vector \f$(\textbf{U},P,B)\f$ representing
-  !!                  current state. This is required for extracting the
-  !!                  relevant function spaces required for operator
-  !!                  construction.
-  !> @return          Instance of the Helmholtz operator
+  !> @param[in] config  Application configuration object
+  !> @param[in] state   Field vector \f$(\textbf{U},P,B)\f$ representing
+  !!                    current state. This is required for extracting the
+  !!                    relevant function spaces required for operator
+  !!                    construction.
+  !> @return            Instance of the Helmholtz operator
   function swe_geopot_operator_constructor(config, state) result(self)
 
     use function_space_mod,                 only: function_space_type
@@ -99,7 +96,7 @@ contains
 
     type(swe_geopot_operator_type)      :: self
 
-    type(config_type), intent(in) :: config
+    type(config_type),       intent(in) :: config
     type(field_vector_type), intent(in) :: state
     type(function_space_type), pointer  :: wp => null(), &
                                            wu => null()
@@ -175,9 +172,10 @@ contains
 
   !> @brief Apply Helmholtz operator to a geopotential field to obtain \f$y=Hx\f$.
   !>
-  !> @param[in,out] self Instance of swe_geopotential_operator_type
-  !> @param[in]     x    Field \f$x\f$ to apply operator to
-  !> @param[in,out] y    Resulting field \f$y=Hx\f$ in geopotential space
+  !> @param[in,out] self   Instance of swe_geopotential_operator_type
+  !> @param[in]     config Application configuration object
+  !> @param[in]     x      Field \f$x\f$ to apply operator to
+  !> @param[in,out] y      Resulting field \f$y=Hx\f$ in geopotential space
   subroutine apply_swe_geopot_operator(self, config, x, y)
 
     use dg_matrix_vector_kernel_mod,        only: dg_matrix_vector_kernel_type

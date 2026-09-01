@@ -58,10 +58,11 @@ module diagnostic_alg_mod
 contains
 
   !> @details Calculates the l2 error norm for wind divergence
+  !> @param[in]     config      Application configuration object
+  !> @param[in]     mesh        Mesh
   !> @param[in,out] divergence  Divergence field
   !> @param[in,out] l2          l2 norm
-  !> @param[in] u               3D wind field
-  !> @param[in] mesh            Mesh
+  !> @param[in]     u           3D wind field
   subroutine divergence_diagnostic_alg(config, mesh, divergence, l2, u)
 
     use dg_matrix_vector_kernel_mod,  only: dg_matrix_vector_kernel_type
@@ -70,8 +71,8 @@ contains
 
     implicit none
 
-    type(config_type), intent(in)          :: config
-    type(mesh_type),   intent(in), pointer :: mesh
+    type(config_type), intent(in) :: config
+    type(mesh_type),   intent(in) :: mesh
 
     type(field_type), intent(inout) :: divergence
     real(r_def), intent(inout)      :: l2
@@ -108,10 +109,11 @@ contains
   !>          It is capable of calculating the error at each timestep by using
   !>          set_rho_alg algorithm which will return the analytic density value
   !>          at each timestep.
-  !> @param[in,out] l2   l2 norm
-  !> @param[in] rho_num  Density
-  !> @param[in] timestep Timestep
-  !> @param[in] dt       The model timestep length
+  !> @param[in]     config   Application configuration object
+  !> @param[in,out] l2       l2 norm
+  !> @param[in]     rho_num  Density
+  !> @param[in]     timestep Timestep
+  !> @param[in]     dt       The model timestep length
   subroutine density_diagnostic_alg(config, l2, rho_num, timestep, dt)
 
     use field_mod,                    only: field_type
@@ -140,11 +142,12 @@ contains
   !> @details An algorithm for calculating the l2 norm for the hydrostatic
   !>          imbalance. It calculates the sum of pressure gradient and
   !>          gravity term at each timestep using the hydrostatic kernel.
+  !> @param[in]     config    Application configuration object
+  !> @param[in]     mesh      Mesh
   !> @param[in,out] l2        l2 norm
   !> @param[in]     theta     Potential temperature
   !> @param[in]     moist_dyn Moist dynamics factors
   !> @param[in]     exner     Exner pressure
-  !> @param[in]     mesh      Mesh
   subroutine hydbal_diagnostic_alg(config, mesh, l2, theta, moist_dyn, exner)
 
     use field_mod,                   only: field_type
@@ -162,8 +165,8 @@ contains
 
     implicit none
 
-    type(config_type), intent(in)          :: config
-    type(mesh_type),   intent(in), pointer :: mesh
+    type(config_type), intent(in) :: config
+    type(mesh_type),   intent(in) :: mesh
 
     real(r_def), intent(inout)            :: l2
     type(field_type), intent(in)          :: theta
@@ -213,6 +216,7 @@ contains
 
   !> @details Generic diagnostic processing for a scalar field to nodal format
   !>          Allows optional projection to W3
+  !> @param[in]     config            Application configuration object
   !> @param[in,out] output_field      The output field. A 1-element array to satisfy project_output API
   !> @param[in,out] nodal_coordinates Coordinates of the output field
   !> @param[in,out] level             Levels of the output field
@@ -234,7 +238,7 @@ contains
     character(len=*), intent(in)    :: field_name
     type(field_type), intent(in)    :: field
 
-    type(mesh_type),  intent(in), pointer :: mesh
+    type(mesh_type),  intent(in)    :: mesh
 
     logical(l_def),   intent(in)    :: W3_project
 
@@ -429,11 +433,12 @@ contains
 
   !> @details Generic diagnostic processing for a scalar field output in ugrid format
   !>          Allows optional projection to W3
-  !> @param[in,out] output_field      The output field
-  !> @param[in] field_name            The field name to use for output
-  !> @param[in] field                 The input field
-  !> @param[in] mesh                  Mesh
-  !> @param[in] W3_project            Logical to allow projection to W3
+  !> @param[in]     config        Application configuration object
+  !> @param[in,out] output_field  The output field
+  !> @param[in]     field_name    The field name to use for output
+  !> @param[in]     field         The input field
+  !> @param[in]     mesh          Mesh
+  !> @param[in]     W3_project    Logical to allow projection to W3
   subroutine scalar_ugrid_diagnostic_alg( config, output_field, field_name, field, &
                                           mesh, W3_project )
 
@@ -444,7 +449,7 @@ contains
     type(field_type), intent(inout) :: output_field(1)
     character(len=*), intent(in)    :: field_name
     type(field_type), intent(in)    :: field
-    type(mesh_type),  intent(in), pointer :: mesh
+    type(mesh_type),  intent(in)    :: mesh
     logical(l_def),   intent(in)    :: W3_project
 
     type(field_type), pointer :: chi(:)
@@ -488,6 +493,7 @@ contains
   end subroutine scalar_ugrid_diagnostic_alg
 
   !> @details Calculates the diagnostic vorticity from the wind
+  !> @param[in]  config     Application configuration object
   !> @param[out] vorticity  Vorticity ( curl(u) ) to compute
   !> @param[in]  u          3D wind field
   !> @param[in]  timestep   Model timestep number
@@ -534,6 +540,7 @@ contains
   end subroutine vorticity_diagnostic_alg
 
   !> @details Calculates the diagnostic potential vorticity from the wind
+  !> @param[in] config              Application configuration object
   !> @param[in] potential_vorticity Potential Vorticity (curl(u) + 2*Omega) dot grad(theta)/rho
   !> @param[in] u                   Wind
   !> @param[in] theta               Potential temperature
@@ -856,8 +863,6 @@ contains
   !!          it is averaged in time to help indicate whether the model has any
   !!          stability problems.
   !> @param[in] w_in_wth  3D vertical velocity field seen by the model physics
-  !> @param[in] mesh      The primary mesh
-
   subroutine calc_wbig_diagnostic_alg( w_in_wth )
 
     use calc_wbig_kernel_mod,             only: calc_wbig_kernel_type

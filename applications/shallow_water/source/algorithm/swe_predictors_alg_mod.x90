@@ -15,6 +15,7 @@
 module swe_predictors_alg_mod
 
   ! Constants and types
+  use config_mod,                 only: config_type
   use constants_mod,              only: r_def
   use sci_fem_constants_mod,      only: get_im3_div_fe
   use field_indices_mod,          only: isw_u, isw_g
@@ -26,7 +27,6 @@ module swe_predictors_alg_mod
   use derived_config_mod,         only: bundle_size
   use transport_config_mod,       only: use_density_predictor, &
                                         cap_density_predictor
-use config_mod, only: config_type
 
   ! Algorithms and Kernels
   use dg_matrix_vector_kernel_mod,    only: dg_matrix_vector_kernel_type
@@ -46,19 +46,21 @@ contains
   !!          used in the geopotential predictor, can be capped to lie between
   !!          two given values.
   !!
+  !> @param[in]     config         Application configuration object
   !> @param[in,out] advected_state The state variables that will be transported
   !> @param[in]     wind           The wind at time n
   !> @param[in]     rhs_n          The RHS terms for u at time n
   !> @param[in]     minus_beta_dt  The time n centring parameter multiplied
   !!                               by the model timestep length
-  subroutine swe_predictors_alg( config, advected_state, &
+  subroutine swe_predictors_alg( config,         &
+                                 advected_state, &
                                  wind,           &
                                  rhs_n,          &
                                  minus_beta_dt )
 
     implicit none
 
-type(config_type), intent(in) :: config
+    type(config_type), intent(in) :: config
 
     ! Arguments
     type( field_vector_type ), intent(inout) :: advected_state

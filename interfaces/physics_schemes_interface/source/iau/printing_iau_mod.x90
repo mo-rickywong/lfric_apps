@@ -90,6 +90,7 @@ module printing_iau_mod
 
   !> @brief   print the prognostic_fields mean/rms
   !> @details print the mean/rms of the different iau fields
+  !> @param[in] config            Application configuration object
   !> @param[in] prognostic_fields The collection of prognostic fields
   !> @param[in] level             Level of logging. If the configured
   !>                              log_level is less than or equal to
@@ -98,7 +99,7 @@ module printing_iau_mod
 
     implicit none
 
-    type(config_type), intent(in) :: config
+    type( config_type ),           intent(in) :: config
     type( field_collection_type ), intent(in) :: prognostic_fields
     integer( kind = i_def ),       intent(in) :: level
 
@@ -293,6 +294,7 @@ module printing_iau_mod
   end subroutine print_minmax_cld
 
   !> @brief Print the cloud_fields mean and rms.
+  !> @param[in] config        Application configuration object
   !> @param[in] cloud_fields  Collection of cloud fields
   !> @param[in] level         Level of logging. If the configured
   !>                          log_level is less than or equal to
@@ -301,7 +303,7 @@ module printing_iau_mod
 
     implicit none
 
-    type(config_type), intent(in) :: config
+    type(config_type),             intent(in) :: config
     type( field_collection_type ), intent(in) :: cloud_fields
     integer( kind = i_def ),       intent(in) :: level
 

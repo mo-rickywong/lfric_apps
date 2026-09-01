@@ -27,6 +27,7 @@
 
 module swe_mixed_operator_alg_mod
 
+  use config_mod,                        only: config_type
   use constants_mod,                     only: r_def
   use sci_fem_constants_mod,             only: get_mass_matrix_fe,         &
                                                get_inverse_mass_matrix_fe, &
@@ -37,14 +38,11 @@ module swe_mixed_operator_alg_mod
   use log_mod,                           only: log_event,       &
                                                LOG_LEVEL_ERROR, &
                                                log_scratch_space
+  use mesh_mod,                          only: mesh_type
   use operator_mod,                      only: operator_type
   use sci_field_vector_mod,              only: field_vector_type
   use sci_linear_operator_mod,           only: abstract_linear_operator_type
   use vector_mod,                        only: abstract_vector_type
-
-  ! Object types
-  use config_mod, only: config_type
-  use mesh_mod,   only: mesh_type
 
   implicit none
 
@@ -142,9 +140,10 @@ contains
 
   !> @brief Applies the swe mixed operator to the vector, \f$ y = M x \f$.
   !>
-  !> @param[in,out] self Instance of the swe mixed operator
-  !> @param[in]     x    Field vector to be read
-  !> @param[in,out] y    Field vector to be written
+  !> @param[in,out] self   Instance of the swe mixed operator
+  !> @param[in]     config Application configuration object
+  !> @param[in]     x      Field vector to be read
+  !> @param[in,out] y      Field vector to be written
   subroutine apply_swe_mixed_operator(self, config, x, y)
 
     use matrix_vector_kernel_mod,           only: matrix_vector_kernel_type
@@ -160,9 +159,10 @@ contains
     implicit none
 
     class(swe_mixed_operator_type), intent(inout) :: self
-    type(config_type),    intent(in)    :: config
-    class(abstract_vector_type),    intent(in)    :: x
-    class(abstract_vector_type),    intent(inout) :: y
+
+    type(config_type),           intent(in)    :: config
+    class(abstract_vector_type), intent(in)    :: x
+    class(abstract_vector_type), intent(inout) :: y
 
     type(operator_type), pointer :: mm_w2, mm_wb => null()
     type(operator_type), pointer :: div, m3_inv => null()

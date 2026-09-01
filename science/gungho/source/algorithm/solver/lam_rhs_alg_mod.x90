@@ -8,7 +8,9 @@
 
 module lam_rhs_alg_mod
 
+  use config_mod,                  only: config_type
   use constants_mod,               only: r_def, i_def, l_def, str_def
+  use mesh_mod,                    only: mesh_type
   use model_clock_mod,             only: model_clock_type
   use matrix_vector_kernel_mod,    only: matrix_vector_kernel_type
   use dg_matrix_vector_kernel_mod, only: dg_matrix_vector_kernel_type
@@ -30,9 +32,6 @@ module lam_rhs_alg_mod
                                          r_solver_operator_type
   use field_indices_mod,           only: igh_u, igh_t, igh_d, igh_p
   use sci_operator_algebra_kernel_mod, only: operator_setval_x_kernel_type
-
-use mesh_mod, only: mesh_type
-use config_mod,only: config_type
 
   implicit none
 
@@ -85,6 +84,7 @@ contains
   !>          Since these terms go into the rhs no normalisation is applied here
   !>          (in contrast to the mixed operator) since the normalisation is
   !>          applied for the whole rhs term before the solver is called.
+  !> @param[in]     config      Application configuration object
   !> @param[in,out] rhs         RHS term for the mixed solve, to include LBCs
   !> @param[in]     lbc_fields  Field collection containing LBC data
   !> @param[in]     model_clock Time in the model
@@ -95,7 +95,7 @@ contains
 
     implicit none
 
-    type(config_type),            intent(in) :: config
+    type(config_type),           intent(in)    :: config
     type(field_type),            intent(inout) :: rhs(bundle_size)
     type(field_collection_type), intent(in)    :: lbc_fields
     class(model_clock_type),     intent(in)    :: model_clock
@@ -118,7 +118,7 @@ contains
     real(r_def)                  :: dt
     real(r_def)                  :: tau_r_dt
     integer(i_def)               :: mesh_id
-    type(mesh_type), pointer           :: mesh
+    type(mesh_type), pointer     :: mesh
 
     type(r_solver_field_type), pointer :: r_solver_rho_at_u => null()
     integer(tik)                 :: id

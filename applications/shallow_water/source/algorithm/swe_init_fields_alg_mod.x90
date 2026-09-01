@@ -10,6 +10,7 @@
 module swe_init_fields_alg_mod
 
   ! Constants, Types, Function Space
+  use config_mod,                         only: config_type
   use constants_mod,                      only: r_def, i_def, radians_to_degrees
   use domain_mod,                         only: domain_type
   use field_mod,                          only: field_type
@@ -50,8 +51,6 @@ module swe_init_fields_alg_mod
   use quadrature_xyoz_mod,                only: quadrature_xyoz_type
   use quadrature_rule_gaussian_mod,       only: quadrature_rule_gaussian_type
 
-  use config_mod, only: config_type
-
   implicit none
 
   public :: swe_init_fields_alg
@@ -64,6 +63,7 @@ contains
   !> @brief Initialise the prognostic fields for the shallow water miniapp.
   !> @details An algorithm for initialising prognostic fields (wind, geopotential,
   !!          buoyancy, potential voriticty) for the shallow water miniapp.
+  !> @param[in]     config      Application configuration object
   !> @param[in]     mesh        Mesh to initialise variables on
   !> @param[in]     s_geopot    The surface geopotential
   !> @param[in,out] prognostics The prognostic variables
@@ -73,9 +73,9 @@ contains
     implicit none
 
     type(config_type), intent(in) :: config
+    type(mesh_type),   intent(in) :: mesh
 
-    ! Mesh, surface geopotential and prognostic fields
-    type( mesh_type ), pointer,    intent(in)    :: mesh
+    ! Surface geopotential and prognostic fields
     type( field_type ),            intent(in)    :: s_geopot
     type( field_collection_type ), intent(inout) :: prognostics
 
@@ -166,7 +166,7 @@ contains
     end if
 
     ! Initialise vorticity
-    call swe_init_vorticity_alg( config, wind, geopot, q )
+    call swe_init_vorticity_alg(config, wind, geopot, q)
 
     ! Set tracer_const to be one
     call invoke( setval_c(tracer_const, 1.0_r_def) )
@@ -187,9 +187,10 @@ contains
   !> @brief Potential vorticity initialisation.
   !> @details An algorithm for initialising the potential vorticity. Used for field
   !!          initialisation and to resynchronise the vorticity during the run.
-  !> @param[in]     wind   The wind field
-  !> @param[in]     geopot The geopotential field
-  !> @param[in,out] q      The potential vorticity field
+  !> @param[in]     config  Application configuration object
+  !> @param[in]     wind    The wind field
+  !> @param[in]     geopot  The geopotential field
+  !> @param[in,out] q       The potential vorticity field
   subroutine swe_init_vorticity_alg( config, wind, geopot, q )
 
     implicit none

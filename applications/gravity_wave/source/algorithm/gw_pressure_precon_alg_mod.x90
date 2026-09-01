@@ -20,6 +20,7 @@
 
 module gw_pressure_precon_alg_mod
 
+  use config_mod,              only : config_type
   use fs_continuity_mod,       only : W3
   use vector_mod,              only : abstract_vector_type
   use r_solver_field_mod,      only : r_solver_field_type
@@ -36,8 +37,6 @@ module gw_pressure_precon_alg_mod
                                only : abstract_hierarchical_preconditioner_type
   use sci_r_solver_field_vector_mod, &
                                only : r_solver_field_vector_type
-
-  use config_mod, only: config_type
 
   ! Columnwise operator kernels
   use sci_columnwise_op_app_kernel_mod, &
@@ -85,7 +84,8 @@ contains
 
   !> @brief Construct a <code> gw_pressure_preconditioner_type</code> object.
   !>
-  !> @param[in] level Multigrid level
+  !> @param[in] config  Application configuration object
+  !> @param[in] level   Multigrid level
   !> @return self The constructed preconditioner object
   function gw_pressure_preconditioner_constructor(config, level) result(self)
 
@@ -119,7 +119,8 @@ contains
 
   !> @brief Build the vertical Helmholtz matrix \f$H_z\f$ in CMA representation.
   !>
-  !> @param[in,out] self Instance of type gw_pressure_preconditioner_type
+  !> @param[in,out] self   Instance of type gw_pressure_preconditioner_type
+  !> @param[in]     config Application configuration object
   subroutine build_Hz(self, config)
 
     use sci_fem_constants_mod,                  only : get_qr_fe
@@ -244,19 +245,18 @@ contains
 
     ! W3 mass matrix
     call mm_w3%initialise( w3_fs, w3_fs )
-    call invoke( name="create_W3_mass_matrix",                                  &
-                 compute_mass_matrix_kernel_w_scalar_type(mm_w3, chi, panel_id, &
-                                                          extend_mesh, &
-geometry, topology, coord_system, scaled_radius, &
-qr) )
+    call invoke( name="create_W3_mass_matrix",                              &
+                 compute_mass_matrix_kernel_w_scalar_type(                  &
+                     mm_w3, chi, panel_id, extend_mesh, geometry, topology, &
+                     coord_system, scaled_radius, qr) )
     mm_w3_inv => get_inverse_mass_matrix_r_solver(config, mesh, W3)
 
     ! Take a copy of the vertical mass matrix since we need to apply the BCs
     call mm%initialise( w2v_fs, w2v_fs )
     call mm_w2v_noBC%initialise( mm%get_fs_to(), mm%get_fs_from() )
-    call invoke( compute_mass_matrix_kernel_w2_type(mm, chi, panel_id,&
-geometry, topology, coord_system, scaled_radius, &
- qr), &
+    call invoke( compute_mass_matrix_kernel_w2_type(                      &
+                     mm, chi, panel_id, geometry, topology, coord_system, &
+                     scaled_radius, qr),                                  &
                  operator_setval_x_kernel_type( mm_w2v_noBC, mm ) )
     mm_w2v = mm_w2v_noBC%deep_copy()
     ! Now apply BCs
@@ -265,9 +265,9 @@ geometry, topology, coord_system, scaled_radius, &
     ! Get horizontal velocity mass matrix
     call mm%initialise( w2h_fs, w2h_fs )
     call mm_w2h%initialise( mm%get_fs_to(), mm%get_fs_from() )
-    call invoke( compute_mass_matrix_kernel_w2_type(mm, chi, panel_id, &
-geometry, topology, coord_system, scaled_radius, &
-qr), &
+    call invoke( compute_mass_matrix_kernel_w2_type(                      &
+                     mm, chi, panel_id, geometry, topology, coord_system, &
+                     scaled_radius, qr),                                  &
                  operator_setval_x_kernel_type( mm_w2h, mm ) )
 
     ! Construct weak gradient as transpose of divergence
@@ -364,16 +364,17 @@ qr), &
   !> @details Apply the vertical preconditioner \f$y = H_z^{-1}x\f$.
   !>
   !> @param[in,out] self Instance of type gw_pressure_preconditioner_type
-  !> @param[in] x Field vector containing the right hand side of the pressure
-  !> @param[in,out] y Field vector containing the solution
+  !> @param[in]     config  Application configuration object
+  !> @param[in]     x       Field vector containing the right hand side of the pressure
+  !> @param[in,out] y       Field vector containing the solution
   subroutine apply_gw_pressure_preconditioner(self, config, x, y)
 
     implicit none
     class(gw_pressure_preconditioner_type), intent(inout) :: self
 
-type(config_type), intent(in) :: config
-    class(abstract_vector_type),            intent(in)    :: x
-    class(abstract_vector_type),            intent(inout) :: y
+    type(config_type),           intent(in)    :: config
+    class(abstract_vector_type), intent(in)    :: x
+    class(abstract_vector_type), intent(inout) :: y
 
     ! Workaround for PSyclone to get pointers of the correct type for x and y
     type(r_solver_field_type), pointer :: x_vec => null(), y_vec => null()
@@ -426,8 +427,9 @@ type(config_type), intent(in) :: config
   !> @brief Construct a coarsened version of the preconditioner on the next
   !!        level of the multigrid hierarchy.
   !>
-  !> @param[in,out] self Instance of type gw_pressure_preconditioner_type
-  !> @param[in,out] other Coarsed version on next multigrid level
+  !> @param[in,out] self    Instance of type gw_pressure_preconditioner_type
+  !> @param[in]     config  Application configuration object
+  !> @param[in,out] other   Coarsed version on next multigrid level
   subroutine coarsen_gw_pressure_preconditioner(self, config, other)
 
     implicit none

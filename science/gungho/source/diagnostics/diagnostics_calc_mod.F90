@@ -12,6 +12,7 @@
 !-------------------------------------------------------------------------------
 module diagnostics_calc_mod
 
+  use config_mod,                    only: config_type
   use constants_mod,                 only: i_def, r_def, str_max_filename, l_def
   use diagnostic_alg_mod,            only: divergence_diagnostic_alg,   &
                                            hydbal_diagnostic_alg,       &
@@ -44,9 +45,6 @@ module diagnostics_calc_mod
   use sci_geometric_constants_mod,   only: get_coordinates,      &
                                            get_panel_id
 
-  ! Object types
-  use config_mod, only: config_type
-
   implicit none
   private
   public :: write_divergence_diagnostic, &
@@ -61,17 +59,19 @@ contains
 !!
 !!  @details  Handles divergence diagnostic processing
 !!
+!!> @param[in] config      Application configuration object
+!!> @param[in] mesh        Mesh
 !!> @param[in] u_field     The u field
 !!> @param[in] ts          Timestep
-!!> @param[in] mesh        Mesh
+
 !-------------------------------------------------------------------------------
 
 subroutine write_divergence_diagnostic(config, mesh, u_field, clock)
 
   implicit none
 
-  type(config_type), intent(in)          :: config
-  type(mesh_type),   intent(in), pointer :: mesh
+  type(config_type), intent(in) :: config
+  type(mesh_type),   intent(in) :: mesh
 
   type(field_type),        intent(in)    :: u_field
   class(model_clock_type), intent(in)    :: clock
@@ -114,9 +114,10 @@ end subroutine write_divergence_diagnostic
 !!
 !!  @details  Handles hydrostatic balance diagnostic processing
 !!
+!!> @param[in] config        Application configuration object
+!!> @param[in] mesh          Mesh
 !!> @param[in] theta_field   The theta field
 !!> @param[in] exner_field   The exner field
-!!> @param[in] mesh          Mesh
 !-------------------------------------------------------------------------------
 
 subroutine write_hydbal_diagnostic( config, mesh, theta_field, moist_dyn_field, &
@@ -126,8 +127,8 @@ subroutine write_hydbal_diagnostic( config, mesh, theta_field, moist_dyn_field, 
 
   implicit none
 
-  type(config_type), intent(in)          :: config
-  type(mesh_type),   intent(in), pointer :: mesh
+  type(config_type), intent(in) :: config
+  type(mesh_type),   intent(in) :: mesh
 
   type(field_type), intent(in)    :: theta_field
   type(field_type), intent(in)    :: moist_dyn_field(num_moist_factors)
@@ -154,6 +155,7 @@ end subroutine write_hydbal_diagnostic
 !>  @details  Calculates the 3D vorticity diagnostic and optionally outputs it.
 !!            Then calculates the vorticity on pressure levels diagnostic and
 !!            optionally outputs it.
+!> @param[in] config    Application configuration object
 !> @param[in] u_field   The wind field
 !> @param[in] exner     Exner pressure
 !> @param[in] clock     Model clock object
@@ -262,6 +264,7 @@ end subroutine write_vorticity_diagnostic
 !> @brief     Potential vorticity diagnostic processing and output.
 !> @details   Optionally calculate and output both model level and pressure
 !>            level diagnostics.
+!> @param[in] config    Application configuration object
 !> @param[in] u_field   The wind field
 !> @param[in] theta     The potential temperature field (K)
 !> @param[in] rho       The density field (kg/m3)
@@ -312,6 +315,7 @@ end subroutine write_pv_diagnostic
 !-------------------------------------------------------------------------------
 !> @brief     Potential vorticity diagnostic processing and output.
 !> @details   Optionally calculate and output model level diagnostic.
+!> @param[in] config    Application configuration object
 !> @param[in] u_field   The wind field
 !> @param[in] theta     The potential temperature field (K)
 !> @param[in] rho       The density field (kg/m3)

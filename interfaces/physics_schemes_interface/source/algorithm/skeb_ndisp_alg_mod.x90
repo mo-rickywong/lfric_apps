@@ -48,8 +48,9 @@ module skeb_ndisp_alg_mod
   !>         3)  Calculate gradients of vorticity and divergence
   !>         4)  Do Norm of gradients of vorticity and divergence
   !>         5)  Scale by k_amp
-  !>@param[in]         u            Wind on W2
-  !>@param[in,out]     ndisp        Numerical dissipation
+  !>@param[in]     config       Application configuration object
+  !>@param[in]     u            Wind on W2
+  !>@param[in,out] ndisp        Numerical dissipation
 
   subroutine skeb_ndisp_alg(config, u, ndisp)
 

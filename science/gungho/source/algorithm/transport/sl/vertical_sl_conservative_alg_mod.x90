@@ -11,6 +11,7 @@
 module vertical_sl_conservative_alg_mod
 
   ! Constants and types
+  use config_mod,                      only: config_type
   use constants_mod,                   only: r_tran, i_def, l_def
   use fs_continuity_mod,               only: W2v, W3, Wtheta
   use function_space_mod,              only: function_space_type
@@ -50,9 +51,6 @@ module vertical_sl_conservative_alg_mod
   ! Pointers to other objects
   use transport_constants_mod,         only: get_mass_matrix_r_tran, &
                                              get_inverse_mass_matrix_r_tran
-
-  ! Object types
-  use config_mod, only: config_type
 
   ! Configuration modules
   use transport_config_mod,            only: slice_order,                      &

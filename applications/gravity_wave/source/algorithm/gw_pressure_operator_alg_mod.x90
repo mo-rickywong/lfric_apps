@@ -22,6 +22,7 @@ module gw_pressure_operator_alg_mod
                                only: abstract_hierarchical_linear_operator_type
   use vector_mod,                         only: abstract_vector_type
   use r_solver_field_mod,                 only: r_solver_field_type
+  use config_mod,                         only: config_type
   use constants_mod,                      only: i_def, r_def, r_solver, l_def
   use solver_constants_mod,               only: get_inverse_mass_matrix_r_solver
   use fs_continuity_mod,                  only: W0, W2, W3, Wtheta
@@ -46,7 +47,6 @@ module gw_pressure_operator_alg_mod
                                                 b_space_wtheta
   use multigrid_mod,                      only: multigrid_function_space_chain
   use sci_mesh_enums_mod,                 only: get_mesh_enums
-  use config_mod, only: config_type
 
   implicit none
 
@@ -98,7 +98,8 @@ contains
   !!          inverse \f$ \tilde{H}_b^{-1} \f$ as well as other operators
   !!          such as div and grad for the Helmholtz operator application.
   !>
-  !> @param[in] level Multigrid level
+  !> @param[in] config  Application configuration object
+  !> @param[in] level   Multigrid level
   !> @return Instance of the Helmholtz operator
   function gw_pressure_operator_constructor(config, level) result(self)
 
@@ -128,11 +129,11 @@ contains
 
     implicit none
 
-    type(gw_pressure_operator_type)     :: self
+    type(gw_pressure_operator_type) :: self
 
-    type(config_type), intent(in) :: config
+    type(config_type),   intent(in) :: config
+    integer(kind=i_def), intent(in) :: level
 
-    integer(kind=i_def), intent(in)     :: level
     type(function_space_type), pointer  :: wu => null(), &
                                            wb => null(), &
                                            wp => null()
@@ -207,10 +208,9 @@ contains
     call M_lumped%initialise( vector_space = wb )
     call Mb_lumped_inv%initialise( vector_space = wb )
     call Mb%initialise( wb, wb )
-    call invoke( compute_mass_matrix_kernel_w_scalar_type(Mb, chi, panel_id, &
-                                                          extend_mesh,&
-geometry, topology, coord_system, scaled_radius, &
- qr),  &
+    call invoke( compute_mass_matrix_kernel_w_scalar_type(                   &
+                         Mb, chi, panel_id, extend_mesh, geometry, topology, &
+                         coord_system, scaled_radius, qr),                   &
                  setval_c( ones,     1.0_r_solver ),                         &
                  setval_c( M_lumped, 0.0_r_solver ),                         &
                  matrix_vector_kernel_type(M_lumped, ones, Mb),              &
@@ -305,9 +305,9 @@ geometry, topology, coord_system, scaled_radius, &
 
   !> @brief Apply Helmholtz operator to a pressure field to obtain \f$y=Hx\f$.
   !>
-  !> @param[in,out] self Instance of gw_pressure_operator_type
-  !> @param[in] x Field \f$x\f$ to apply operator to
-  !> @param[in,out] y Resulting field \f$y=Hx\f$ in pressure space
+  !> @param[in]     config   Application configuration object
+  !> @param[in]     x        Field \f$x\f$ to apply operator to
+  !> @param[in,out] y        Resulting field \f$y=Hx\f$ in pressure space
   subroutine apply_gw_pressure_operator(self, config, x, y)
 
     use dg_matrix_vector_kernel_mod,        only: dg_matrix_vector_kernel_type
@@ -317,9 +317,10 @@ geometry, topology, coord_system, scaled_radius, &
     implicit none
     class(gw_pressure_operator_type), intent(inout) :: self
 
-    type(config_type),      intent(in)    :: config
-    class(abstract_vector_type),      intent(in)    :: x
-    class(abstract_vector_type),      intent(inout) :: y
+    type(config_type),           intent(in)    :: config
+    class(abstract_vector_type), intent(in)    :: x
+    class(abstract_vector_type), intent(inout) :: y
+
     real(kind=r_solver) :: const
 
     type(mesh_type), pointer :: mesh => null()
@@ -384,14 +385,18 @@ geometry, topology, coord_system, scaled_radius, &
   !> @brief Return a coarsened version of the operator on the
   !!        next level of the multigrid hierarchy.
   !>
-  !> @param[in] self Instance of gw_pressure_operator_type
+  !> @param[in]     config          Application configuration object
   !> @param[in,out] coarse_operator Coarsened version of the operator on
   !!                                the next multigrid level
-  subroutine coarsen_gw_pressure_operator(self,config,coarse_operator)
+  subroutine coarsen_gw_pressure_operator(self, config, coarse_operator)
+
     use function_space_mod, only: function_space_type
+
     implicit none
+
     class(gw_pressure_operator_type), intent(in) :: self
-type(config_type), intent(in) :: config
+    type(config_type),                intent(in) :: config
+
     class(abstract_hierarchical_linear_operator_type), allocatable, intent(inout) :: coarse_operator
     allocate(coarse_operator, &
              source=gw_pressure_operator_type(config, self%level+1))

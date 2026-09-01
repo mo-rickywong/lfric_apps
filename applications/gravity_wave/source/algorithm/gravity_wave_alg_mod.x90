@@ -8,6 +8,7 @@
 !>        gravity wave equations
 module gravity_wave_alg_mod
 
+  use config_mod,                     only: config_type
   use constants_mod,                  only: i_def, r_def, l_def, &
                                             r_second, str_def,   &
                                             r_solver
@@ -67,7 +68,6 @@ module gravity_wave_alg_mod
   use timing_mod,                     only: start_timing, stop_timing, &
                                             tik, LPROF
 
-use config_mod, only: config_type
   implicit none
 
   private
@@ -105,11 +105,12 @@ contains
 
   !> @details Initialisation procedure for the timestepping algorithm
   !>          Initialises various internal fields from the prognostic fields
+  !> @param[in] config   Application configuration object
   !> @param[in] mesh     Mesh on which the model runs
   !> @param[in] wind     The 3D wind field
   !> @param[in] pressure The pressure field
   !> @param[in] buoyancy The buoyancy field
-  subroutine gravity_wave_alg_init( config, mesh, wind, pressure, buoyancy)
+  subroutine gravity_wave_alg_init(config, mesh, wind, pressure, buoyancy)
 
     use quadrature_xyoz_mod,           only: quadrature_xyoz_type
     use quadrature_rule_gaussian_mod,  only: quadrature_rule_gaussian_type
@@ -160,9 +161,8 @@ contains
 
     implicit none
 
-    ! Mesh
-    type(config_type), intent(in)          :: config
-    type(mesh_type),   intent(in), pointer :: mesh
+    type(config_type), intent(in) :: config
+    type(mesh_type),   intent(in) :: mesh
 
     ! Prognostic fields
     type( field_type ), intent( in ) :: wind, pressure, buoyancy

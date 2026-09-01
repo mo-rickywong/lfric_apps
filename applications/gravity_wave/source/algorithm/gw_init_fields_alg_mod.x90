@@ -12,6 +12,7 @@ module gw_init_fields_alg_mod
                                                LOG_LEVEL_INFO,    &
                                                LOG_LEVEL_TRACE,   &
                                                LOG_LEVEL_ERROR
+  use config_mod,                        only: config_type
   use constants_mod,                     only: r_def, i_def, &
                                                radians_to_degrees
 
@@ -40,7 +41,7 @@ module gw_init_fields_alg_mod
 
   ! Handles
   use fs_continuity_mod,                 only: W0, W2, W3, Wtheta
-use config_mod, only: config_type
+
   implicit none
 
   private
@@ -49,6 +50,7 @@ use config_mod, only: config_type
 contains
   !> @details An algorithm for initialising prognostic fields for
   !>          all solvers.
+  !> @param[in]  config       Application configuration object
   !> @param[inout] prognostics  The prognostic variables
   !>                            (wind buoyancy and pressure)
   subroutine gw_init_fields_alg(config, wind, pressure, buoyancy )

@@ -91,6 +91,7 @@ module mixed_schur_preconditioner_alg_mod
   use base_mesh_config_mod,            only: prime_mesh_name
   use vector_mod,                      only: abstract_vector_type
   use r_solver_field_mod,              only: r_solver_field_type
+  use config_mod,                      only: config_type
   use constants_mod,                   only: i_def, r_def, r_solver
   use sci_geometric_constants_mod,     only: get_face_selector_ew, &
                                              get_face_selector_ns
@@ -122,7 +123,6 @@ module mixed_schur_preconditioner_alg_mod
   use boundaries_config_mod,           only: limited_area
   use mixed_solver_config_mod,         only: eliminate_variables,          &
                                              eliminate_variables_analytic
-  use config_mod, only: config_type
 
   implicit none
 
@@ -241,16 +241,18 @@ contains
   !!          3. Reconstruct velocity and buoyancy from pressure
   !>
   !> @param[in,out] self Instance of type mixed_schur_preconditioner_type
-  !> @param[in] x Field vector containing the residuals
-  !!              \f$(\textbf{R}_u, R_t, R_r, R_t)\f$
-  !> @param[in,out] y Field vector containing the solution
-  !!                  \f$(\textbf{U},\theta,\rho,\Pi)\f$ to be calculated
+  !> @param[in]     config  Application configuration object
+  !> @param[in]     x       Field vector containing the residuals
+  !!                        \f$(\textbf{R}_u, R_t, R_r, R_t)\f$
+  !> @param[in,out] y       Field vector containing the solution
+  !!                        \f$(\textbf{U},\theta,\rho,\Pi)\f$ to be calculated
   subroutine apply_mixed_schur_preconditioner(self, config, x, y)
     implicit none
     class(mixed_schur_preconditioner_type), intent(inout) :: self
-type(config_type), intent(in) :: config
-    class(abstract_vector_type),            intent(in)    :: x
-    class(abstract_vector_type),            intent(inout) :: y
+
+    type(config_type),           intent(in) :: config
+    class(abstract_vector_type), intent(in)    :: x
+    class(abstract_vector_type), intent(inout) :: y
     integer(tik)                                          :: id_precon, &
                                                              id_solve
 
@@ -301,8 +303,9 @@ type(config_type), intent(in) :: config
   !!          for the Helmholtz equation.
   !>
   !> @param[in,out] self Instance of type mixed_schur_preconditioner_type
-  !> @param[in]     rhs0 Initial residuals \f$(\textbf{R}_u,R_t,R_d,R_p)\f$
-  !!                     of the mixed system
+  !> @param[in]     config  Application configuration object
+  !> @param[in]     rhs0    Initial residuals \f$(\textbf{R}_u,R_t,R_d,R_p)\f$
+  !!                        of the mixed system
   subroutine build_pressure_rhs(self, config, rhs0)
 
     use dg_matrix_vector_kernel_mod,      only: dg_matrix_vector_kernel_type
@@ -315,10 +318,10 @@ type(config_type), intent(in) :: config
 
     implicit none
 
-    type(config_type), intent(in) :: config
-
     class( mixed_schur_preconditioner_type ),   intent( inout ) :: self
-    type( r_solver_field_vector_type ), target, intent(in)      :: rhs0
+
+    type(config_type),                          intent(in) :: config
+    type( r_solver_field_vector_type ), target, intent(in) :: rhs0
 
     type( r_solver_operator_type ), pointer :: m3_rho_star,    &
                                                ptheta2,        &
@@ -334,7 +337,7 @@ type(config_type), intent(in) :: config
     type( r_solver_field_type ),  pointer   :: w2_mask, &
                                                w3_mask
     integer( kind=i_def )                   :: mesh_id
-    type(mesh_type), pointer                  :: mesh
+    type(mesh_type), pointer                :: mesh
     integer( kind=i_def )                   :: element_order_h
     integer( kind=i_def )                   :: element_order_v
     type( r_solver_field_type ),  pointer   :: rhs_uv, &
@@ -435,7 +438,8 @@ type(config_type), intent(in) :: config
   !!          \f$\rho\f$ and potential temperature \f$\theta\f$.
   !>
   !> @param[in,out] self Instance of type mixed_schur_preconditioner_type
-  !> @param[in,out] state Solution \f$(\textbf{U},\theta,\rho,\Pi)\f$ of the mixed system
+  !> @param[in]     config  Application configuration object
+  !> @param[in,out] state   Solution \f$(\textbf{U},\theta,\rho,\Pi)\f$ of the mixed system
   subroutine back_substitute(self, config, state)
 
     use dg_inc_matrix_vector_kernel_mod, only: dg_inc_matrix_vector_kernel_type

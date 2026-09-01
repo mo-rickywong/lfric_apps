@@ -185,7 +185,7 @@ contains
 
     implicit none
 
-    type(mesh_type), pointer, intent(in) :: mesh
+    type(mesh_type), intent(in) :: mesh
 
     integer(kind=i_def) :: i, j
     type(function_space_type), pointer     :: w2_fs => null()

@@ -379,6 +379,7 @@ contains
   !!            ||X1-X2||/||X1|| = 0.00000000E+00
   !!            test           apply vert divergence : PASS
   !>
+  !> @param[in] config Application configuration object
   !> @param[in] x1 First field to compare
   !> @param[in] x2 Second field to compare
   !> @param[in] tolerance Tolerance \f$\epsilon\f$
@@ -583,6 +584,7 @@ contains
   !> @details Apply the (vertical-only) velocity mass matrix,
   !!          both as a LMA and as a CMA and compare the results.
   !>
+  !> @param[in] config    Application configuration object
   !> @param[in] tolerance Error tolerance for comparison
   subroutine test_cma_apply_mass_v(config, tolerance)
 
@@ -648,6 +650,7 @@ contains
   !!          Apply the operator and compare to the separate application
   !!          of the two operators in LMA representation.
   !>
+  !> @param[in] config    Application configuration object
   !> @param[in] tolerance Error tolerance for comparison
   subroutine test_cma_multiply_div_v_mass_v(config, tolerance)
 
@@ -697,6 +700,7 @@ contains
   !!          operator and compare to the separate application of the two
   !!          operators in LMA representation.
   !>
+  !> @param[in] config    Application configuration object
   !> @param[in] tolerance Error tolerance for comparison
   subroutine test_cma_multiply_grad_v_div_v(config, tolerance)
 
@@ -748,6 +752,7 @@ contains
   !!          representation. Compare the result of applying \f$A\f$
   !!          to applying the operators individually.
   !>
+  !> @param[in] config    Application configuration object
   !> @param[in] tolerance Error tolerance for comparison
   subroutine test_cma_add(config, tolerance)
 
@@ -791,6 +796,7 @@ contains
   !!          to a given input field \f$u_{in}\f$. Then compare \f$u\f$ and
   !!          \f$u_{in}\f$ which should be identical.
   !>
+  !> @param[in] config    Application configuration object
   !> @param[in] tolerance Error tolerance for comparison
   subroutine test_cma_apply_inv(config, tolerance)
 
@@ -837,6 +843,7 @@ contains
   !!
   !!          This test currently only works reliably on one processor.
   !>
+  !> @param[in] config    Application configuration object
   !> @param[in] tolerance Error tolerance for comparison
   subroutine test_cma_diag_DhMDhT(config, tolerance)
 

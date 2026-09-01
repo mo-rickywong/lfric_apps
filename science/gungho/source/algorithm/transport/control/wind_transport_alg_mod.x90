@@ -7,6 +7,7 @@
 
 module wind_transport_alg_mod
 
+  use config_mod,                     only: config_type
   use constants_mod,                  only: i_def, r_def, l_def
   use sci_dg_convert_hdiv_field_kernel_mod,                                    &
                                       only: dg_convert_hdiv_field_kernel_type
@@ -44,7 +45,6 @@ module wind_transport_alg_mod
   use transport_field_mod,            only: transport_field
   use transport_metadata_mod,         only: transport_metadata_type
 
-use config_mod, only: config_type
   implicit none
 
   private
@@ -104,11 +104,14 @@ contains
     type(function_space_type),  pointer :: w2b_fs
     logical(kind=l_def)                 :: optimised_conversion
     integer(tik)                        :: id_to, id_from
-type(config_type), pointer :: config
+
+    type(config_type), pointer :: config
+
     k_h = get_element_order_h_transport()
     k_v = get_element_order_v_transport()
 
-config => transport_controller%get_config()
+    config => transport_controller%get_config()
+
     ! ------------------------------------------------------------------------ !
     ! Semi-implicit formulation
     ! ------------------------------------------------------------------------ !

@@ -8,6 +8,7 @@
 module adjt_semi_implicit_solver_step_alg_mod
 
   use adj_solver_lookup_cache_mod,      only: adj_solver_lookup_cache_type
+  use config_mod,                       only: config_type
   use constants_mod,                    only: i_def, r_def, l_def, r_solver, EPS
   use log_mod,                          only: log_event,         &
                                               log_scratch_space, &
@@ -35,7 +36,7 @@ module adjt_semi_implicit_solver_step_alg_mod
   use function_space_mod,               only: function_space_type
   use field_array_mod,                  only: field_array_type
   use field_collection_mod,             only: field_collection_type
-use config_mod, only: config_type
+
   implicit none
 
   private
@@ -57,7 +58,7 @@ contains
     implicit none
 
     type(modeldb_type),         target, intent(inout) :: modeldb
-    type(mesh_type),           pointer, intent(in)    :: mesh
+    type(mesh_type),                    intent(in)    :: mesh
     type(model_clock_type),             intent(in)    :: model_clock
     type(adj_solver_lookup_cache_type), intent(in)    :: adj_lookup_table_cache
 
@@ -234,6 +235,7 @@ contains
   end subroutine adjt_semi_implicit_solver_step_alg
 
   !> @brief Actual code for adjoint test for semi_implicit_solver_alg_mod subroutine step
+  !> @param[in]     config                   Application configuration object
   !> @param[in,out] state                    Prognostic state
   !> @param[in,out] rhs                      Prognostic rhs
   !> @param[in,out] dry_flux_solver          Dry flux solver
