@@ -54,7 +54,7 @@ module init_from_controller_alg_mod
     implicit none
 
     ! Arguments
-    type(mesh_type),                              pointer, intent(in) :: mesh
+    type(mesh_type),                                       intent(in) :: mesh
     integer(kind=i_def),                                   intent(in) :: num_steps
     type(r_tran_field_type), dimension(:), allocatable, intent(inout) :: flux_inp
     type(transport_controller_type),                    intent(inout) :: transport_controller
