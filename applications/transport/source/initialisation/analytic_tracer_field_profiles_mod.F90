@@ -36,7 +36,6 @@ use initial_tracer_field_config_mod, &
                                        field_max, field_background
 use mesh_mod, only: geometry_spherical
 
-use base_mesh_config_mod,       only : geometry
 use planet_config_mod,          only : p_zero, Rd, kappa, scaled_radius
 use extrusion_config_mod,       only : domain_height
 
@@ -83,13 +82,16 @@ end function hadley_like_dcmip
 
 
 !> @brief Compute an analytic tracer field.
+!> @param[in] geometry     Enumeration value for geometry
 !> @param[in] chi          Position in physical coordinates
 !> @param[in] choice       Integer defining which specified formula to use
 !> @param[in] domain_max_x Max. domain extent in x-direction.
 !> @result tracer The result tracer field
-function analytic_tracer_field(chi, choice, domain_max_x) result(tracer)
+function analytic_tracer_field(geometry, chi, choice, domain_max_x) result(tracer)
 
   implicit none
+
+  integer,          intent(in) :: geometry
   real(kind=r_def), intent(in) :: chi(3)
   integer,          intent(in) :: choice
   real(kind=r_def), intent(in) :: domain_max_x

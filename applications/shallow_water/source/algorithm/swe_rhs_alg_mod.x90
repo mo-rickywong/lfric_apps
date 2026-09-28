@@ -37,7 +37,6 @@ module swe_rhs_alg_mod
   use quadrature_xyoz_mod,            only: quadrature_xyoz_type
 
   ! Configuration Options
-  use base_mesh_config_mod,           only: geometry
   use finite_element_config_mod,      only: element_order_h, element_order_v
   use formulation_config_mod,         only: rotating
   use shallow_water_settings_config_mod,                                     &
@@ -151,7 +150,7 @@ contains
     call invoke( X_plus_Y( total_geopot, state%vector(isw_g), s_geopot ) )
     if ( thermal_swe ) then
       ! Thermal SWE forcing terms
-      if ( geometry == geometry_spherical ) then
+      if ( mesh%geometry() == geometry_spherical ) then
          call log_event("RHS thermal SW kernels only work for planar geometry",LOG_LEVEL_ERROR)
       else
         ! Volume integral

@@ -9,6 +9,8 @@
 module analytic_density_profiles_mod_test
 
   use constants_mod, only : i_def, r_def
+  use mesh_mod,      only : geometry_spherical
+
   use funit
 
   implicit none
@@ -113,7 +115,9 @@ contains
     real(kind=r_def) :: tol
 
     chi = (/ 2.0_r_def,3.25_r_def,4.5_r_def /)
-    rho = analytic_density(chi , test_yz_cosine_hill, 0.0_r_def)
+! geometry_spherical?????
+    rho = analytic_density(geometry_spherical, chi, &
+                           test_yz_cosine_hill, 0.0_r_def)
     if ( r_def == real64 ) then
        tol = 10.0E-12_r_def
     else

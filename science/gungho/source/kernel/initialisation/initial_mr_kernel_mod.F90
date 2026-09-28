@@ -14,9 +14,10 @@
 module initial_mr_kernel_mod
 
   use argument_mod,                  only: arg_type, func_type,       &
-                                           GH_FIELD, GH_REAL,         &
-                                           GH_SCALAR, GH_BASIS,       &
-                                           GH_WRITE, GH_READ,         &
+                                           GH_FIELD, GH_SCALAR,       &
+                                           GH_REAL, GH_INTEGER,       &
+                                           GH_BASIS, GH_WRITE,        &
+                                           GH_READ,                   &
                                            ANY_SPACE_9,               &
                                            ANY_DISCONTINUOUS_SPACE_3, &
                                            GH_EVALUATOR, CELL_COLUMN
@@ -30,7 +31,6 @@ module initial_mr_kernel_mod
   use initial_pressure_config_mod,   only: method, method_balanced
 
   ! Configuration modules
-  use base_mesh_config_mod,      only: geometry, topology
   use finite_element_config_mod, only: coord_system
   use planet_config_mod,         only: scaled_radius
 
@@ -43,13 +43,15 @@ module initial_mr_kernel_mod
   !> The type declaration for the kernel. Contains the metadata needed by the Psy layer
   type, public, extends(kernel_type) :: initial_mr_kernel_type
     private
-    type(arg_type) :: meta_args(9) = (/                                      &
+    type(arg_type) :: meta_args(11) = (/                                     &
          arg_type(GH_FIELD,   GH_REAL, GH_READ,  Wtheta),                    &
          arg_type(GH_FIELD,   GH_REAL, GH_READ,  W3),                        &
          arg_type(GH_FIELD,   GH_REAL, GH_READ,  W3),                        &
          arg_type(GH_FIELD*6, GH_REAL, GH_WRITE, Wtheta),                    &
          arg_type(GH_FIELD*3, GH_REAL, GH_READ,  ANY_SPACE_9),               &
          arg_type(GH_FIELD,   GH_REAL, GH_READ,  ANY_DISCONTINUOUS_SPACE_3), &
+         arg_type(GH_SCALAR,  GH_INTEGER, GH_READ),                          &! geometry
+         arg_type(GH_SCALAR,  GH_INTEGER, GH_READ),                          &! topology
          arg_type(GH_SCALAR,  GH_REAL, GH_READ),                             &
          arg_type(GH_SCALAR,  GH_REAL, GH_READ),                             &
          arg_type(GH_SCALAR,  GH_REAL, GH_READ)                              &
@@ -85,6 +87,8 @@ contains
   !! @param[in] chi_2 Second component of the chi coordinate field
   !! @param[in] chi_3 Third component of the chi coordinate field
   !! @param[in] panel_id A field giving the ID for mesh panels
+  !! @param[in] geometry Enumeration for the mesh geometry
+  !! @param[in] topology Enumeration for the mesh topology
   !! @param[in] p_zero Reference surface pressure
   !! @param[in] Rd Gas constant for dry air
   !! @param[in] kappa Ratio of Rd and cp
@@ -104,7 +108,7 @@ contains
   subroutine initial_mr_code(nlayers, theta, exner, rho,            &
                              mr_v, mr_cl, mr_r, mr_ci, mr_s, mr_g,  &
                              chi_1, chi_2, chi_3,                   &
-                             panel_id,                              &
+                             panel_id, geometry, topology,          &
                              p_zero, Rd, kappa,                     &
                              ndf_wtheta, undf_wtheta, map_wtheta,   &
                              ndf_w3, undf_w3, map_w3,               &
@@ -133,6 +137,8 @@ contains
     real(kind=r_def), dimension(undf_w3),     intent(in)    :: rho
     real(kind=r_def), dimension(undf_chi),    intent(in)    :: chi_1, chi_2, chi_3
     real(kind=r_def), dimension(undf_pid),    intent(in)    :: panel_id
+    integer(kind=i_def),                      intent(in)    :: geometry
+    integer(kind=i_def),                      intent(in)    :: topology
     real(kind=r_def),                         intent(in)    :: p_zero
     real(kind=r_def),                         intent(in)    :: Rd
     real(kind=r_def),                         intent(in)    :: kappa
@@ -204,7 +210,7 @@ contains
         mr_s(map_wtheta(df) + k) = 0.0_r_def
         mr_g(map_wtheta(df) + k) = 0.0_r_def
         mr_v(map_wtheta(df) + k) =  &
-          analytic_moisture(xyz, temperature_at_dof, pressure_at_dof, test)
+          analytic_moisture(geometry, xyz, temperature_at_dof, pressure_at_dof, test)
 
       end do
 
@@ -268,7 +274,7 @@ contains
         mr_s(map_wtheta(df) + k) = 0.0_r_def
         mr_g(map_wtheta(df) + k) = 0.0_r_def
         mr_v(map_wtheta(df) + k) =  &
-          analytic_moisture(xyz, temperature_at_dof, pressure_at_dof, test)
+          analytic_moisture(geometry, xyz, temperature_at_dof, pressure_at_dof, test)
       end do
 
     end if

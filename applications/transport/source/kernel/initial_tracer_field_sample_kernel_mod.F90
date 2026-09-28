@@ -150,7 +150,7 @@ contains
         else
           ! Set tracer field based on namelist
           tracer(map_trc(df) + k) = &
-              analytic_tracer_field( xyz, test, domain_max_x )
+              analytic_tracer_field( geometry, xyz, test, domain_max_x )
         end if
 
       end do

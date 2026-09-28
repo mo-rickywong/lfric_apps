@@ -15,6 +15,7 @@ module analytic_orography_field_spherical_mod_test
   use ugrid_mesh_data_mod,        only : ugrid_mesh_data_type
 
   use mesh_mod, only: mesh_type, geometry_spherical, topology_periodic
+  use finite_element_config_mod,  only :  coord_system_xyz
 
   use funit
 
@@ -40,8 +41,10 @@ module analytic_orography_field_spherical_mod_test
   character(str_def), parameter   :: mesh_name   = 'unit_test'
   character(len=str_max_filename) :: file_prefix = "data/mesh_C16"
 
-  real(r_def), parameter :: radius        = 6371229.0_r_def
-  real(r_def), parameter :: domain_height = 10000.0_r_def
+  real(r_def), parameter :: radius         = 6371229.0_r_def
+  real(r_def), parameter :: domain_height  = 10000.0_r_def
+  real(r_def), parameter :: scaling_factor = 125.0_r_def
+  real(r_def), parameter :: scaled_radius  = scaling_factor*radius
 
   integer(i_def), parameter :: nlayers     = 10_i_def
   integer(i_def), parameter :: total_ranks = 1_i_def
@@ -206,6 +209,8 @@ contains
     real(r_def)               :: eta(0:nlayers)
     real(r_def)               :: vertex_coords_2d(3,1), chi_surf, chi_test
 
+    real(r_def), parameter :: scaling_factor = 6371229.0_r_def
+
     ! Add global mesh
     call ugrid_mesh_data%read_from_file(trim(file_prefix)//'.nc', mesh_name)
     global_mesh = global_mesh_type( ugrid_mesh_data )
@@ -271,7 +276,11 @@ contains
                                            height_domain_top,                  &
                                            chi_1_in, chi_2_in, chi_3_in,       &
                                            chi_1_cart, chi_2_cart, chi_3_cart, &
-                                           panel_id )
+                                           panel_id, &
+                                           geometry_spherical, &
+                                           topology_periodic, &
+                                           coord_system_xyz, &
+                                           scaled_radius )
     ! Transform coordinate field back to (long, lat, r) for comparison
     do i = 1, undf
       call xyz2llr(chi_1_cart(i), chi_2_cart(i), chi_3_cart(i), &

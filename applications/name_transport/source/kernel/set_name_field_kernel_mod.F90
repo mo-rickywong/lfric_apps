@@ -173,7 +173,7 @@ subroutine set_name_field_code(nlayers, tracer,                        &
                         xyz(1), xyz(2), xyz(3) )
 
           ! Set tracer field based on namelist
-          tracer_ref = analytic_name_field(xyz, test, domain_max_x)
+          tracer_ref = analytic_name_field(geometry, xyz, test, domain_max_x)
 
           integrand =  trc_basis(1,df1,qp1,qp2) * tracer_ref * dj(qp1,qp2)
           rhs_e(df1) = rhs_e(df1) + wqp_h(qp1)*wqp_v(qp2)*integrand

@@ -16,6 +16,7 @@
 !-------------------------------------------------------------------------------
 module assign_orography_field_mod
 
+  use config_mod,                     only : config_type
   use constants_mod,                  only : r_def, i_def, l_def
   use orography_config_mod,           only : orog_init_option,          &
                                              orog_init_option_analytic, &
@@ -39,12 +40,7 @@ module assign_orography_field_mod
   use fs_continuity_mod,              only : W0, Wchi
   use function_space_mod,             only : BASIS
 
-  ! Configuration modules
-  use base_mesh_config_mod,      only: geometry, topology
-  use finite_element_config_mod, only: coord_system, &
-                                       coord_order,  &
-                                       coord_system_xyz
-  use planet_config_mod,         only: scaled_radius
+  use finite_element_config_mod, only: coord_system_xyz
 
   implicit none
 
@@ -66,7 +62,9 @@ module assign_orography_field_mod
                                             ndf_pid, undf_pid, map_pid,    &
                                             domain_surface, domain_height, &
                                             chi_1_in, chi_2_in, chi_3_in,  &
-                                            chi_1, chi_2, chi_3, panel_id)
+                                            chi_1, chi_2, chi_3, panel_id, &
+                                            geometry, topology,            &
+                                            coord_system, scaled_radius)
 
       import :: i_def, r_def
 
@@ -83,6 +81,10 @@ module assign_orography_field_mod
       real(kind=r_def),    intent(inout) :: chi_2(undf_chi)
       real(kind=r_def),    intent(inout) :: chi_3(undf_chi)
       real(kind=r_def),    intent(in)    :: panel_id(undf_pid)
+      integer(kind=i_def), intent(in)    :: geometry
+      integer(kind=i_def), intent(in)    :: topology
+      integer(kind=i_def), intent(in)    :: coord_system
+      real(kind=r_def),    intent(in)    :: scaled_radius
 
     end subroutine analytic_orography_interface
 
@@ -136,15 +138,17 @@ contains
   !> routines calculate analytic orography from horizontal coordinates or else
   !> use the surface_altitude field and then update the vertical coordinate.
   !>
+  !> @param[in]     config              Application configuration object
+  !> @param[in]     mesh                Mesh to apply orography to
   !> @param[in,out] chi_inventory       Contains all of the model's coordinate
   !!                                    fields, itemised by mesh
   !> @param[in]     panel_id_inventory  Contains all of the model's panel ID
   !!                                    fields, itemised by mesh
-  !> @param[in]     mesh                Mesh to apply orography to
   !> @param[in]     surface_altitude    Field containing the surface altitude
   !=============================================================================
-  subroutine assign_orography_field(chi_inventory, panel_id_inventory,         &
-                                    mesh, surface_altitude)
+  subroutine assign_orography_field( config, mesh, &
+                                     chi_inventory, panel_id_inventory, &
+                                     surface_altitude )
 
     use inventory_by_mesh_mod,          only : inventory_by_mesh_type
     use field_mod,                      only : field_type, field_proxy_type
@@ -157,10 +161,13 @@ contains
 
     implicit none
 
+    type(config_type), intent(in) :: config
+    type(mesh_type),   intent(in) :: mesh
+
     ! Arguments
     type(inventory_by_mesh_type), intent(inout) :: chi_inventory
     type(inventory_by_mesh_type), intent(in)    :: panel_id_inventory
-    type(mesh_type),     pointer, intent(in)    :: mesh
+
 
     ! We keep the surface_altitude as an optional argument since it is
     ! not needed for miniapps that only want analytic orography
@@ -188,11 +195,17 @@ contains
     real(kind=r_def),    pointer :: nodes(:,:)
     integer(kind=i_def)          :: dim_sf, df, df_sf, depth
 
+    integer(i_def) :: coord_system
+    real(r_def)    :: scaled_radius
+
     ! Procedure pointer
     procedure(analytic_orography_interface), pointer :: analytic_orography => null()
     procedure(ancil_orography_interface),    pointer :: ancil_orography => null()
 
     real(kind=r_def), allocatable :: basis_sf_on_chi(:,:,:)
+
+    coord_system  = config%finite_element%coord_system()
+    scaled_radius = config%planet%scaled_radius()
 
     call chi_inventory%get_field_array(mesh, chi)
     call panel_id_inventory%get_field(mesh, panel_id)
@@ -261,7 +274,8 @@ contains
                 chi_in_proxy(1)%data, chi_in_proxy(2)%data,                    &
                 chi_in_proxy(3)%data,                                          &
                 chi_proxy(1)%data, chi_proxy(2)%data, chi_proxy(3)%data,       &
-                panel_id_proxy%data                                            &
+                panel_id_proxy%data, mesh%geometry(), mesh%topology(),         &
+                coord_system, scaled_radius                                    &
         )
       end do
 
@@ -374,13 +388,19 @@ contains
   !> @param[in,out] chi_2          2nd coordinate field in Wchi (output)
   !> @param[in,out] chi_3          3rd coordinate field in Wchi (output)
   !> @param[in]     panel_id       Field giving the ID for mesh panels
+  !> @param[in]     geometry
+  !> @param[in]     topology
+  !> @param[in]     coord_system
+  !> @param[in]     scaled_radius
   !=============================================================================
   subroutine analytic_orography_spherical_xyz(nlayers,                         &
                                               ndf_chi, undf_chi, map_chi,      &
                                               ndf_pid, undf_pid, map_pid,      &
                                               domain_surface, domain_height,   &
                                               chi_1_in, chi_2_in, chi_3_in,    &
-                                              chi_1, chi_2, chi_3, panel_id)
+                                              chi_1, chi_2, chi_3, panel_id,   &
+                                              geometry, topology,              &
+                                              coord_system, scaled_radius )
 
     implicit none
 
@@ -395,6 +415,12 @@ contains
     real(kind=r_def),    intent(inout) :: chi_1(undf_chi), chi_2(undf_chi)
     real(kind=r_def),    intent(inout) :: chi_3(undf_chi)
     real(kind=r_def),    intent(in)    :: panel_id(undf_pid)
+
+    integer(i_def), intent(in) :: geometry
+    integer(i_def), intent(in) :: topology
+    integer(i_def), intent(in) :: coord_system
+    real(r_def),    intent(in) :: scaled_radius
+
     ! Internal variables
     integer(kind=i_def) :: k, df, dfk
     real(kind=r_def)    :: chi_3_r
@@ -469,6 +495,10 @@ contains
   !> @param[in,out] chi_2          2nd coordinate field in Wchi (output)
   !> @param[in,out] chi_3          3rd coordinate field in Wchi (output)
   !> @param[in]     panel_id       Field giving the ID for mesh panels
+  !> @param[in]     geometry
+  !> @param[in]     topology
+  !> @param[in]     coord_system
+  !> @param[in]     scaled_radius
   !=============================================================================
   subroutine analytic_orography_spherical_native(nlayers,                      &
                                                  ndf_chi, undf_chi, map_chi,   &
@@ -477,7 +507,8 @@ contains
                                                  domain_height,                &
                                                  chi_1_in, chi_2_in, chi_3_in, &
                                                  chi_1, chi_2, chi_3,          &
-                                                 panel_id)
+                                                 panel_id, geometry, topology, &
+                                                 coord_system, scaled_radius)
 
     implicit none
 
@@ -492,6 +523,12 @@ contains
     real(kind=r_def),    intent(inout) :: chi_1(undf_chi), chi_2(undf_chi)
     real(kind=r_def),    intent(inout) :: chi_3(undf_chi)
     real(kind=r_def),    intent(in)    :: panel_id(undf_pid)
+
+    integer(i_def), intent(in) :: geometry
+    integer(i_def), intent(in) :: topology
+    integer(i_def), intent(in) :: coord_system
+    real(r_def),    intent(in) :: scaled_radius
+
     ! Internal variables
     integer(kind=i_def) :: k, df, dfk, ipanel
     real(kind=r_def)    :: surface_height, domain_depth
@@ -561,6 +598,10 @@ contains
   !> @param[in,out] chi_2          2nd coordinate field in Wchi (output)
   !> @param[in,out] chi_3          3rd coordinate field in Wchi (output)
   !> @param[in]     panel_id       Field giving the ID for mesh panels
+  !> @param[in]     geometry
+  !> @param[in]     topology
+  !> @param[in]     coord_system
+  !> @param[in]     scaled_radius
   !=============================================================================
   subroutine analytic_orography_cartesian(nlayers,                             &
                                           ndf_chi, undf_chi, map_chi,          &
@@ -569,7 +610,8 @@ contains
                                           domain_height,                       &
                                           chi_1_in, chi_2_in, chi_3_in,        &
                                           chi_1, chi_2, chi_3,                 &
-                                          panel_id)
+                                          panel_id, geometry, topology,        &
+                                          coord_system, scaled_radius)
 
     implicit none
 
@@ -584,6 +626,11 @@ contains
     real(kind=r_def),    intent(inout) :: chi_1(undf_chi), chi_2(undf_chi)
     real(kind=r_def),    intent(inout) :: chi_3(undf_chi)
     real(kind=r_def),    intent(in)    :: panel_id(undf_pid)
+
+    integer(i_def), intent(in) :: geometry
+    integer(i_def), intent(in) :: topology
+    integer(i_def), intent(in) :: coord_system
+    real(r_def),    intent(in) :: scaled_radius
 
     ! Internal variables
     integer(kind=i_def) :: k, df, dfk

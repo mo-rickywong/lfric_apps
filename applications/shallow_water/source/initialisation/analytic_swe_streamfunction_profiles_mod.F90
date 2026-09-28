@@ -19,7 +19,6 @@ module analytic_swe_streamfunction_profiles_mod
   use mesh_mod, only: geometry_spherical
 
   ! Configuration
-  use base_mesh_config_mod,   only: geometry
   use planet_config_mod,      only: scaled_radius, scaled_omega
   use shallow_water_settings_config_mod,                   &
                               only: swe_test_swe_galewsky, &
@@ -35,9 +34,10 @@ contains
   !> @brief Compute an analytic streamfunction field for the shallow water miniapp.
   !> @param[in] chi Position in physical coordinates
   !> @result    psi The result streamfunction field
-  function analytic_swe_streamfunction(chi, choice) result(psi)
+  function analytic_swe_streamfunction(geometry, chi, choice) result(psi)
 
     implicit none
+    integer,          intent(in) :: geometry
     real(kind=r_def), intent(in) :: chi(3)
     integer,          intent(in) :: choice
     real(kind=r_def)             :: psi(3)

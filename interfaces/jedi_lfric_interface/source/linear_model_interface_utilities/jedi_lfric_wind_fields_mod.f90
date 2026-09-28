@@ -13,7 +13,6 @@
 module jedi_lfric_wind_fields_mod
 
   use config_mod,                    only : config_type
-  use base_mesh_config_mod,          only : geometry, topology
   use constants_mod,                 only : str_def, i_def
   use field_collection_mod,          only : field_collection_type
   use field_mod,                     only : field_type

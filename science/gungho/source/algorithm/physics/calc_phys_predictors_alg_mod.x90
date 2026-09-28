@@ -12,6 +12,7 @@ module calc_phys_predictors_alg_mod
   use field_mod,                only: field_type
   use field_collection_mod,     only: field_collection_type
   use derived_config_mod,       only: bundle_size
+  use mesh_mod,                 only: mesh_type, topology_non_periodic
   use model_clock_mod,          only: model_clock_type
   use field_indices_mod,        only: igh_u, igh_t
   use formulation_config_mod,   only: horizontal_physics_predictor, &
@@ -26,8 +27,6 @@ module calc_phys_predictors_alg_mod
 
   use limited_area_lbc_alg_mod, only: overwrite_blending_zone
   use boundaries_config_mod,    only: limited_area, transport_boundary_depth
-  use mesh_mod,                 only: topology_non_periodic
-  use base_mesh_config_mod,     only: topology
 
   implicit none
 
@@ -78,12 +77,17 @@ subroutine calc_phys_predictors_alg( config, derived_fields, rhs_np1, rhs_adv, &
     type( field_type ), pointer :: lbc_theta => null()
 
     type( field_type ) :: du, dtheta, rhsu_np1
-    integer( tik )     :: id
+
+    type( mesh_type ), pointer :: mesh
+
+    integer( tik ) :: id
 
     if ( LPROF ) call start_timing( id, 'dynamics.phys_predictors' )
 
     call derived_fields%get_field('theta_star', theta_star)
     call derived_fields%get_field('u_star', u_star)
+
+    mesh => theta_star%get_mesh()
 
     if (use_wavedynamics) then
 
@@ -108,7 +112,7 @@ subroutine calc_phys_predictors_alg( config, derived_fields, rhs_np1, rhs_adv, &
       call rhsu_np1%field_final()
       call du%field_final()
 
-      if ( limited_area .and. topology == topology_non_periodic ) then
+      if ( limited_area .and. mesh%topology() == topology_non_periodic ) then
 
         ! After advection, values in the lateral boundary rim are overwritten
         ! by the LBC data, to a depth given by transport_boundary_depth. This

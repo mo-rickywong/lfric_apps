@@ -171,7 +171,7 @@ subroutine set_exner_code(nlayers,                                    &
                        coord_system, scaled_radius,     &
                        xyz(1), xyz(2), xyz(3) )
 
-          exner_ref = analytic_pressure(xyz, test, time)
+          exner_ref = analytic_pressure(geometry, xyz, test, time)
 
           integrand =  w3_basis(1,df1,qp1,qp2) * exner_ref * dj(qp1,qp2)
           rhs_e(df1) = rhs_e(df1) + wqp_h(qp1)*wqp_v(qp2)*integrand

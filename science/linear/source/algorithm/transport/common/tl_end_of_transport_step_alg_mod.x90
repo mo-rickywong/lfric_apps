@@ -8,7 +8,6 @@
 
 module tl_end_of_transport_step_alg_mod
 
-  use base_mesh_config_mod,           only: topology
   use boundaries_config_mod,          only: limited_area
   use config_mod,                     only: config_type
   use constants_mod,                  only: i_def, r_tran, l_def
@@ -72,6 +71,10 @@ contains
     type(transport_counter_type),  intent(in)    :: transport_counter
     type(transport_metadata_type), intent(in)    :: transport_metadata
 
+    type(mesh_type), pointer :: mesh
+
+    mesh => field_in%get_mesh()
+
     ! Enforce a min value if required
     if ( transport_metadata%get_enforce_min_value() ) then
       call log_event('T.L.: enforcing min value advective not ' // &
@@ -79,7 +82,8 @@ contains
     end if
 
     ! At the end do the overwrite step for the blending zone
-    if ( limited_area .and. topology == topology_non_periodic ) then
+    if ( limited_area .and. &
+         (mesh%topology() == topology_non_periodic) ) then
       call log_event('T.L.: LAM overwrite not yet implemented', LOG_LEVEL_ERROR)
     end if
 
@@ -139,7 +143,7 @@ contains
     type(transport_metadata_type),   intent(in)    :: transport_metadata
 
     ! Internal variables
-    integer(kind=i_def)                   :: mesh_id, step
+    integer(kind=i_def)                   :: step
     integer(kind=i_def)                   :: ref_step
     type(mesh_type),              pointer :: mesh
     type(r_tran_field_type)               :: increment
@@ -153,7 +157,6 @@ contains
 
     ! Extract transport runtime
     mesh => field_np1%get_mesh()
-    mesh_id = mesh%get_id()
     enforce_min_value = transport_metadata%get_enforce_min_value()
     is_dry_field = (trim(transport_metadata%get_name()) == trim(dry_field_name))
 
@@ -210,7 +213,8 @@ contains
     ! ------------------------------------------------------------------------ !
     ! Blending zone update
     ! ------------------------------------------------------------------------ !
-    if ( limited_area .and. topology == topology_non_periodic ) then
+    if ( limited_area .and. &
+         (mesh%topology() == topology_non_periodic) ) then
       call log_event('T.L.: conservative overwrite blending zone not ' // &
                      'yet implemented', LOG_LEVEL_ERROR)
     end if

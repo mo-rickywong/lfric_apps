@@ -36,7 +36,6 @@ use initial_name_field_config_mod, &
                                 only : r1, x1, y1, z1, r2, x2, y2, z2, &
                                        field_max, field_background
 
-use base_mesh_config_mod,       only : geometry
 use planet_config_mod,          only : p_zero, Rd, kappa, scaled_radius
 use extrusion_config_mod,       only : domain_height
 
@@ -87,9 +86,10 @@ end function hadley_like_dcmip
 !> @param[in] choice       Integer defining which specified formula to use
 !> @param[in] domain_max_x Max. domain extent in x-direction.
 !> @result tracer The result tracer field
-function analytic_name_field(chi, choice, domain_max_x) result(tracer)
+function analytic_name_field(geometry, chi, choice, domain_max_x) result(tracer)
 
   implicit none
+  integer,          intent(in) :: geometry
   real(kind=r_def), intent(in) :: chi(3)
   integer,          intent(in) :: choice
   real(kind=r_def), intent(in) :: domain_max_x

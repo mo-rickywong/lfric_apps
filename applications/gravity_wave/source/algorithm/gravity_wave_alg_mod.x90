@@ -551,10 +551,10 @@ contains
           call log_event( 'gravity_wave, gravity_wave_alg_mod: '//    &
                           'Invalid buoyancy space', LOG_LEVEL_ERROR )
       end select
-      w2_mask => get_mask_fe(W2, mesh%get_id(), prime_mesh_name)
-      w3_mask => get_mask_fe(W3, mesh%get_id(), prime_mesh_name)
-      wtheta_mask => get_mask_fe(buoyancy_space, mesh%get_id(), prime_mesh_name)
-    endif
+      w2_mask => get_mask_fe(modeldb%config, mesh, W2, prime_mesh_name)
+      w3_mask => get_mask_fe(modeldb%config, mesh, W3, prime_mesh_name)
+      wtheta_mask => get_mask_fe(modeldb%config, mesh, buoyancy_space, prime_mesh_name)
+    end if
 
     call state%import_field(wind,     igw_u)
     call state%import_field(pressure, igw_p)

@@ -173,7 +173,7 @@ contains
                         ipanel, geometry, topology,   &
                         coord_system, scaled_radius,  &
                         llr(1), llr(2), llr(3) )
-          psi_spherical = analytic_swe_streamfunction(llr, swe_test)
+          psi_spherical = analytic_swe_streamfunction(geometry, llr, swe_test)
           psi_physical = sphere2cart_vector(psi_spherical,llr)
 
         else
@@ -182,7 +182,7 @@ contains
                         ipanel, geometry, topology,   &
                         coord_system, scaled_radius,  &
                         xyz(1), xyz(2), xyz(3) )
-          psi_physical = analytic_swe_streamfunction(xyz, swe_test)
+          psi_physical = analytic_swe_streamfunction(geometry, xyz, swe_test)
 
         end if
         do df = 1, ndf

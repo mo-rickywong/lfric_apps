@@ -9,7 +9,7 @@
 !!          point based upon a specified analytic formula
 module analytic_temperature_profiles_mod
 
-use constants_mod,                only : r_def, pi
+use constants_mod,                only : i_def, r_def, pi
 use log_mod,                      only : log_event,                &
                                          log_scratch_space,        &
                                          LOG_LEVEL_ERROR
@@ -30,7 +30,6 @@ use initial_density_config_mod,    only : r1, x1, y1, r2, x2, y2,      &
                                           density_max, density_background
 use initial_pressure_config_mod,   only : surface_pressure
 use mesh_mod,                      only : geometry_spherical
-use base_mesh_config_mod,          only : geometry
 use planet_config_mod,             only : p_zero, Rd, kappa, scaled_radius, &
                                           scaled_omega, gravity, cp
 use reference_profile_mod,         only : reference_profile
@@ -52,9 +51,10 @@ contains
 !> @param[in] chi Position in physical coordinates
 !> @param[in] choice Integer defining which specified formula to use
 !> @result temperature The result temperature field
-function analytic_temperature(chi, choice) result(temperature)
+function analytic_temperature(geometry, chi, choice) result(temperature)
 
   implicit none
+  integer(i_def),   intent(in) :: geometry
   real(kind=r_def), intent(in) :: chi(3)
   integer,          intent(in) :: choice
   real(kind=r_def)             :: temperature

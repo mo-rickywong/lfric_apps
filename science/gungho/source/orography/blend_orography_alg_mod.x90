@@ -10,11 +10,13 @@
 
 module blend_orography_alg_mod
 
+  use config_mod,                     only: config_type
   use constants_mod,                  only: i_def, str_def
   use field_mod,                      only: field_type
   use limited_area_constants_mod,     only: get_blend_mask,    &
                                             get_lbc_mask_fv
   use mesh_mod,                       only: mesh_type
+
   implicit none
 
   public :: blend_orography
@@ -30,9 +32,11 @@ contains
   !> @param[in]     driving_orog Driving model orography
   !> @param[in]     mesh_name    Name of the finest mesh
 
-  subroutine blend_orography(lam_orog, driving_orog, mesh_name)
+  subroutine blend_orography(config, lam_orog, driving_orog, mesh_name)
 
     implicit none
+
+    type(config_type), intent(in) :: config
 
     type(field_type), intent(inout)         :: lam_orog
     type(field_type), intent(in)            :: driving_orog
@@ -41,14 +45,15 @@ contains
                                                lbc_mask
     type(field_type)                        :: lam_lbc, driving_lbc, inc
     integer(kind=i_def)                     :: fs_enum
-    type(mesh_type), pointer                :: mesh
+
+    type(mesh_type), pointer :: lam_mesh
 
     ! Define the function space required for masks.
-    fs_enum = lam_orog%which_function_space()
-    mesh    => lam_orog%get_mesh()
+    fs_enum  =  lam_orog%which_function_space()
+    lam_mesh => lam_orog%get_mesh()
 
-    blend_mask    => get_blend_mask( fs_enum, mesh%get_id(), mesh_name )
-    lbc_mask      => get_lbc_mask_fv( fs_enum, mesh%get_id(), mesh_name )
+    blend_mask => get_blend_mask( config, lam_mesh, fs_enum, mesh_name )
+    lbc_mask   => get_lbc_mask_fv( config, lam_mesh, fs_enum, mesh_name )
 
     ! Setup the temporary fields.
     call lam_orog%copy_field_properties( lam_lbc )
@@ -78,7 +83,7 @@ contains
                ! Add weighted increment back on to the state.
                inc_X_plus_Y( lam_orog, inc ) )
 
-    nullify( blend_mask, lbc_mask, mesh )
+    nullify( blend_mask, lbc_mask, lam_mesh )
 
   end subroutine blend_orography
 

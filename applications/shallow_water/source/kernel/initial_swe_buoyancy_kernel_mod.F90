@@ -130,7 +130,8 @@ contains
                     coord_system, scaled_radius,  &
                     xyz(1), xyz(2), xyz(3) )
 
-      buoyancy(map_wb(df)) = analytic_swe_buoyancy(xyz, swe_test, domain_x)
+      buoyancy(map_wb(df)) = analytic_swe_buoyancy(geometry, xyz, &
+                                                   swe_test, domain_x)
     end do
 
   end subroutine initial_swe_buoyancy_code

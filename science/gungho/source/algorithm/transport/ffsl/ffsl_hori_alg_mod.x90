@@ -70,7 +70,6 @@ module ffsl_hori_alg_mod
   use fv_divergence_y_kernel_mod,       only: fv_divergence_y_kernel_type
 
   ! Configuration options
-  use base_mesh_config_mod,             only: topology, geometry
   use boundaries_config_mod,            only: limited_area,                    &
                                               transport_boundary_depth,        &
                                               transport_overwrite_freq,        &
@@ -233,7 +232,7 @@ contains
     end if
 
     do_overwrite = (                                                           &
-      limited_area .and. topology == topology_non_periodic .and.               &
+      limited_area .and. mesh%topology() == topology_non_periodic .and.        &
       transport_overwrite_freq == transport_overwrite_freq_all                 &
     )
     if (do_overwrite) then
@@ -365,8 +364,8 @@ contains
 
     ! Whether computation is on the cubed sphere
     is_cubed_sphere = (                                                        &
-        geometry == geometry_spherical                                         &
-        .and. topology == topology_periodic                                    &
+        mesh%geometry() == geometry_spherical                                  &
+        .and. mesh%topology() == topology_periodic                             &
     )
 
     if (is_cubed_sphere) then
@@ -619,8 +618,8 @@ contains
     end if
 
     is_cubed_sphere = (                                                        &
-        geometry == geometry_spherical                                         &
-        .and. topology == topology_periodic                                    &
+        mesh%geometry() == geometry_spherical                                  &
+        .and. mesh%topology() == topology_periodic                             &
     )
 
     if (is_cubed_sphere) then
@@ -974,8 +973,8 @@ contains
 
     ! Whether computation is on the cubed sphere
     is_cubed_sphere = (                                                        &
-        geometry == geometry_spherical                                         &
-        .and. topology == topology_periodic                                    &
+        mesh%geometry() == geometry_spherical                                  &
+        .and. mesh%topology() == topology_periodic                             &
     )
 
     if (is_cubed_sphere) then

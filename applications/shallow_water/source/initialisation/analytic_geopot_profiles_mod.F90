@@ -23,7 +23,6 @@ module analytic_geopot_profiles_mod
   use mesh_mod, only: geometry_spherical
 
   ! Configurations
-  use base_mesh_config_mod,   only: geometry
   use planet_config_mod,      only: scaled_radius, gravity, &
                                     scaled_omega, scaling_factor
   use shallow_water_settings_config_mod,                           &
@@ -48,10 +47,11 @@ contains
   !> @param[in] choice   Which test to set up
   !> @param[in] domain_x Domain size in x-direction.
   !> @result    geopot The result geopotential field
-  function analytic_geopot(chi, choice, domain_x) result(geopot)
+  function analytic_geopot(geometry, chi, choice, domain_x) result(geopot)
 
     implicit none
 
+    integer(i_def),   intent(in) :: geometry
     real(kind=r_def), intent(in) :: chi(3)
     integer,          intent(in) :: choice
     real(kind=r_def), intent(in) :: domain_x
@@ -174,10 +174,11 @@ contains
   !> @param[in] chi    Position in physical coordinates
   !> @param[in] domain_x Domain size in x-direction.
   !> @result    tracer The result tracer field
-  function analytic_tracer(chi, domain_x) result(tracer)
+  function analytic_tracer(geometry, chi, domain_x) result(tracer)
 
     implicit none
 
+    integer(i_def),   intent(in) :: geometry
     real(kind=r_def), intent(in) :: chi(3)
     real(kind=r_def), intent(in) :: domain_x
 

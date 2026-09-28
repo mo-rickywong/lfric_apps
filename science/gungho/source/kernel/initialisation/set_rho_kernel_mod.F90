@@ -172,7 +172,7 @@ subroutine set_rho_code(nlayers, rho,                           &
                         coord_system, scaled_radius,     &
                         xyz(1), xyz(2), xyz(3) )
 
-          rho_ref = analytic_density(xyz, test, time)
+          rho_ref = analytic_density(geometry, xyz, test, time)
 
           integrand =  rho_basis(1,df1,qp1,qp2) * rho_ref * dj(qp1,qp2)
           rhs_e(df1) = rhs_e(df1) + wqp_h(qp1)*wqp_v(qp2)*integrand

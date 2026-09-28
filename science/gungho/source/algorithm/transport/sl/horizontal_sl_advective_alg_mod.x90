@@ -49,7 +49,6 @@ module horizontal_sl_advective_alg_mod
   use transport_constants_mod,          only: get_panel_edge_dist
 
   ! Configs
-  use base_mesh_config_mod,             only: topology, geometry
   use boundaries_config_mod,            only: limited_area,                    &
                                               transport_boundary_depth,        &
                                               transport_overwrite_freq,        &
@@ -140,8 +139,9 @@ module horizontal_sl_advective_alg_mod
     mesh_id =  mesh%get_id()
 
 
-    is_cubed_sphere = (                                                  &
-      geometry == geometry_spherical .and. topology == topology_periodic &
+    is_cubed_sphere = (                           &
+      mesh%geometry() == geometry_spherical .and. &
+      mesh%topology() == topology_periodic        &
     )
 
     if (is_cubed_sphere) then
@@ -234,7 +234,7 @@ module horizontal_sl_advective_alg_mod
                  X_minus_bY(field_y, field_n, half_dt, half_increment_y) )
 
     do_overwrite = (                                                           &
-      limited_area .and. topology == topology_non_periodic .and.               &
+      limited_area .and. mesh%topology() == topology_non_periodic .and.        &
       transport_overwrite_freq == transport_overwrite_freq_all                 &
     )
     if (do_overwrite) then

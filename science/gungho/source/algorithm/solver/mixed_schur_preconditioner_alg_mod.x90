@@ -385,7 +385,7 @@ contains
     call invoke( name = "compute_elim_helmholtz_ru",           &
                  X_times_Y( self%rhs_u, rhs_uvw, Hb_lumped_inv ) )
     if ( limited_area ) then
-      w2_mask => get_mask_r_solver(W2, mesh_id, prime_mesh_name)
+      w2_mask => get_mask_r_solver(config, mesh, W2, prime_mesh_name)
       call invoke( inc_X_times_Y(self%rhs_u, w2_mask) )
     end if
 
@@ -418,7 +418,7 @@ contains
     end if
 
     if ( limited_area ) then
-      w3_mask => get_mask_r_solver(W3, mesh_id, prime_mesh_name)
+      w3_mask => get_mask_r_solver(config, mesh, W3, prime_mesh_name)
       call invoke( inc_X_times_Y(rhs, w3_mask) )
     end if
 
@@ -493,7 +493,7 @@ contains
       state_uv => state%get_field_from_position( isol_uv )
       state_w  => state%get_field_from_position( isol_w )
       if ( limited_area ) then
-        w2_mask => get_mask_r_solver(W2, mesh_id, prime_mesh_name)
+        w2_mask => get_mask_r_solver(config, mesh, W2, prime_mesh_name)
       else
         call dummy_field%initialise( vector_space = self%rhs_u%get_function_space() )
         w2_mask => dummy_field
@@ -516,7 +516,7 @@ contains
                                                     Hb_lumped_inv),            &
                    enforce_bc_kernel_type(u_inc) )
       if ( limited_area ) then
-        w2_mask => get_mask_r_solver(W2, mesh_id, prime_mesh_name)
+        w2_mask => get_mask_r_solver(config, mesh, W2, prime_mesh_name)
         call invoke( inc_X_times_Y(u_inc, w2_mask) )
       end if
 

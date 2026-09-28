@@ -173,7 +173,7 @@ subroutine initial_swe_u_code( nlayers, rhs,                       &
                       ipanel, geometry, topology,   &
                       coord_system, scaled_radius,  &
                       llr(1), llr(2), llr(3) )
-        u_spherical = analytic_swe_wind(llr, swe_test, domain_x)
+        u_spherical = analytic_swe_wind(geometry, llr, swe_test, domain_x)
         u_physical = sphere2cart_vector(u_spherical,llr)
 
       else
@@ -182,7 +182,7 @@ subroutine initial_swe_u_code( nlayers, rhs,                       &
                       ipanel, geometry, topology,   &
                       coord_system, scaled_radius,  &
                       xyz(1), xyz(2), xyz(3) )
-        u_physical = analytic_swe_wind(xyz, swe_test, domain_x)
+        u_physical = analytic_swe_wind(geometry, xyz, swe_test, domain_x)
 
       end if
       do df = 1, ndf

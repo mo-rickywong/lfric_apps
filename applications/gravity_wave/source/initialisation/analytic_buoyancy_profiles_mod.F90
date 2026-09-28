@@ -9,12 +9,11 @@
 !!          point based upon a specified analytic formula
 module analytic_buoyancy_profiles_mod
 
-use constants_mod,                only : r_def, pi
+use constants_mod,                only : i_def, r_def, pi
 use log_mod,                      only : log_event,                &
                                          log_scratch_space,        &
                                          LOG_LEVEL_ERROR
 use coord_transform_mod,           only : xyz2llr
-use base_mesh_config_mod,          only : geometry
 use planet_config_mod,             only : scaled_radius, gravity
 use generate_global_gw_fields_mod, only : generate_global_gw_pert
 use reference_profile_mod,         only : reference_profile
@@ -29,9 +28,11 @@ contains
 !> @brief Compute an analytic buoyancy field
 !> @param[in] chi Position in physical coordinates
 !> @result buoyancy The result buoyancy field
-function analytic_buoyancy(chi) result(buoyancy)
+function analytic_buoyancy(geometry, chi) result(buoyancy)
 
   implicit none
+
+  integer(i_def),   intent(in) :: geometry
   real(kind=r_def), intent(in) :: chi(3)
   real(kind=r_def)             :: buoyancy
 

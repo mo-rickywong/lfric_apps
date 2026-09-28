@@ -1047,10 +1047,10 @@ contains
     ! for models with global land mass included (i.e GAL)
     call init_altitude( orography_twod_mesh, surface_altitude )
 
-    call setup_orography_alg( base_mesh_names,                &
-                              orography_mesh%get_mesh_name(), &
-                              chi_inventory,                  &
-                              panel_id_inventory,             &
+    call setup_orography_alg( modeldb%config, base_mesh_names, &
+                              orography_mesh%get_mesh_name(),  &
+                              chi_inventory,                   &
+                              panel_id_inventory,              &
                               surface_altitude )
 
 

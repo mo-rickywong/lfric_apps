@@ -219,9 +219,10 @@ contains
 
     if (limited_area) then
       ! Extract limited area mask
-      wtheta_mask => get_mask_r_solver(buoyancy_space, mesh_id, prime_mesh_name)
-      w2_mask => get_mask_r_solver(W2, mesh_id, prime_mesh_name)
-      w3_mask => get_mask_r_solver(W3, mesh_id, prime_mesh_name)
+      wtheta_mask => get_mask_r_solver(config, mesh, buoyancy_space, &
+                                       prime_mesh_name)
+      w2_mask => get_mask_r_solver(config, mesh, W2, prime_mesh_name)
+      w3_mask => get_mask_r_solver(config, mesh, W3, prime_mesh_name)
     endif
 
     ! Set auxiliary constants

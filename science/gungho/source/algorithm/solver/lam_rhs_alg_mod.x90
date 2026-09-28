@@ -45,23 +45,25 @@ contains
   !> @details Set the RHS to zero outside the limited area model interior.
   !> @param[in,out] rhs     The full RHS, to be used in the linear mixed solver
   !> @param[in]     finest_mesh_name Name of the finest mesh
-  subroutine apply_mask_rhs(rhs, finest_mesh_name)
+  subroutine apply_mask_rhs(config, rhs, finest_mesh_name)
 
     implicit none
 
+    type(config_type),  intent(in)     :: config
     type(field_type),   intent(inout)  :: rhs(bundle_size)
     character(len=str_def), intent(in) :: finest_mesh_name
     type(field_type), pointer          :: w2_mask     => null(), &
                                           w3_mask     => null(), &
                                           wtheta_mask => null()
-    integer(kind=i_def)                :: mesh_id
 
-    mesh_id = rhs(igh_u)%get_mesh_id()
+    type(mesh_type), pointer :: mesh
+
+    mesh => rhs(igh_u)%get_mesh()
 
     ! LAM Masks
-    w2_mask     => get_mask_fe(W2, mesh_id, finest_mesh_name)
-    w3_mask     => get_mask_fe(W3, mesh_id, finest_mesh_name)
-    wtheta_mask => get_mask_fe(Wtheta, mesh_id, finest_mesh_name)
+    w2_mask     => get_mask_fe(config, mesh, W2, finest_mesh_name)
+    w3_mask     => get_mask_fe(config, mesh, W3, finest_mesh_name)
+    wtheta_mask => get_mask_fe(config, mesh, Wtheta, finest_mesh_name)
 
     call invoke( inc_X_times_Y( rhs(igh_u),     &
                                 w2_mask),       &
@@ -117,7 +119,6 @@ contains
                                     wtheta_mask => null()
     real(r_def)                  :: dt
     real(r_def)                  :: tau_r_dt
-    integer(i_def)               :: mesh_id
     type(mesh_type), pointer     :: mesh
 
     type(r_solver_field_type), pointer :: r_solver_rho_at_u => null()
@@ -125,7 +126,6 @@ contains
 
     if ( LPROF ) call start_timing( id, 'dynamics.rhs_lbc' )
 
-    mesh_id = rhs(igh_u)%get_mesh_id()
     mesh => rhs(igh_u)%get_mesh()
 
     dt = real(model_clock%get_seconds_per_step(), r_def)
@@ -135,9 +135,9 @@ contains
     call lbc_fields%get_field('boundary_u_diff', boundary_u)
 
     ! LAM Masks
-    w2_mask     => get_mask_fe(W2, mesh_id, finest_mesh_name)
-    w3_mask     => get_mask_fe(W3, mesh_id, finest_mesh_name)
-    wtheta_mask => get_mask_fe(Wtheta, mesh_id, finest_mesh_name)
+    w2_mask     => get_mask_fe(config, mesh, W2, finest_mesh_name)
+    w3_mask     => get_mask_fe(config, mesh, W3, finest_mesh_name)
+    wtheta_mask => get_mask_fe(config, mesh, Wtheta, finest_mesh_name)
 
     ! Obtain operators from runtime constants
     div => get_im3_div_fe(config, mesh)

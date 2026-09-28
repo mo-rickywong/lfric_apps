@@ -9,7 +9,7 @@
 !!          point based upon a specified analytic formula
 module analytic_pressure_profiles_mod
 
-use constants_mod,              only : r_def, pi
+use constants_mod,              only : r_def, pi, i_def
 use log_mod,                    only : log_event,                &
                                        log_scratch_space,        &
                                        LOG_LEVEL_ERROR
@@ -38,7 +38,6 @@ use idealised_config_mod,       only : test_cold_bubble_x,           &
 use initial_density_config_mod, only : r1, x1, y1, z1, r2, x2, y2, z2, &
                                        density_max, density_background
 use mesh_mod,                   only : geometry_spherical
-use base_mesh_config_mod,       only : geometry
 use planet_config_mod,          only : p_zero, Rd, kappa, scaled_radius
 use reference_profile_mod,      only : reference_profile
 use analytic_temperature_profiles_mod, only: analytic_temperature
@@ -109,9 +108,10 @@ contains
   !> @param[in] chi Position in physical coordinates
   !> @param[in] choice Integer defining which specified formula to use
   !> @result pressure The result pressure field
-  function analytic_pressure(chi, choice, time) result(pressure)
+  function analytic_pressure(geometry, chi, choice, time) result(pressure)
 
     implicit none
+    integer(i_def),   intent(in) :: geometry
     real(kind=r_def), intent(in) :: chi(3)
     integer,          intent(in) :: choice
     real(kind=r_def), intent(in) :: time
@@ -184,7 +184,7 @@ contains
     case (test_solid_body_rotation, &
           test_solid_body_rotation_alt)
       t0 = 280.0_r_def
-      temperature = analytic_temperature(chi, choice)
+      temperature = analytic_temperature(geometry, chi, choice)
       pressure = t0/temperature
       density = p_zero/(Rd*temperature) * pressure**( (1.0_r_def - kappa )/ kappa )
     case (test_deep_baroclinic_wave)

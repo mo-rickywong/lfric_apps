@@ -13,7 +13,9 @@ module analytic_orography_field_cartesian_mod_test
   use analytic_orography_mod,     only : orography_profile
   use ugrid_mesh_data_mod,        only : ugrid_mesh_data_type
 
-  use mesh_mod,  only: mesh_type, geometry_planar, topology_periodic
+  use mesh_mod,                  only: mesh_type, geometry_planar, &
+                                       topology_periodic
+  use finite_element_config_mod, only: coord_system_xyz
 
   use funit
 
@@ -56,38 +58,28 @@ module analytic_orography_field_cartesian_mod_test
   logical(l_def), parameter :: generate_inner_halos = .true.
   logical(l_def), parameter :: enforce_constraints  = .false.
 
+  integer(i_def), parameter :: geometry      = geometry_planar
+  integer(i_def), parameter :: topology      = topology_periodic
+  integer(i_def), parameter :: coord_system  = coord_system_xyz
+  real(r_def),    parameter :: scaled_radius = 1.0_r_def
+
 contains
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine setUp(this)
 
     use schar_orography_cartesian_mod, only : schar_cartesian_type
-    use finite_element_config_mod,     only : cellshape_quadrilateral, &
-                                              coord_system_xyz, coord_space_wchi
-    use feign_config_mod,              only : feign_finite_element_config,   &
-                                              feign_base_mesh_config,        &
-                                              feign_extrusion_config,        &
+    use feign_config_mod,              only : feign_extrusion_config,        &
                                               feign_initial_pressure_config, &
                                               feign_orography_schar_cartesian_config
     use orography_schar_cartesian_config_mod, &
                                        only : direction_x
     use extrusion_config_mod,          only : method_uniform, stretching_method_linear
-
     use initial_pressure_config_mod,   only : method_balanced
 
     implicit none
 
     class(analytic_orography_field_cartesian_test_type), intent(inout) :: this
-
-    ! Set mesh configuration
-    call feign_base_mesh_config(                                    &
-                         file_prefix     = file_prefix,             &
-                         prime_mesh_name = mesh_name,               &
-                         geometry        = geometry_planar,         &
-                         prepartitioned  = .false.,                 &
-                         topology        = topology_periodic,       &
-                         fplane          = .false.,                 &
-                         f_lat_deg       = 0.0_r_def )
 
     call feign_extrusion_config( method=method_uniform,       &
                                  planet_radius=6000.0_r_def,  &
@@ -96,16 +88,6 @@ contains
                                  stretching_height=1.0_r_def, &
                                  stretching_method=stretching_method_linear, &
                                  eta_values=(/0.5_r_def/) )
-
-    call feign_finite_element_config( cellshape=cellshape_quadrilateral, &
-                                      coord_order=0_i_def,               &
-                                      coord_order_nonprime=1_i_def,      &
-                                      coord_space=coord_space_wchi,      &
-                                      coord_system=coord_system_xyz,     &
-                                      element_order_h=0_i_def,           &
-                                      element_order_v=0_i_def,           &
-                                      rehabilitate=.true.,               &
-                                      vorticity_in_w1=.false. )
 
     call feign_initial_pressure_config( method = method_balanced,             &
                                         surface_pressure = surface_pressure )
@@ -254,7 +236,8 @@ contains
                                        height_domain_top,            &
                                        chi_1_in, chi_2_in, chi_3_in, &
                                        chi_1, chi_2, chi_3,          &
-                                       panel_id )
+                                       panel_id, geometry, topology, &
+                                       coord_system, scaled_radius )
 
     ! Test selected chi_3
     itest = 1

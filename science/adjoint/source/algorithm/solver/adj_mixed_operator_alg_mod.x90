@@ -126,8 +126,8 @@ contains
 
     ! LAM Masks
     if (limited_area) then
-      w2_mask => get_mask_r_solver( W2, mesh%get_id(), prime_mesh_name )
-      w3_mask => get_mask_r_solver( W3, mesh%get_id(), prime_mesh_name )
+      w2_mask => get_mask_r_solver( config, mesh, W2, prime_mesh_name )
+      w3_mask => get_mask_r_solver( config, mesh, W3, prime_mesh_name )
     end if
 
     if (split_w) then

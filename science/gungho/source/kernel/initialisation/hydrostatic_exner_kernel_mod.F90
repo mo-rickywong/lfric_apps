@@ -185,7 +185,7 @@ subroutine hydrostatic_exner_code(nlayers, exner, theta,         &
                 xyz(1), xyz(2), xyz(3) )
 
   ! Exner at the model surface or top
-  exner_start = analytic_pressure( xyz, test, 0.0_r_def)
+  exner_start = analytic_pressure( geometry, xyz, test, 0.0_r_def)
 
   ! Set local value of gravity at each vertical level
   if (shallow) then

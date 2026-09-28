@@ -706,7 +706,7 @@ contains
        if ( element_order_h == 0 .and. element_order_v == 0 ) then
          call rsol_w2_mask%initialise( vector_space = w2_fs )
          if ( limited_area ) then
-           w2_mask => get_mask_fv(W2, mesh%get_id(), prime_mesh_name)
+           w2_mask => get_mask_fv(config, mesh, W2, prime_mesh_name)
            call invoke( real_to_real_x(rsol_w2_mask, w2_mask) )
          else
            ! Create dummy mask arrays with 1 in every entry

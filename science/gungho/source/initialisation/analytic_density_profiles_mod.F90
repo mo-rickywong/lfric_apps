@@ -9,7 +9,7 @@
 !!          point based upon a specified analytic formula
 module analytic_density_profiles_mod
 
-use constants_mod,              only : r_def, pi
+use constants_mod,              only : r_def, i_def, pi
 use log_mod,                    only : log_event,                &
                                        log_scratch_space,        &
                                        LOG_LEVEL_ERROR
@@ -48,7 +48,6 @@ use initial_density_config_mod, only : r1, x1, y1, z1, r2, x2, y2, z2, &
                                        density_max, density_background
 use mesh_mod, only: geometry_spherical
 
-use base_mesh_config_mod,       only : geometry
 use planet_config_mod,          only : p_zero, Rd, kappa, scaled_radius
 use reference_profile_mod,      only : reference_profile
 use analytic_temperature_profiles_mod, &
@@ -138,9 +137,11 @@ end function vortex_field
 !> @param[in] chi Position in physical coordinates
 !> @param[in] choice Integer defining which specified formula to use
 !> @result density The result density field
-function analytic_density(chi, choice, time) result(density)
+function analytic_density(geometry, chi, choice, time) result(density)
 
   implicit none
+
+  integer(i_def),   intent(in) :: geometry
   real(kind=r_def), intent(in) :: chi(3)
   integer,          intent(in) :: choice
   real(kind=r_def), intent(in) :: time
@@ -244,7 +245,7 @@ function analytic_density(chi, choice, time) result(density)
   case( test_solid_body_rotation,                                    &
         test_solid_body_rotation_alt )
     t0          = 280.0_r_def
-    temperature = analytic_temperature(chi, choice)
+    temperature = analytic_temperature(geometry, chi, choice)
     pressure    = t0 / temperature
     density     = p_zero * pressure**( (1.0_r_def - kappa )/ kappa )           &
                          / (Rd * temperature)

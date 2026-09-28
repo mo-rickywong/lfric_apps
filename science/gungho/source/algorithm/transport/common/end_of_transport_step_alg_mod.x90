@@ -8,7 +8,6 @@
 
 module end_of_transport_step_alg_mod
 
-  use base_mesh_config_mod,           only: topology
   use boundaries_config_mod,          only: limited_area,                      &
                                             transport_boundary_depth,          &
                                             transport_overwrite_freq,          &
@@ -122,12 +121,15 @@ contains
     ! Internal variables
     real(kind=r_tran)                     :: min_value
     logical(kind=l_def)                   :: final_split_step
-    type(mesh_type),              pointer :: mesh
     integer(kind=i_def)                   :: step
     logical(kind=l_def)                   :: do_overwrite
     type(r_tran_field_type),      pointer :: field_start
 
+    type(mesh_type), pointer :: mesh
+    integer(i_def) :: topology
+
     mesh => field_np1%get_mesh()
+    topology = mesh%topology()
 
     ! Determine whether this is the final split step
     step = transport_counter%get_split_step_of_substep_counter()
@@ -141,7 +143,7 @@ contains
 
     do_overwrite = (                                                           &
       ! Only overwrite when we have a LAM, and one of the following...
-      limited_area .and. topology == topology_non_periodic .and. (             &
+      limited_area .and. (topology == topology_non_periodic) .and. (           &
         transport_overwrite_freq == transport_overwrite_freq_split_step .or.   &
         transport_overwrite_freq == transport_overwrite_freq_all .or. (        &
           final_split_step                                                     &
@@ -212,7 +214,7 @@ contains
     integer(kind=i_def)                   :: limit_iteration
     integer(kind=i_def)                   :: num_limiting_steps
     integer(kind=i_def)                   :: k_h, k_v
-    type(mesh_type),              pointer :: mesh
+
     type(r_tran_field_type)               :: increment
     type(r_tran_field_type)               :: sum_flux
     type(r_tran_field_type),      pointer :: detj_at_w3
@@ -231,12 +233,19 @@ contains
     real(kind=r_tran)                     :: field_min, field_max
     integer(tik)                          :: id_iter
 
+    type(mesh_type),   pointer :: mesh
     type(config_type), pointer :: config
+
+    integer(i_def) :: topology
+
 
     config => flux_precomputations%get_config()
 
     ! Extract transport runtime
     mesh => field_np1%get_mesh()
+!   mesh => field_in%get_mesh()
+    topology = mesh%topology()
+
     enforce_min_value = transport_metadata%get_enforce_min_value()
     is_dry_field = (trim(transport_metadata%get_name()) == trim(dry_field_name))
     detj_at_w3 => get_detj_at_w3_r_tran(config, mesh)
@@ -346,7 +355,7 @@ contains
     ! ------------------------------------------------------------------------ !
     do_overwrite = (                                                           &
       ! Only overwrite when we have a LAM, and one of the following...
-      limited_area .and. topology == topology_non_periodic .and. (             &
+      limited_area .and. (topology == topology_non_periodic) .and. (           &
         transport_overwrite_freq == transport_overwrite_freq_split_step .or.   &
         transport_overwrite_freq == transport_overwrite_freq_all .or. (        &
           final_split_step                                                     &
@@ -490,6 +499,9 @@ contains
     integer(tik)                          :: id_iter
 
     type(config_type), pointer :: config
+    integer(i_def) :: topology
+
+
 
     config => flux_precomputations%get_config()
 
@@ -500,6 +512,8 @@ contains
     mr_function_space = field_np1%which_function_space()
     flux_function_space = flux%which_function_space()
     mr_start => transport_counter%get_field_n()
+
+    topology = prime_extrusion_mesh%topology()
 
     ! Determine whether this is the final split step
     step = transport_counter%get_split_step_of_substep_counter()
@@ -735,7 +749,7 @@ contains
     ! ------------------------------------------------------------------------ !
     do_overwrite = (                                                           &
       ! Only overwrite when we have a LAM, and one of the following...
-      limited_area .and. topology == topology_non_periodic .and. (             &
+      limited_area .and. (topology == topology_non_periodic) .and. (           &
         transport_overwrite_freq == transport_overwrite_freq_split_step .or.   &
         transport_overwrite_freq == transport_overwrite_freq_all .or. (        &
           final_split_step                                                     &

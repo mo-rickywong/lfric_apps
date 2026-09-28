@@ -20,9 +20,8 @@
 
 module gungho_extrusion_mod
 
-  use base_mesh_config_mod, only : key_from_geometry, &
-                                   geometry_planar,   &
-                                   geometry_spherical
+  use base_mesh_config_mod, only : key_from_geometry
+  use mesh_mod,             only : geometry_planar, geometry_spherical
   use constants_mod,        only : r_def, i_def
   use extrusion_mod,        only : extrusion_type,             &
                                    PRIME_EXTRUSION,            &

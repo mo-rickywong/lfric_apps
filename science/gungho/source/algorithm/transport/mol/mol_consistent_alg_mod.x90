@@ -40,7 +40,6 @@ module mol_consistent_alg_mod
                                       only: inject_wt_to_sh_w3_kernel_type
 
   ! Configuration
-  use base_mesh_config_mod,  only: topology
   use boundaries_config_mod, only: limited_area, &
                                    transport_boundary_depth
   use transport_config_mod,  only: runge_kutta_method
@@ -261,7 +260,8 @@ module mol_consistent_alg_mod
                                      rk_weights(nstage, stage+1), mr_np1) )
         end if
 
-        if ( limited_area .and. topology == topology_non_periodic ) then
+        if ( limited_area .and. &
+             prime_extrusion_mesh%topology() == topology_non_periodic ) then
           ! This code is required while LAMs loop over cells right up to
           ! the edge of a limited area domain.  It can be removed if
           ! we only loop over columns in the interior domain.
@@ -277,7 +277,8 @@ module mol_consistent_alg_mod
       ! ---------------------------------------------------------------------- !
       ! Blending zone update
       ! ---------------------------------------------------------------------- !
-      if ( limited_area .and. topology == topology_non_periodic ) then
+      if ( limited_area .and. &
+           prime_extrusion_mesh%topology() == topology_non_periodic ) then
         ! This code is required while LAMs loop over cells right up to
         ! the edge of a limited area domain.  It can be removed if
         ! we only loop over columns in the interior domain.

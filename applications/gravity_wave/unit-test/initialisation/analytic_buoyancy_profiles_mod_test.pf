@@ -9,6 +9,7 @@
 module analytic_buoyancy_profiles_mod_test
 
   use constants_mod, only : r_def, i_def
+  use mesh_mod,      only : geometry_spherical, topology_periodic
   use funit
 
   implicit none
@@ -32,8 +33,6 @@ contains
   @before
   subroutine set_up()
 
-    use mesh_mod,                only : geometry_spherical, &
-                                        topology_periodic
     use extrusion_config_mod,    only : method_uniform, &
                                         stretching_method_linear
     use feign_config_mod,        only : feign_base_mesh_config,           &
@@ -141,7 +140,7 @@ contains
     real(r_def), parameter :: tol = 1.0e-14_r_def
 
     xyz = (/ scaled_radius, 0.0_r_def, 0.0_r_def /)
-    b = analytic_buoyancy(xyz)
+    b = analytic_buoyancy(geometry_spherical, xyz)
 
     buoyancy = 0.0_r_def
     @assertEqual(buoyancy, b, tol)

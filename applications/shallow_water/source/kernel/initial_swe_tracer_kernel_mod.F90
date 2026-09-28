@@ -122,7 +122,7 @@ contains
                     coord_system, scaled_radius,  &
                     xyz(1), xyz(2), xyz(3) )
 
-      tracer(map_w3(df)) = analytic_tracer(xyz, domain_x)
+      tracer(map_w3(df)) = analytic_tracer(geometry, xyz, domain_x)
 
     end do
 

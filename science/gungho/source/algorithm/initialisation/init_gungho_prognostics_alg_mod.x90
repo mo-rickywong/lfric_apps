@@ -84,7 +84,6 @@ module init_gungho_prognostics_alg_mod
   use moist_dyn_mod,                   only: num_moist_factors, gas_law
 
   ! Configuration modules
-  use base_mesh_config_mod,      only: geometry
   use planet_config_mod,         only: gravity, cp, rd, &
                                        p_zero, kappa, recip_epsilon
 
@@ -150,7 +149,7 @@ contains
     !--------------------------------------------------------------------------!
 
     if (smp_init_wind) then
-      if ( geometry /= geometry_planar ) then
+      if ( mesh%geometry() /= geometry_planar ) then
         call log_event('Sampling initial wind only implemented for planar geometry', &
                        LOG_LEVEL_ERROR)
       end if
@@ -198,7 +197,7 @@ contains
         ! Prevent any flux out from the domain
         ! However for spherical domains this could prevent the resulting
         ! wind from being divergence-free, so only do this for Cartesian domains
-        if (geometry /= geometry_spherical) then
+        if (mesh%geometry() /= geometry_spherical) then
           call invoke( name = "apply_bcs_to_u", &
                        enforce_bc_kernel_type( u ) )
         end if
@@ -445,7 +444,9 @@ contains
       panel_id => get_panel_id(mesh)
 
       call invoke( initial_mr_kernel_type( theta, exner, rho, mr, chi, &
-                                           panel_id, p_zero, rd, kappa ) )
+                                           panel_id, mesh%geometry(),  &
+                                           mesh%topology(), p_zero,    &
+                                           rd, kappa ) )
 
       call moist_dyn_factors_alg( moist_dyn, mr )
 

@@ -10,6 +10,7 @@
 module analytic_swe_buoyancy_profiles_mod_test
 
   use constants_mod, only : r_def, i_def
+    use mesh_mod,    only : geometry_planar, topology_periodic
   use funit
 
   implicit none
@@ -23,8 +24,6 @@ contains
   @before
   subroutine set_up()
 
-    use mesh_mod,                only : geometry_planar, &
-                                        topology_periodic
     use extrusion_config_mod,    only : method_uniform, &
                                         stretching_method_linear
     use feign_config_mod,        only : feign_base_mesh_config,    &
@@ -121,19 +120,22 @@ contains
     ! check thermal vortex case at difference x values
 
     xyz = (/ 0.2_r_def, 0.0_r_def, scaled_radius /)
-    buoyancy = analytic_swe_buoyancy(xyz, swe_test_swe_thermal_dbl_vortex, domain_x )
+    buoyancy = analytic_swe_buoyancy(geometry_planar, xyz, &
+                                     swe_test_swe_thermal_dbl_vortex, domain_x )
     answer = 1.047552825814758_r_def
     @assertEqual(answer, buoyancy, tol)
 
     xyz = (/ -0.2_r_def, 0.0_r_def, scaled_radius /)
-    buoyancy = analytic_swe_buoyancy(xyz, swe_test_swe_thermal_dbl_vortex, domain_x )
+    buoyancy = analytic_swe_buoyancy(geometry_planar, xyz, &
+                                     swe_test_swe_thermal_dbl_vortex, domain_x )
     answer = 0.952447174185242_r_def
     @assertEqual(answer, buoyancy, tol)
 
     ! check that changing y has no effect
 
     xyz = (/ -0.2_r_def, 0.4_r_def, scaled_radius /)
-    buoyancy = analytic_swe_buoyancy(xyz, swe_test_swe_thermal_dbl_vortex, domain_x )
+    buoyancy = analytic_swe_buoyancy(geometry_planar, xyz, &
+                                     swe_test_swe_thermal_dbl_vortex, domain_x )
     answer = 0.952447174185242_r_def
     @assertEqual(answer, buoyancy, tol)
 

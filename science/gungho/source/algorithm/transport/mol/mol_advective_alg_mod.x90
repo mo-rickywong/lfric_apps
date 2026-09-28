@@ -27,7 +27,6 @@ module mol_advective_alg_mod
   use wind_precomputations_alg_mod,   only: wind_precomputations_type
 
   ! Configuration
-  use base_mesh_config_mod,           only: topology
   use boundaries_config_mod,          only: limited_area, transport_boundary_depth
   use transport_config_mod,           only: runge_kutta_method
 
@@ -151,7 +150,7 @@ contains
         ! Update field: f = f^n - dt*rhs
         call invoke( X_minus_bY(field_np1, field_n, dt_mol_substep, rhs) )
 
-        if ( limited_area .and. topology == topology_non_periodic ) then
+        if ( limited_area .and. mesh%topology() == topology_non_periodic ) then
           ! This code is required while LAMs loop over cells right up to
           ! the edge of a limited area domain.  It can be removed if
           ! we only loop over columns in the interior domain.
@@ -164,7 +163,7 @@ contains
 
       end do stage_loop
 
-      if ( limited_area .and. topology == topology_non_periodic ) then
+      if ( limited_area .and. mesh%topology() == topology_non_periodic ) then
         ! This code is required while LAMs loop over cells right up to
         ! the edge of a limited area domain.  It can be removed if
         ! we only loop over columns in the interior domain. This call may not

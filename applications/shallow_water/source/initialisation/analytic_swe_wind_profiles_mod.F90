@@ -18,7 +18,6 @@ module analytic_swe_wind_profiles_mod
   use mesh_mod, only: geometry_spherical
 
   ! Configuration
-  use base_mesh_config_mod,   only: geometry
   use planet_config_mod,      only: scaled_radius, scaled_omega
   use shallow_water_settings_config_mod,                           &
                               only: ref_gp,                        &
@@ -40,10 +39,11 @@ contains
   !> @param[in] choice
   !> @param[in] domain_x Domain size in x-direction.
   !> @result    wind The resulting velocity field
-  function analytic_swe_wind( chi, choice, domain_x ) result(wind)
+  function analytic_swe_wind( geometry, chi, choice, domain_x ) result(wind)
 
     implicit none
 
+    integer,          intent(in)   :: geometry
     real(kind=r_def), intent(in)   :: chi(3)
     integer,          intent(in)   :: choice
     real(kind=r_def), intent(in)   :: domain_x

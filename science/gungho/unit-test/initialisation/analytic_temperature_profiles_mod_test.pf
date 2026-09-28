@@ -9,6 +9,7 @@
 module analytic_temperature_profiles_mod_test
 
   use constants_mod, only : i_def, r_def
+  use mesh_mod,      only : geometry_planar, topology_periodic
   use funit
 
   implicit none
@@ -51,8 +52,6 @@ contains
                                         feign_initial_density_config,     &
                                         feign_initial_pressure_config
 
-    use mesh_mod,             only : geometry_planar, &
-                                     topology_periodic
     use extrusion_config_mod,         only : method_uniform, &
                                              stretching_method_linear
     use idealised_config_mod,  only: test_cold_bubble_x
@@ -157,22 +156,22 @@ contains
 
     xyz = (/ 0.0_r_def, 0.0_r_def, 3000.0_r_def /)
     call reference_profile(pressure, density, temperature, xyz, test_cold_bubble_x)
-    temperature = analytic_temperature(xyz, test_cold_bubble_x)
+    temperature = analytic_temperature(geometry_planar, xyz, test_cold_bubble_x)
     answer = 300.0_r_def - 15.0_r_def/pressure
     @assertEqual(answer, temperature, tol)
-    temperature = analytic_temperature(xyz, test_cold_bubble_y)
+    temperature = analytic_temperature(geometry_planar, xyz, test_cold_bubble_y)
     @assertEqual(answer, temperature, tol)
 
     xyz = (/ 0.0_r_def, 1000.0_r_def, 260.0_r_def /)
     call reference_profile(pressure, density, temperature, xyz, test_warm_bubble)
     answer = temperature + 0.5_r_def
-    temperature = analytic_temperature(xyz, test_warm_bubble)
+    temperature = analytic_temperature(geometry_planar, xyz, test_warm_bubble)
     @assertEqual(answer, temperature, tol)
 
     xyz = (/ 0.0_r_def, 0.0_r_def, 350.0_r_def /)
     call reference_profile(pressure, density, temperature, xyz, test_warm_bubble_3d)
     answer = temperature + 0.5_r_def
-    temperature = analytic_temperature(xyz, test_warm_bubble_3d)
+    temperature = analytic_temperature(geometry_planar, xyz, test_warm_bubble_3d)
     @assertEqual(answer, temperature, tol)
 
   end subroutine test_all

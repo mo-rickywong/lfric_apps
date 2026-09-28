@@ -350,7 +350,8 @@ contains
                   modeldb,            &
                   chi_inventory,      &
                   panel_id_inventory, &
-                  geometry, topology )
+                  mesh%geometry(),    &
+                  mesh%topology() )
 
     ! Call clock initial step before initial conditions output
     ! This ensures that lfric_initial.nc will be written out

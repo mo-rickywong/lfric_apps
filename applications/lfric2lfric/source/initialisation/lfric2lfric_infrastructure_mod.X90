@@ -596,10 +596,13 @@ contains
 
       ! Blend the regridded src orography with the dst orography
       ! --------------------------------------------------------
-      call blend_orography(surface_altitude_dst, surface_altitude_src_on_dst, &
+      call blend_orography(modeldb%config, &
+                           surface_altitude_dst, &
+                           surface_altitude_src_on_dst, &
                            mesh_names(dst))
 
-      call setup_orography_alg( mesh_names(dst:dst),            &
+      call setup_orography_alg( modeldb%config,                 &
+                                mesh_names(dst:dst),            &
                                 orography_mesh%get_mesh_name(), &
                                 chi_inventory,                  &
                                 panel_id_inventory,             &

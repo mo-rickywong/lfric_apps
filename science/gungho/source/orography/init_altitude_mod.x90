@@ -46,9 +46,9 @@ module init_altitude_mod
 
     implicit none
 
-    type(mesh_type),  intent(in), pointer :: twod_mesh
-    type(field_type), intent(out)         :: surface_altitude
-    type(field_type)                      :: surface_altitude_tmp
+    type(mesh_type),  intent(in)  :: twod_mesh
+    type(field_type), intent(out) :: surface_altitude
+    type(field_type)              :: surface_altitude_tmp
 
     ! Pointers to vector space and read interface
     type(function_space_type), pointer  :: vector_space => null()
@@ -84,7 +84,7 @@ module init_altitude_mod
       case ( orog_init_option_analytic )
 
         ! Set up analytic orography parameters
-        call set_orography_option()
+        call set_orography_option(twod_mesh)
 
       ! Orography read from ancil file
       case ( orog_init_option_ancil, orog_init_option_start_dump )

@@ -1065,7 +1065,8 @@ contains
           ! Compute the LAM LBCs and RHS
           !--------------------------------------------------------------------
           if ( limited_area .and. inner == 1 .and. outer == 1 ) then
-            call lam_solver_lbc(self%state(igh_u), lbc_fields, prime_mesh_name)
+            call lam_solver_lbc(self%config, self%state(igh_u), lbc_fields, &
+                                prime_mesh_name)
             call calc_rhs_lbc(self%config, self%rhs_lbc, lbc_fields, &
                               model_clock, prime_mesh_name, tau_r)
           end if
@@ -1086,7 +1087,7 @@ contains
               call add_bundle(self%rhs_np1, self%rhs_lbc, self%rhs_np1, bundle_size)
             end if
             ! Apply masks to RHS
-            call apply_mask_rhs(self%rhs_np1, prime_mesh_name)
+            call apply_mask_rhs(self%config, self%rhs_np1, prime_mesh_name)
           end if
 
           ! Accelerators for inner loop convergence
@@ -1144,7 +1145,8 @@ contains
                .and. inner == inner_iterations               &
                .and. outer == outer_iterations ) ) then
 
-              call lam_blend_lbc(self%state(igh_u), self%state(igh_p), &
+              call lam_blend_lbc(self%config,                          &
+                                 self%state(igh_u), self%state(igh_p), &
                                  self%state(igh_d), self%state(igh_t), &
                                  mr, lbc_fields, microphysics_fields,  &
                                  aerosol_fields, lbc_option,           &

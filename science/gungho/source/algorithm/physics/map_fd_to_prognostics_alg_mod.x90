@@ -59,7 +59,6 @@ module map_fd_to_prognostics_alg_mod
   use config_mod, only: config_type
 
   ! Configuration modules
-  use base_mesh_config_mod,      only: geometry, topology
   use formulation_config_mod,    only: rotating, shallow
   use finite_element_config_mod, only: coord_system, coord_system_native
   use physics_config_mod,        only: sample_physics_winds, &
@@ -293,9 +292,9 @@ contains
                    dg_inc_matrix_vector_kernel_type(u_broken, u_up, u_up_map),   &
                    average_w2b_to_w2_kernel_type(u, u_broken, rmultiplicity_w2) )
 
-      if (sample_physics_winds_correction                                      &
-          .and. geometry == geometry_spherical                                 &
-          .and. topology == topology_periodic) then
+      if (sample_physics_winds_correction             &
+          .and. mesh%geometry() == geometry_spherical &
+          .and. mesh%topology() == topology_periodic) then
 
         w2_fs => u%get_function_space()
         call u_lon_w2%initialise( w2_fs )
@@ -327,8 +326,10 @@ contains
                      convert_phys_to_hdiv_kernel_type(u_correction,            &
                                                       u_lon_w2, u_lat_w2,      &
                                                       u_up_w2, chi, panel_id,  &
-                                                      geometry, topology,      &
-                                                      coord_system, scaled_radius), &
+                                                      mesh%geometry(),         &
+                                                      mesh%topology(),         &
+                                                      coord_system,            &
+                                                      scaled_radius),          &
                      ! Increment wind with correction field
                      inc_X_plus_Y(u, u_correction) )
       end if

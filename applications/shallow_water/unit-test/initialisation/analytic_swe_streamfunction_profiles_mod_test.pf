@@ -10,6 +10,7 @@
 module analytic_swe_streamfunction_profiles_mod_test
 
   use constants_mod, only : r_def, i_def
+  use mesh_mod,      only : geometry_spherical, topology_periodic
   use funit
 
   implicit none
@@ -23,8 +24,6 @@ contains
   @before
   subroutine set_up()
 
-    use mesh_mod,                only : geometry_spherical, &
-                                        topology_periodic
     use extrusion_config_mod,    only : method_uniform, &
                                         stretching_method_linear
     use feign_config_mod,        only : feign_base_mesh_config,    &
@@ -123,17 +122,20 @@ contains
     ! xyz is (long, lat, r)
 
     xyz = (/ 0.0_r_def, pi/2.0_r_def, scaled_radius /)
-    streamfunction = analytic_swe_streamfunction(xyz, swe_test_swe_geostr_balance )
+    streamfunction = analytic_swe_streamfunction(geometry_spherical, xyz, &
+                                                 swe_test_swe_geostr_balance )
     answer = 218166156.4992912_r_def
     @assertEqual(answer, streamfunction(3), tol)
 
     xyz = (/ 0.0_r_def, 0.0_r_def, scaled_radius /)
-    streamfunction = analytic_swe_streamfunction(xyz, swe_test_swe_geostr_balance )
+    streamfunction = analytic_swe_streamfunction(geometry_spherical, xyz, &
+                                                 swe_test_swe_geostr_balance )
     answer = 0.0_r_def
     @assertEqual(answer, streamfunction(3), tol)
 
     xyz = (/ 0.5_r_def, pi/2.0_r_def, scaled_radius /)
-    streamfunction = analytic_swe_streamfunction(xyz, swe_test_swe_geostr_balance )
+    streamfunction = analytic_swe_streamfunction(geometry_spherical, xyz, &
+                                                 swe_test_swe_geostr_balance )
     answer = 218166156.4992912_r_def
     @assertEqual(answer, streamfunction(3), tol)
 

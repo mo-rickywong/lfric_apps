@@ -36,11 +36,13 @@ module analytic_swe_buoyancy_profiles_mod
   !> @param[in] choice
   !> @param[in] domain_x Domain size in x-direction.
   !> @result    buoyancy The result buoyancy field
-  function analytic_swe_buoyancy(chi, choice, domain_x) result(buoyancy)
+  function analytic_swe_buoyancy(geometry, chi, choice, domain_x) result(buoyancy)
 
     use analytic_geopot_profiles_mod, only: analytic_geopot
 
     implicit none
+
+    integer, intent(in) :: geometry
 
     real(kind=r_def), intent(in) :: chi(3)
     integer,          intent(in) :: choice
@@ -56,7 +58,7 @@ module analytic_swe_buoyancy_profiles_mod
 
     case ( swe_test_swe_vortex_field )
       if ( thermal_swe ) then
-        gp = analytic_geopot(chi, swe_test_swe_gaussian_hill, domain_x)
+        gp = analytic_geopot(geometry, chi, swe_test_swe_gaussian_hill, domain_x)
         buoyancy = ( gp / ref_gp ) ** 2
       else
         buoyancy = 1.0_r_def
@@ -69,7 +71,7 @@ module analytic_swe_buoyancy_profiles_mod
 
     case ( swe_test_swe_geostr_balance )
       if ( thermal_swe ) then
-        gp = analytic_geopot(chi, swe_test_swe_geostr_balance, domain_x)
+        gp = analytic_geopot(geometry, chi, swe_test_swe_geostr_balance, domain_x)
         buoyancy = 1.0_r_def + 0.05_r_def * ( ref_gp / gp ) ** 2
       else
         buoyancy = 1.0_r_def
@@ -77,7 +79,7 @@ module analytic_swe_buoyancy_profiles_mod
 
     case ( swe_test_swe_gaussian_hill )
       if ( thermal_swe ) then
-        gp = analytic_geopot(chi, swe_test_swe_gaussian_hill, domain_x)
+        gp = analytic_geopot(geometry, chi, swe_test_swe_gaussian_hill, domain_x)
         buoyancy = ( gp / ref_gp ) ** 2
       else
         buoyancy = 1.0_r_def

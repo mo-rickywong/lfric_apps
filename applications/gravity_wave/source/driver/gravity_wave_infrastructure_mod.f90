@@ -31,6 +31,7 @@ module gravity_wave_infrastructure_mod
                                          LOG_LEVEL_ALWAYS,   &
                                          LOG_LEVEL_ERROR
   use mesh_collection_mod,        only : mesh_collection
+  use mesh_mod,                   only : mesh_type
   use field_mod,                  only : field_type
   use driver_fem_mod,             only : init_fem
   use driver_io_mod,              only : init_io, final_io
@@ -98,6 +99,8 @@ contains
 
     integer(i_def) :: i
     integer(i_def), parameter :: one_layer = 1_i_def
+
+    type(mesh_type), pointer :: mesh
 
     !=======================================================================
     ! 0.0 Extract configuration variables
@@ -247,9 +250,10 @@ contains
     !-------------------------------------------------------------------------
     ! Initialise aspects of output
     !-------------------------------------------------------------------------
+    mesh => mesh_collection%get_mesh(prime_mesh_name)
     call init_io( program_name, prime_mesh_name, modeldb, &
                   chi_inventory, panel_id_inventory,      &
-                  geometry, topology )
+                  mesh%geometry(), mesh%topology() )
 
     !-------------------------------------------------------------------------
     ! Setup constants

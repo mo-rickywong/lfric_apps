@@ -35,7 +35,6 @@ module calc_dep_pts_alg_mod
                                                tik, LPROF
 
   ! Configs
-  use base_mesh_config_mod,              only: geometry, topology
   use departure_points_config_mod,       only: horizontal_method,              &
                                                horizontal_method_euler,        &
                                                horizontal_method_timeaverage,  &
@@ -367,8 +366,9 @@ contains
     ndep = ndepk_fs%get_ndata()
     cap_dep_points = (horizontal_limit == horizontal_limit_cap)
 
-    is_cubed_sphere = (                                                        &
-      geometry == geometry_spherical .and. topology == topology_periodic       &
+    is_cubed_sphere = (                           &
+      mesh%geometry() == geometry_spherical .and. &
+      mesh%topology() == topology_periodic        &
     )
 
     if (is_cubed_sphere) then

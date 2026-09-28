@@ -42,7 +42,6 @@ module atl_mol_conservative_alg_mod
 
   ! Configuration
   use boundaries_config_mod,           only: limited_area
-  use base_mesh_config_mod,            only: topology
   use linear_config_mod,               only: transport_efficiency
   use transport_config_mod,            only: runge_kutta_method, &
                                              dry_field_name,     &
@@ -75,7 +74,6 @@ module atl_mol_conservative_alg_mod
     type(adj_trans_lookup_cache_type),  intent(in)    :: adj_lookup_table_cache
 
     ! Internal variables
-    integer(kind=i_def)                      :: mesh_id
     integer(kind=i_def)                      :: stage, s, direction
     integer(kind=i_def)                      :: nstage, substep
     integer(kind=i_def)                      :: ls_nstage, ls_substep
@@ -128,7 +126,6 @@ module atl_mol_conservative_alg_mod
     ! ------------------------------------------------------------------------ !
     ! Extract transport objects and initialise temporary fields
     ! ------------------------------------------------------------------------ !
-    mesh_id =  field%get_mesh_id()
     mesh    => field%get_mesh()
     config  => tl_transport_controller%get_config()
 
@@ -289,7 +286,7 @@ module atl_mol_conservative_alg_mod
         ! -------------------------------------------------------------------- !
         ! Blending zone update
         ! -------------------------------------------------------------------- !
-        if ( limited_area .and. topology == topology_non_periodic ) then
+        if ( limited_area .and. mesh%topology() == topology_non_periodic ) then
           call log_event('T.L.: limited area in mol conservative not ' // &
                          'yet implemented', LOG_LEVEL_ERROR)
         end if
@@ -302,7 +299,7 @@ module atl_mol_conservative_alg_mod
       ! ---------------------------------------------------------------------- !
       ! Blending zone update
       ! ---------------------------------------------------------------------- !
-      if ( limited_area .and. topology == topology_non_periodic ) then
+      if ( limited_area .and. mesh%topology() == topology_non_periodic ) then
         call log_event('T.L.: limited area in mol conservative not ' // &
                         'yet implemented', LOG_LEVEL_ERROR)
       end if
@@ -371,7 +368,7 @@ module atl_mol_conservative_alg_mod
       ! ---------------------------------------------------------------------- !
       ! Blending zone update
       ! ---------------------------------------------------------------------- !
-      if ( limited_area .and. topology == topology_non_periodic ) then
+      if ( limited_area .and. mesh%topology() == topology_non_periodic ) then
         call log_event('ATL.: limited area in mol conservative not ' // &
                         'yet implemented', LOG_LEVEL_ERROR)
       end if
@@ -393,7 +390,7 @@ module atl_mol_conservative_alg_mod
         ! -------------------------------------------------------------------- !
         ! Blending zone update
         ! -------------------------------------------------------------------- !
-        if ( limited_area .and. topology == topology_non_periodic ) then
+        if ( limited_area .and. mesh%topology() == topology_non_periodic ) then
           call log_event('ATL.: limited area in mol conservative not ' // &
                          'yet implemented', LOG_LEVEL_ERROR)
         end if

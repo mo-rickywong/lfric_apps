@@ -125,7 +125,7 @@ subroutine initial_buoyancy_code(nlayers,                           &
                     coord_system, scaled_radius,     &
                     xyz(1), xyz(2), xyz(3) )
 
-      buoyancy(map_wt(df) + k) = analytic_buoyancy(xyz)
+      buoyancy(map_wt(df) + k) = analytic_buoyancy(geometry, xyz)
     end do
   end do
 

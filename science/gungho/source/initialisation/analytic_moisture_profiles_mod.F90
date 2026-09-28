@@ -20,7 +20,6 @@ use idealised_config_mod,         only : test_grabowski_clark,      &
 use physics_common_mod,           only : qsaturation
 use planet_config_mod,            only : recip_epsilon, scaled_radius
 use coord_transform_mod,          only : xyz2llr, central_angle
-use base_mesh_config_mod,         only : geometry
 use initial_density_config_mod,   only : r1, x1, y1, z1, r2, x2, y2, z2
 use deep_baroclinic_wave_mod,     only : deep_baroclinic_wave
 
@@ -33,14 +32,17 @@ public :: analytic_moisture
 contains
 
 !> @brief Compute an analytic moisture field
+!> @param[in] geometry    Enumeration for the mesh geometry
 !> @param[in] chi         Position in Cartesian coordinates
 !> @param[in] temperature Air temperature in K
 !> @param[in] pressure    Air pressure in Pa
 !> @param[in] choice      Integer defining which specified formula to use
 !> @result moisture The resulting moisture field
-function analytic_moisture(chi, temperature, pressure, choice) result(moisture)
+function analytic_moisture(geometry, chi, temperature, pressure, choice) result(moisture)
 
   implicit none
+
+  integer(i_def),      intent(in) :: geometry
   real(kind=r_def),    intent(in) :: chi(3)
   real(kind=r_def),    intent(in) :: temperature
   real(kind=r_def),    intent(in) :: pressure

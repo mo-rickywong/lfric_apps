@@ -15,9 +15,8 @@
 module orography_control_mod
 
   use constants_mod,          only : i_def, str_short
-  use mesh_mod,               only : geometry_spherical, &
+  use mesh_mod,               only : mesh_type, geometry_spherical, &
                                      geometry_planar
-  use base_mesh_config_mod,   only : geometry
   use orography_config_mod,   only : profile,        &
                                      profile_schar,  &
                                      profile_agnesi, &
@@ -48,9 +47,11 @@ contains
   !>          4) Bell-shaped mountain.
   !>          The default option in no orography (flat planet surface).
   !=============================================================================
-  subroutine set_orography_option()
+  subroutine set_orography_option(mesh)
 
     implicit none
+
+    type(mesh_type), intent(in) :: mesh
 
     ! ----------- Deallocate abstract orography type if allocated -------------!
     if ( allocated (orography_profile) ) deallocate(orography_profile)
@@ -59,7 +60,7 @@ contains
     select case( profile )
       ! Witch-of-Agnesi orography
       case( profile_agnesi )
-        if ( geometry == geometry_spherical ) then
+        if ( mesh%geometry() == geometry_spherical ) then
           ! Read parameters for Witch-of-Agnesi mountain in spherical
           ! coordinates and initialise the corresponding type
            call set_orography_agnesi_spherical()
@@ -70,7 +71,7 @@ contains
         end if
       ! Schar orography
       case( profile_schar )
-        if ( geometry == geometry_spherical ) then
+        if ( mesh%geometry() == geometry_spherical ) then
           ! Read parameters for Schar mountain in (lon,lat) coordinates and
           ! initialise the corresponding type
            call set_orography_schar_spherical()
@@ -81,14 +82,14 @@ contains
         end if
       ! DCMIP200 orography
       case( profile_dcmip200 )
-        if ( geometry == geometry_spherical ) then
+        if ( mesh%geometry() == geometry_spherical ) then
           ! Read parameters for dcmip200 mountain in spherical
           ! coordinates and initialise the corresponding type
           call set_orography_dcmip200_spherical()
         end if
       ! Bell-shaped orography
       case( profile_bell )
-        if ( geometry == geometry_planar ) then
+        if ( mesh%geometry() == geometry_planar ) then
           ! Read parameters for bell-shaped mountain in Cartesian
           ! coordinates and initialise the corresponding type
           call set_orography_bell_cartesian()

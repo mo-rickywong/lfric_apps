@@ -140,7 +140,7 @@ contains
                       coord_system, scaled_radius,     &
                       xyz(1), xyz(2), xyz(3) )
 
-        rho(map_rho(df) + k) = analytic_density(xyz, test, time)
+        rho(map_rho(df) + k) = analytic_density(geometry, xyz, test, time)
 
       end do
     end do

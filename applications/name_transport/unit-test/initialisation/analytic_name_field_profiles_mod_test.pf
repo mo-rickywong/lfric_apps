@@ -10,6 +10,7 @@ module analytic_name_field_profiles_mod_test
 
   use constants_mod, only : i_def, r_def
   use funit
+  use mesh_mod, only : geometry_planar
 
   implicit none
 
@@ -85,7 +86,8 @@ contains
     ! Set chi field
     chi = (/ 2.0_r_def,3.25_r_def,4.5_r_def /)
     ! Compute NAME density for cosine hill test
-    rho = analytic_name_field( chi, test_yz_cosine_hill, &
+    rho = analytic_name_field( geometry_planar, chi, &
+                               test_yz_cosine_hill,  &
                                domain_max_x )
     if ( r_def == real64 ) then
        tol = 10.0E-12_r_def

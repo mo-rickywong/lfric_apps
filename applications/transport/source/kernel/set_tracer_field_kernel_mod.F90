@@ -183,7 +183,7 @@ subroutine set_tracer_field_code(nlayers, tracer,                        &
             tracer_ref = 1.0_r_def
           else
             ! Set tracer field based on namelist
-            tracer_ref = analytic_tracer_field(xyz, test, domain_max_x)
+            tracer_ref = analytic_tracer_field(geometry, xyz, test, domain_max_x)
           end if
 
           integrand =  trc_basis(1,df1,qp1,qp2) * tracer_ref * dj(qp1,qp2)

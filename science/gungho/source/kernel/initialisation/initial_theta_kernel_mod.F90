@@ -132,7 +132,7 @@ subroutine initial_theta_code(nlayers,                               &
                     coord_system, scaled_radius,     &
                     xyz(1), xyz(2), xyz(3) )
 
-      theta(map_wtheta(df) + k) = analytic_temperature(xyz, test)
+      theta(map_wtheta(df) + k) = analytic_temperature(geometry, xyz, test)
 
     end do
   end do

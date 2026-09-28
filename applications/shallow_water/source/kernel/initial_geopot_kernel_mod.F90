@@ -125,7 +125,7 @@ contains
                     coord_system, scaled_radius,  &
                     xyz(1), xyz(2), xyz(3) )
 
-      geopot(map_w3(df)) = analytic_geopot(xyz, swe_test, domain_x)
+      geopot(map_w3(df)) = analytic_geopot(geometry, xyz, swe_test, domain_x)
 
     end do
 

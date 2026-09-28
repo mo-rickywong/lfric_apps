@@ -14,6 +14,7 @@
 module limited_area_constants_mod
 
   ! Infrastructure
+  use config_mod,                        only: config_type
   use constants_mod,                     only: i_def, r_def, l_def, &
                                                str_def, str_short
   use extrusion_mod,                     only: TWOD, PRIME_EXTRUSION
@@ -34,12 +35,11 @@ module limited_area_constants_mod
                                                LOG_LEVEL_ERROR, &
                                                LOG_LEVEL_DEBUG
   use mesh_collection_mod,               only: mesh_collection
-  use mesh_mod,                          only: mesh_type !, geometry_spherical
+  use mesh_mod,                          only: mesh_type
   use timing_mod,                        only: start_timing, stop_timing, &
                                                tik, LPROF
 
   ! Configuration
-! use base_mesh_config_mod,              only: geometry
   use boundaries_config_mod,             only: normal_only, lbc_method, &
                                                lbc_method_coordinate_based
   use finite_element_config_mod,         only: element_order_h, &
@@ -130,17 +130,17 @@ contains
   !> @param[in] use_fe           Whether to use finite element or finite volume
   !> @param[in] finest_mesh_name Masks are created only from the finest mesh
   !>                             of the model mesh hierarchy
-  subroutine create_standard_masks(mesh, use_fe, finest_mesh_name)
+  subroutine create_standard_masks(config, mesh, use_fe, finest_mesh_name)
 
     implicit none
 
     ! Arguments
-    type(mesh_type), pointer, intent(in) :: mesh
+    type(config_type),        intent(in) :: config
+    type(mesh_type),          intent(in) :: mesh
     logical(kind=l_def),      intent(in) :: use_fe
     character(len=str_def),   intent(in) :: finest_mesh_name
 
     ! Internal variables
-    integer(kind=i_def)                :: mesh_id
     integer(kind=i_def)                :: k_h, k_v
     type(function_space_type), pointer :: w2_fs
     type(function_space_type), pointer :: w3_fs
@@ -200,12 +200,11 @@ contains
       call mask_boundary_w2_inventory%initialise(name='w2boundary_mask')
     end if
 
-    mesh_id = mesh%get_id()
     chi => get_coordinates(mesh)
     w2_fs => function_space_collection%get_fs( mesh, k_h, k_v, W2 )
     w3_fs => function_space_collection%get_fs( mesh, k_h, k_v, W3 )
     wtheta_fs => function_space_collection%get_fs( mesh, k_h, k_v, Wtheta )
-    onion_layers => get_onion_layers(mesh_id, finest_mesh_name)
+    onion_layers => get_onion_layers(mesh%get_id(), finest_mesh_name)
 
     ! Add fields to inventory
     call mask_w2_inventory%add_field(mask_w2, w2_fs, mesh, name='w2_mask')
@@ -220,16 +219,16 @@ contains
 
     if (normal_only) then
       call log_event( "Using w2 dofs on boundary for LBC", LOG_LEVEL_DEBUG )
-      call create_boundary_mask( mask_boundary_w2, onion_layers, chi )
-      call create_limited_area_mask( mask_w2, onion_layers, chi )
+      call create_boundary_mask( config, mask_boundary_w2, onion_layers, chi )
+      call create_limited_area_mask( config, mask_w2, onion_layers, chi )
     else
       call log_event(                                                          &
               "Using w2 dofs on boundary and tangential 1 cell in",            &
               LOG_LEVEL_DEBUG                                                  &
       )
-      call create_boundary_mask( w2perp_mask, onion_layers, chi )
-      call create_parallel_boundary_mask ( w2parallel_mask, chi )
-      call create_limited_area_mask( w2interior_mask, onion_layers, chi )
+      call create_boundary_mask( config, w2perp_mask, onion_layers, chi )
+      call create_parallel_boundary_mask ( config, w2parallel_mask, chi )
+      call create_limited_area_mask( config, w2interior_mask, onion_layers, chi )
 
       call invoke(                                                             &
                    ! Add the W2parallel and W2perp masks together
@@ -241,11 +240,11 @@ contains
     ! Check that the W2 boundary mask has the correct number of dofs
     ! if we're using the coordinate_based method
     if ( lbc_method == lbc_method_coordinate_based )then
-      call check_w2b_mask( mask_boundary_w2 )
+      call check_w2b_mask( config, mask_boundary_w2 )
     end if
 
-    call create_limited_area_mask( mask_w3, onion_layers, chi )
-    call create_limited_area_mask( mask_wtheta, onion_layers, chi )
+    call create_limited_area_mask( config, mask_w3, onion_layers, chi )
+    call create_limited_area_mask( config, mask_wtheta, onion_layers, chi )
 
     ! Add the masks to the mask_collection to enable writing out
     if (.not. allocated(mask_collection)) then
@@ -454,15 +453,16 @@ contains
   !> @param[in] finest_mesh_name Masks are created only from the finest mesh
   !>                             of the model mesh hierarchy
   !> @return The interior mask field
-  function get_mask_fe(space, mesh_id, finest_mesh_name) result(mask_ptr)
+  function get_mask_fe(config, mesh, space, finest_mesh_name) result(mask_ptr)
 
     implicit none
 
+    type(config_type), intent(in) :: config
+    type(mesh_type),   intent(in) :: mesh
+
     integer(kind=i_def),       intent(in) :: space
-    integer(kind=i_def),       intent(in) :: mesh_id
     character(len=str_def),    intent(in) :: finest_mesh_name
     integer(kind=i_def)                   :: finest_mesh_id
-    type(mesh_type),              pointer :: mesh
     type(mesh_type),              pointer :: finest_mesh
     type(field_type),             pointer :: mask_ptr
     logical(kind=l_def)                   :: constant_exists
@@ -471,7 +471,7 @@ contains
 
     ! If running at lowest order, use finite volume
     if (element_order_h == 0 .and. element_order_v == 0) then
-      mask_ptr => get_mask_fv(space, mesh_id, finest_mesh_name)
+      mask_ptr => get_mask_fv(config, mesh, space, finest_mesh_name)
       return
     end if
 
@@ -498,8 +498,7 @@ contains
       call inventory%initialise(name=inventory_name)
     end if
 
-    mesh => mesh_collection%get_mesh(mesh_id)
-    constant_exists = inventory%paired_object_exists(mesh_id)
+    constant_exists = inventory%paired_object_exists(mesh%get_id())
 
     if (.not. constant_exists) then
       ! Create constant if it doesn't already exist
@@ -508,8 +507,8 @@ contains
       ! If this is the finest mesh, create all standard finest mesh masks
       finest_mesh => mesh_collection%get_mesh(finest_mesh_name)
       finest_mesh_id = finest_mesh%get_id()
-      if (mesh_id == finest_mesh_id) then
-        call create_standard_masks(mesh, use_fe=.true., &
+      if (mesh%get_id() == finest_mesh_id) then
+        call create_standard_masks(config, mesh, use_fe=.true., &
                                    finest_mesh_name=finest_mesh_name)
 
       ! Check mesh is prime extrusion
@@ -525,7 +524,7 @@ contains
         ! If masks don't yet exist on finest mesh, create them
         constant_exists = inventory%paired_object_exists(finest_mesh_id)
         if (.not. constant_exists) then
-          call create_standard_masks(finest_mesh, use_fe=.true., &
+          call create_standard_masks(config, finest_mesh, use_fe=.true., &
                                      finest_mesh_name=finest_mesh_name)
         end if
 
@@ -553,15 +552,17 @@ contains
   !> @param[in] finest_mesh_name Masks are created only from the finest mesh
   !>                             of the model mesh hierarchy
   !> @return The interior mask field
-  function get_mask_fv(space, mesh_id, finest_mesh_name) result(mask_ptr)
+  function get_mask_fv(config, mesh, space, finest_mesh_name) result(mask_ptr)
 
     implicit none
 
+    type(config_type), intent(in) :: config
+    type(mesh_type),   intent(in) :: mesh
+
     integer(kind=i_def),       intent(in) :: space
-    integer(kind=i_def),       intent(in) :: mesh_id
     character(len=str_def),    intent(in) :: finest_mesh_name
+
     integer(kind=i_def)                   :: finest_mesh_id
-    type(mesh_type),              pointer :: mesh
     type(mesh_type),              pointer :: finest_mesh
     type(field_type),             pointer :: mask_ptr
     logical(kind=l_def)                   :: constant_exists
@@ -591,8 +592,7 @@ contains
       call inventory%initialise(name=inventory_name)
     end if
 
-    mesh => mesh_collection%get_mesh(mesh_id)
-    constant_exists = inventory%paired_object_exists(mesh_id)
+    constant_exists = inventory%paired_object_exists(mesh%get_id())
 
     if (.not. constant_exists) then
       ! Create constant if it doesn't already exist
@@ -601,8 +601,8 @@ contains
       ! If this is the finest mesh, create all standard finest mesh masks
       finest_mesh => mesh_collection%get_mesh(finest_mesh_name)
       finest_mesh_id = finest_mesh%get_id()
-      if (mesh_id == finest_mesh_id) then
-        call create_standard_masks(mesh, use_fe=.false., &
+      if (mesh%get_id() == finest_mesh_id) then
+        call create_standard_masks(config, mesh, use_fe=.false., &
                                    finest_mesh_name=finest_mesh_name)
 
       ! Check mesh is prime extrusion
@@ -618,7 +618,7 @@ contains
         ! If masks don't yet exist on finest mesh, create them
         constant_exists = inventory%paired_object_exists(finest_mesh_id)
         if (.not. constant_exists) then
-          call create_standard_masks(finest_mesh, use_fe=.false., &
+          call create_standard_masks(config, finest_mesh, use_fe=.false., &
                                      finest_mesh_name=finest_mesh_name)
         end if
 
@@ -646,14 +646,16 @@ contains
   !> @param[in] finest_mesh_name Masks are created only from the finest mesh
   !>                             of the model mesh hierarchy
   !> @return The interior mask field
-  function get_mask_r_solver(space, mesh_id, finest_mesh_name) result(mask_r_solver)
+  function get_mask_r_solver(config, mesh, space, finest_mesh_name) result(mask_r_solver)
 
     implicit none
 
-    integer(kind=i_def),       intent(in) :: mesh_id
+    type(config_type), intent(in) :: config
+    type(mesh_type),   intent(in) :: mesh
+
     integer(kind=i_def),       intent(in) :: space
     character(len=str_def),    intent(in) :: finest_mesh_name
-    type(mesh_type),              pointer :: mesh
+
     type(field_type),             pointer :: mask_r_def
     type(r_solver_field_type),    pointer :: mask_r_solver
     logical(kind=l_def)                   :: constant_exists
@@ -685,12 +687,11 @@ contains
       call inventory%initialise(name=inventory_name)
     end if
 
-    mesh => mesh_collection%get_mesh(mesh_id)
-    constant_exists = inventory%paired_object_exists(mesh_id)
+    constant_exists = inventory%paired_object_exists(mesh%get_id())
 
     if (.not. constant_exists) then
       ! Create constant if it doesn't already exist
-      mask_r_def => get_mask_fe(space, mesh_id, finest_mesh_name)
+      mask_r_def => get_mask_fe(config, mesh, space, finest_mesh_name)
 
       if ( LPROF ) call start_timing( id, 'runtime_constants.limited_area' )
 
@@ -713,14 +714,16 @@ contains
   !> @param[in] finest_mesh_name Masks are created only from the finest mesh
   !>                             of the model mesh hierarchy
   !> @return The boundary mask field
-  function get_boundary_mask_fe(space, mesh_id, finest_mesh_name) result(mask_ptr)
+  function get_boundary_mask_fe(config, mesh, space, finest_mesh_name) result(mask_ptr)
 
     implicit none
 
+    type(config_type), intent(in) :: config
+    type(mesh_type),   intent(in) :: mesh
+
     integer(kind=i_def),       intent(in) :: space
-    integer(kind=i_def),       intent(in) :: mesh_id
     character(len=str_def),    intent(in) :: finest_mesh_name
-    type(mesh_type),              pointer :: mesh
+
     type(mesh_type),              pointer :: finest_mesh
     type(field_type),             pointer :: mask_ptr
     logical(kind=l_def)                   :: constant_exists
@@ -730,7 +733,7 @@ contains
 
     ! If running at lowest order, use finite volume
     if (element_order_h == 0 .and. element_order_v == 0) then
-      mask_ptr => get_boundary_mask_fv(space, mesh_id, finest_mesh_name)
+      mask_ptr => get_boundary_mask_fv(config, mesh, space, finest_mesh_name)
       return
     end if
 
@@ -751,8 +754,7 @@ contains
       call inventory%initialise(name=inventory_name)
     end if
 
-    mesh => mesh_collection%get_mesh(mesh_id)
-    constant_exists = inventory%paired_object_exists(mesh_id)
+    constant_exists = inventory%paired_object_exists(mesh%get_id())
 
     if (.not. constant_exists) then
       ! Create constant if it doesn't already exist
@@ -760,14 +762,14 @@ contains
 
       ! Check if this is the finest mesh
       finest_mesh => mesh_collection%get_mesh(finest_mesh_name)
-      if (mesh_id /= finest_mesh%get_id()) then
+      if (mesh%get_id() /= finest_mesh%get_id()) then
         call log_event(                                                        &
                 'Boundary masks only implemented on meshes on finest mesh',    &
                 LOG_LEVEL_ERROR                                                &
         )
       end if
 
-      call create_standard_masks(mesh, use_fe=.true., &
+      call create_standard_masks(config, mesh, use_fe=.true., &
                                  finest_mesh_name=finest_mesh_name)
 
       if ( LPROF ) call stop_timing( id, 'runtime_constants.limited_area' )
@@ -784,14 +786,16 @@ contains
   !> @param[in] finest_mesh_name Masks are created only from the finest mesh
   !>                             of the model mesh hierarchy
   !> @return The boundary mask field
-  function get_boundary_mask_fv(space, mesh_id, finest_mesh_name) result(mask_ptr)
+  function get_boundary_mask_fv(config, mesh, space, finest_mesh_name) result(mask_ptr)
 
     implicit none
 
+    type(config_type), intent(in) :: config
+    type(mesh_type),   intent(in) :: mesh
+
     integer(kind=i_def),       intent(in) :: space
-    integer(kind=i_def),       intent(in) :: mesh_id
     character(len=str_def),    intent(in) :: finest_mesh_name
-    type(mesh_type),              pointer :: mesh
+
     type(mesh_type),              pointer :: finest_mesh
     type(field_type),             pointer :: mask_ptr
     logical(kind=l_def)                   :: constant_exists
@@ -816,8 +820,7 @@ contains
       call inventory%initialise(name=inventory_name)
     end if
 
-    mesh => mesh_collection%get_mesh(mesh_id)
-    constant_exists = inventory%paired_object_exists(mesh_id)
+    constant_exists = inventory%paired_object_exists(mesh%get_id())
 
     if (.not. constant_exists) then
       ! Create constant if it doesn't already exist
@@ -825,14 +828,14 @@ contains
 
       ! Check if this is the finest mesh
       finest_mesh => mesh_collection%get_mesh(finest_mesh_name)
-      if (mesh_id /= finest_mesh%get_id()) then
+      if (mesh%get_id() /= finest_mesh%get_id()) then
         call log_event(                                                        &
                 'Boundary masks only implemented on meshes on finest mesh',    &
                 LOG_LEVEL_ERROR                                                &
         )
       end if
 
-      call create_standard_masks(mesh, use_fe=.false., &
+      call create_standard_masks(config, mesh, use_fe=.false., &
                                  finest_mesh_name=finest_mesh_name)
 
       if ( LPROF ) call stop_timing( id, 'runtime_constants.limited_area' )
@@ -849,14 +852,17 @@ contains
   !> @param[in] finest_mesh_name Masks are created only from the finest mesh
   !>                             of the model mesh hierarchy
   !> @return The LBC mask field
-  function get_lbc_mask_fe(space, mesh_id, finest_mesh_name) result(mask_ptr)
+  function get_lbc_mask_fe(config, mesh, space, finest_mesh_name) &
+                    result(mask_ptr)
 
     implicit none
 
-    integer(kind=i_def),       intent(in) :: mesh_id
+    type(config_type), intent(in) :: config
+    type(mesh_type),   intent(in) :: mesh
+
     integer(kind=i_def),       intent(in) :: space
     character(len=str_def),    intent(in) :: finest_mesh_name
-    type(mesh_type),              pointer :: mesh
+
     type(field_type),             pointer :: mask_ptr
     type(field_type),             pointer :: chi(:)
     type(field_type),             pointer :: onion_layers
@@ -869,7 +875,7 @@ contains
 
     ! If running at lowest order, use finite volume
     if (element_order_h == 0 .and. element_order_v == 0) then
-      mask_ptr => get_lbc_mask_fv(space, mesh_id, finest_mesh_name)
+      mask_ptr => get_lbc_mask_fv(config, mesh, space, finest_mesh_name)
       return
     end if
 
@@ -899,12 +905,11 @@ contains
       call inventory%initialise(name=inventory_name)
     end if
 
-    mesh => mesh_collection%get_mesh(mesh_id)
-    constant_exists = inventory%paired_object_exists(mesh_id)
+    constant_exists = inventory%paired_object_exists(mesh%get_id())
 
     if (.not. constant_exists) then
       ! Create constant if it doesn't already exist
-      onion_layers => get_onion_layers(mesh_id, finest_mesh_name)
+      onion_layers => get_onion_layers(mesh%get_id(), finest_mesh_name)
       chi => get_coordinates(mesh)
 
       if ( LPROF ) call start_timing( id, 'runtime_constants.limited_area' )
@@ -912,7 +917,7 @@ contains
       fs => function_space_collection%get_fs(mesh, element_order_h, &
                                              element_order_v, space)
       call inventory%add_field(mask_ptr, fs, mesh, name=field_name)
-      call create_lbc_mask(mask_ptr, onion_layers, chi)
+      call create_lbc_mask(config, mask_ptr, onion_layers, chi)
 
       ! Add field to mask collection
       if (.not. allocated(mask_collection)) then
@@ -935,14 +940,15 @@ contains
   !> @param[in] finest_mesh_name Masks are created only from the finest mesh
   !>                             of the model mesh hierarchy
   !> @return The LBC mask field
-  function get_lbc_mask_fv(space, mesh_id, finest_mesh_name) result(mask_ptr)
+  function get_lbc_mask_fv(config, mesh, space, finest_mesh_name) result(mask_ptr)
 
     implicit none
 
-    integer(kind=i_def),       intent(in) :: mesh_id
+    type(config_type), intent(in) :: config
+    type(mesh_type),   intent(in) :: mesh
+
     integer(kind=i_def),       intent(in) :: space
     character(len=str_def),    intent(in) :: finest_mesh_name
-    type(mesh_type),              pointer :: mesh
     type(field_type),             pointer :: mask_ptr
     type(field_type),             pointer :: chi(:)
     type(field_type),             pointer :: onion_layers
@@ -979,19 +985,18 @@ contains
       call inventory%initialise(name=inventory_name)
     end if
 
-    mesh => mesh_collection%get_mesh(mesh_id)
-    constant_exists = inventory%paired_object_exists(mesh_id)
+    constant_exists = inventory%paired_object_exists(mesh%get_id())
 
     if (.not. constant_exists) then
       ! Create constant if it doesn't already exist
-      onion_layers => get_onion_layers(mesh_id, finest_mesh_name)
+      onion_layers => get_onion_layers(mesh%get_id(), finest_mesh_name)
       chi => get_coordinates(mesh)
 
       if ( LPROF ) call start_timing( id, 'runtime_constants.limited_area' )
 
       fs => function_space_collection%get_fs(mesh, 0, 0, space)
       call inventory%add_field(mask_ptr, fs, mesh, name=field_name)
-      call create_lbc_mask(mask_ptr, onion_layers, chi)
+      call create_lbc_mask(config, mask_ptr, onion_layers, chi)
 
       ! Add field to mask collection
       if (.not. allocated(mask_collection)) then
@@ -1087,14 +1092,15 @@ contains
   !> @param[in] finest_mesh_name Masks are created only from the finest mesh
   !>                             of the model mesh hierarchy
   !> @return The blend mask field
-  function get_blend_mask(space, mesh_id, finest_mesh_name) result(mask_ptr)
+  function get_blend_mask(config, mesh, space, finest_mesh_name) result(mask_ptr)
 
     implicit none
 
-    integer(kind=i_def),       intent(in) :: mesh_id
+    type(config_type), intent(in) :: config
+    type(mesh_type),   intent(in) :: mesh
+
     integer(kind=i_def),       intent(in) :: space
     character(len=str_def),    intent(in) :: finest_mesh_name
-    type(mesh_type),              pointer :: mesh
     type(field_type),             pointer :: mask_ptr
     type(field_type),             pointer :: chi(:)
     type(field_type),             pointer :: onion_layers
@@ -1127,12 +1133,11 @@ contains
       call inventory%initialise(name=inventory_name)
     end if
 
-    mesh => mesh_collection%get_mesh(mesh_id)
-    constant_exists = inventory%paired_object_exists(mesh_id)
+    constant_exists = inventory%paired_object_exists(mesh%get_id())
 
     if (.not. constant_exists) then
       ! Create constant if it doesn't already exist
-      onion_layers => get_onion_layers(mesh_id, finest_mesh_name)
+      onion_layers => get_onion_layers(mesh%get_id(), finest_mesh_name)
       chi => get_coordinates(mesh)
 
       if ( LPROF ) call start_timing( id, 'runtime_constants.limited_area' )
@@ -1140,7 +1145,7 @@ contains
       fs => function_space_collection%get_fs(mesh, element_order_h, &
                                              element_order_v, space)
       call inventory%add_field(mask_ptr, fs, mesh, name=inventory_name)
-      call create_blend_mask(mask_ptr, onion_layers, chi)
+      call create_blend_mask(config, mask_ptr, onion_layers, chi)
 
       ! Add field to mask collection
       if (.not. allocated(mask_collection)) then

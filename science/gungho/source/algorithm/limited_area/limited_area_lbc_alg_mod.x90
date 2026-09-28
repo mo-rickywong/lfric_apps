@@ -25,6 +25,7 @@ module limited_area_lbc_alg_mod
                                             get_onion_layers
   use limited_area_masks_alg_mod,     only: rim_width
   use fs_continuity_mod,              only: W2, W3, Wtheta
+  use config_mod,                     only: config_type
   use constants_mod,                  only: i_def, str_def, r_def, &
                                             l_def, r_tran
   use initialization_config_mod,      only: lbc_option_analytic,         &
@@ -49,9 +50,11 @@ contains
   !> @param[in]     lam_wind_field  Nested model wind field
   !> @param[in,out] lbc_fields      LBC field collection
   !> @param[in]     finestmesh_name Name of the finest mesh
-  subroutine lam_solver_lbc( lam_wind_field, lbc_fields, finest_mesh_name )
+  subroutine lam_solver_lbc( config, lam_wind_field, lbc_fields, finest_mesh_name )
 
     implicit none
+
+    type(config_type), intent(in) :: config
 
     type(field_type), intent(in)               :: lam_wind_field
     type(field_collection_type), intent(inout) :: lbc_fields
@@ -61,14 +64,14 @@ contains
     type(field_type), pointer                  :: boundary_u_driving
     type(field_type), pointer                  :: boundary_u_diff
 
-    type(mesh_type),  pointer :: mesh => null()
+    type(mesh_type),  pointer :: mesh
 
     mesh => lam_wind_field%get_mesh()
     if (lam_wind_field%get_element_order_h() > 0 .or. &
         lam_wind_field%get_element_order_v() > 0) then
-      mask => get_boundary_mask_fe( W2, mesh%get_id(), finest_mesh_name )
+      mask => get_boundary_mask_fe( config, mesh, W2, finest_mesh_name )
     else
-      mask => get_boundary_mask_fv( W2, mesh%get_id(), finest_mesh_name )
+      mask => get_boundary_mask_fv( config, mesh, W2, finest_mesh_name )
     end if
 
     call lbc_fields%get_field( 'boundary_u_driving', boundary_u_driving )
@@ -114,7 +117,7 @@ contains
   !> @param[in]     microphysics_casim Run with CASIM scheme
   !> @param[in]     murk_lbc   Apply lateral boundary conditions for murk
   !> @param[in]     finest_mesh_name Name of the finest mesh
-  subroutine lam_blend_lbc( state_u, state_p, state_d, state_t, mr, lbc_fields, &
+  subroutine lam_blend_lbc( config, state_u, state_p, state_d, state_t, mr, lbc_fields, &
                             microphysics_fields, aerosol_fields, lbc_option,    &
                             microphysics_casim, murk_lbc, moisture_formulation, &
                             finest_mesh_name )
@@ -122,7 +125,7 @@ contains
                                        LOG_LEVEL_INFO
 
     implicit none
-
+type(config_type), intent(in) :: config
     type(field_type),            intent(inout) :: state_u, &
                                                   state_p, &
                                                   state_d, &
@@ -157,15 +160,15 @@ contains
       ! For analytic LBCs we relax back the full prognostic fields
       call log_event( "Blending analytic LBC data...", LOG_LEVEL_INFO )
 
-      call blend_field( state_u, lbc_fields, name_u, finest_mesh_name )
-      call blend_field( state_p, lbc_fields, name_p, finest_mesh_name )
-      call blend_field( state_d, lbc_fields, name_d, finest_mesh_name )
-      call blend_field( state_t, lbc_fields, name_t, finest_mesh_name )
+      call blend_field( config, state_u, lbc_fields, name_u, finest_mesh_name )
+      call blend_field( config, state_p, lbc_fields, name_p, finest_mesh_name )
+      call blend_field( config, state_d, lbc_fields, name_d, finest_mesh_name )
+      call blend_field( config, state_t, lbc_fields, name_t, finest_mesh_name )
 
       if ( moisture_formulation /= moisture_formulation_dry ) then
         do imr = 1, nummr
           name_mr = trim( 'lbc_' // adjustl(mr_names (imr)) )
-          call blend_field( mr(imr), lbc_fields, name_mr, finest_mesh_name )
+          call blend_field( config, mr(imr), lbc_fields, name_mr, finest_mesh_name )
         enddo
       end if
 
@@ -174,19 +177,19 @@ contains
       ! a subset of moisture fields
       call log_event( "Blending um2lfric LBC data...", LOG_LEVEL_INFO )
 
-      call blend_field( state_u, lbc_fields, name_u, finest_mesh_name )
-      call blend_field( state_p, lbc_fields, name_p, finest_mesh_name )
-      call blend_field( state_d, lbc_fields, name_d, finest_mesh_name )
-      call blend_field( state_t, lbc_fields, name_t, finest_mesh_name )
+      call blend_field( config, state_u, lbc_fields, name_u, finest_mesh_name )
+      call blend_field( config, state_p, lbc_fields, name_p, finest_mesh_name )
+      call blend_field( config, state_d, lbc_fields, name_d, finest_mesh_name )
+      call blend_field( config, state_t, lbc_fields, name_t, finest_mesh_name )
 
-      call blend_field( mr(imr_v), lbc_fields, name_m_v, finest_mesh_name )
-      call blend_field( mr(imr_cl), lbc_fields, name_m_cl, finest_mesh_name )
-      call blend_field( mr(imr_s), lbc_fields, name_m_s, finest_mesh_name )
-      call blend_field( mr(imr_r), lbc_fields, name_m_r, finest_mesh_name )
+      call blend_field( config, mr(imr_v), lbc_fields, name_m_v, finest_mesh_name )
+      call blend_field( config, mr(imr_cl), lbc_fields, name_m_cl, finest_mesh_name )
+      call blend_field( config, mr(imr_s), lbc_fields, name_m_s, finest_mesh_name )
+      call blend_field( config, mr(imr_r), lbc_fields, name_m_r, finest_mesh_name )
 
       if (murk_lbc) then
         call aerosol_fields%get_field('murk', murk)
-        call blend_field( murk, lbc_fields, name_murk, finest_mesh_name )
+        call blend_field( config, murk, lbc_fields, name_murk, finest_mesh_name )
       end if
 
       ! For Casim give number fields values in LBC region
@@ -332,9 +335,11 @@ contains
   !> @param[in]     lbc_fields Field collection containing LBC data
   !> @param[in]     name       Name of the field to select from lbc_fields
   !> @param[in]     finest_mesh_name Name of the finest mesh
-  subroutine blend_field(lam_field, lbc_fields, name, finest_mesh_name)
+  subroutine blend_field(config, lam_field, lbc_fields, name, finest_mesh_name)
 
     implicit none
+
+    type(config_type), intent(in) :: config
 
     character(len=*), intent(in)            :: name
     type(field_type), intent(inout)         :: lam_field
@@ -352,12 +357,12 @@ contains
     mesh    => lam_field%get_mesh()
 
     call lbc_fields%get_field( name, driving_field )
-    blend_mask => get_blend_mask( fs_enum, mesh%get_id(), finest_mesh_name )
+    blend_mask => get_blend_mask( config, mesh, fs_enum, finest_mesh_name )
     if (lam_field%get_element_order_h() > 0 .or. &
         lam_field%get_element_order_v() > 0) then
-      lbc_mask => get_lbc_mask_fe( fs_enum, mesh%get_id(), finest_mesh_name )
+      lbc_mask => get_lbc_mask_fe( config, mesh, fs_enum, finest_mesh_name )
     else
-      lbc_mask => get_lbc_mask_fv( fs_enum, mesh%get_id(), finest_mesh_name )
+      lbc_mask => get_lbc_mask_fv( config, mesh, fs_enum, finest_mesh_name )
     end if
 
     ! Setup the temporary fields.

@@ -140,7 +140,7 @@ contains
                       coord_system, scaled_radius,     &
                       xyz(1), xyz(2), xyz(3) )
 
-        exner(map_w3(df) + k) = analytic_pressure(xyz, test, current_time)
+        exner(map_w3(df) + k) = analytic_pressure(geometry, xyz, test, current_time)
 
       end do
     end do

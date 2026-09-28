@@ -10,6 +10,10 @@
 module analytic_geopot_profiles_mod_test
 
   use constants_mod, only : r_def, i_def
+  use mesh_mod,      only : geometry_spherical, &
+                            topology_periodic
+
+
   use funit
 
   implicit none
@@ -23,8 +27,6 @@ contains
   @before
   subroutine set_up()
 
-    use mesh_mod,                           only : geometry_spherical, &
-                                                   topology_periodic
     use extrusion_config_mod,               only : method_uniform, &
                                                    stretching_method_linear
     use feign_config_mod,                   only : feign_base_mesh_config,    &
@@ -123,23 +125,29 @@ contains
     ! xyz are geocentric coordinates
 
     xyz = (/ 0.0_r_def, 0.0_r_def, scaled_radius /)
-    geopot_sol = analytic_geopot(xyz, swe_test_swe_geostr_balance, domain_x )
+    geopot_sol = analytic_geopot(geometry_spherical, xyz, &
+                                 swe_test_swe_geostr_balance, &
+                                 domain_x )
     answer = 11305.645371144576_r_def
     @assertEqual(answer, geopot_sol, tol)
 
     xyz = (/ 0.0_r_def, sqrt(1.0_r_def/2.0_r_def)*scaled_radius, sqrt(1.0_r_def/2.0_r_def)*scaled_radius /)
-    geopot_sol = analytic_geopot(xyz, swe_test_swe_geostr_balance, domain_x )
+    geopot_sol = analytic_geopot( geometry_spherical, xyz, &
+                                  swe_test_swe_geostr_balance, &
+                                  domain_x )
     answer = 20362.82268557229_r_def
     @assertEqual(answer, geopot_sol, tol)
 
     xyz = (/ 0.0_r_def, scaled_radius, 0.0_r_def /)
-    geopot_sol = analytic_geopot(xyz, swe_test_swe_geostr_balance, domain_x )
+    geopot_sol = analytic_geopot( geometry_spherical, xyz, &
+                                  swe_test_swe_geostr_balance, &
+                                  domain_x )
     answer = 29420.0_r_def
     @assertEqual(answer, geopot_sol, tol)
 
     ! Check step function tracer is initialised correctly
     xyz = (/ 0.0_r_def, sqrt(1.0_r_def/2.0_r_def)*scaled_radius, sqrt(1.0_r_def/2.0_r_def)*scaled_radius /)
-    tracer_sol = analytic_tracer(xyz, domain_x )
+    tracer_sol = analytic_tracer(geometry_spherical, xyz, domain_x )
     answer = 1.0_r_def
     @assertEqual(answer, tracer_sol, tol)
 

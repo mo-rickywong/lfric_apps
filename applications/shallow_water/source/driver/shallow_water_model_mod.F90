@@ -88,6 +88,8 @@ module shallow_water_model_mod
     class(extrusion_type),        allocatable :: extrusion
     type(uniform_extrusion_type), allocatable :: extrusion_2d
 
+    type(mesh_type), pointer :: mesh
+
     character(str_def) :: prime_mesh_name
 
     integer(i_def) :: geometry
@@ -253,11 +255,11 @@ module shallow_water_model_mod
 
     ! If using XIOS for diagnostic output or checkpointing, then set up XIOS
     ! domain and context
-
+    mesh => mesh_collection%get_mesh(prime_mesh_name)
     files_init_ptr => init_shallow_water_files
     call init_io( io_context_name, prime_mesh_name, modeldb, &
                   chi_inventory, panel_id_inventory,         &
-                  geometry, topology,                        &
+                  mesh%geometry(), mesh%topology(),          &
                   populate_filelist=files_init_ptr )
 
     !-------------------------------------------------------------------------

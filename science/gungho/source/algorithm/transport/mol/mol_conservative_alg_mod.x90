@@ -39,7 +39,6 @@ module mol_conservative_alg_mod
   use dg_matrix_vector_kernel_mod,    only: dg_matrix_vector_kernel_type
 
   ! Configuration modules
-  use base_mesh_config_mod,  only: topology
   use boundaries_config_mod, only: limited_area, transport_boundary_depth
   use transport_config_mod,  only: runge_kutta_method, &
                                    dry_field_name,     &
@@ -214,7 +213,7 @@ module mol_conservative_alg_mod
         ! -------------------------------------------------------------------- !
         ! Blending zone update
         ! -------------------------------------------------------------------- !
-        if ( limited_area .and. topology == topology_non_periodic ) then
+        if ( limited_area .and. mesh%topology() == topology_non_periodic ) then
           ! This code is required while LAMs loop over cells right up to
           ! the edge of a limited area domain.  It can be removed if
           ! we only loop over columns in the interior domain.
@@ -233,7 +232,7 @@ module mol_conservative_alg_mod
       ! ---------------------------------------------------------------------- !
       ! Blending zone update
       ! ---------------------------------------------------------------------- !
-      if ( limited_area .and. topology == topology_non_periodic ) then
+      if ( limited_area .and. mesh%topology() == topology_non_periodic ) then
         ! This code is required while LAMs loop over cells right up to
         ! the edge of a limited area domain.  It can be removed if
         ! we only loop over columns in the interior domain.
