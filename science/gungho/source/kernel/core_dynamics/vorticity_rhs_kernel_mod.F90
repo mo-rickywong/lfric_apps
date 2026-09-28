@@ -11,7 +11,8 @@
 module vorticity_rhs_kernel_mod
 
   use argument_mod,      only : arg_type, func_type,       &
-                                GH_FIELD, GH_REAL,         &
+                                GH_FIELD, GH_SCALAR,       &
+                                GH_REAL, GH_INTEGER,       &
                                 GH_READ, GH_INC,           &
                                 ANY_SPACE_9,               &
                                 ANY_DISCONTINUOUS_SPACE_3, &
@@ -20,10 +21,6 @@ module vorticity_rhs_kernel_mod
   use constants_mod,     only : r_def, i_def
   use fs_continuity_mod, only : W1, W2
   use kernel_mod,        only : kernel_type
-
-  use base_mesh_config_mod,      only: geometry, topology
-  use finite_element_config_mod, only: coord_system
-  use planet_config_mod,         only: scaled_radius
 
   implicit none
 
@@ -37,11 +34,15 @@ module vorticity_rhs_kernel_mod
   !>
   type, public, extends(kernel_type) :: vorticity_rhs_kernel_type
     private
-    type(arg_type) :: meta_args(4) = (/                                    &
+    type(arg_type) :: meta_args(8) = (/                                    &
          arg_type(GH_FIELD,   GH_REAL, GH_INC,  W1),                       &
          arg_type(GH_FIELD,   GH_REAL, GH_READ, W2),                       &
          arg_type(GH_FIELD*3, GH_REAL, GH_READ, ANY_SPACE_9),              &
-         arg_type(GH_FIELD,   GH_REAL, GH_READ, ANY_DISCONTINUOUS_SPACE_3) &
+         arg_type(GH_FIELD,   GH_REAL, GH_READ, ANY_DISCONTINUOUS_SPACE_3),&
+         arg_type(GH_SCALAR,  GH_INTEGER, GH_READ),                        &! geometry
+         arg_type(GH_SCALAR,  GH_INTEGER, GH_READ),                        &! topology
+         arg_type(GH_SCALAR,  GH_INTEGER, GH_READ),                        &! coord_system
+         arg_type(GH_SCALAR,  GH_REAL,    GH_READ)                         &! scald_radius
          /)
     type(func_type) :: meta_funcs(3) = (/                                  &
          func_type(W1,          GH_DIFF_BASIS),                            &
@@ -69,6 +70,10 @@ contains
 !! @param[in] chi_2 2nd coordinate field in Wchi
 !! @param[in] chi_3 3rd coordinate field in Wchi
 !! @param[in] panel_id Field giving the ID for mesh panels
+!! @param[in] geometry
+!! @param[in] topology
+!! @param[in] coord_system
+!! @param[in] scaled_radius
 !! @param[in] ndf_xi Number of degrees of freedom per cell for W1
 !! @param[in] undf_xi Unique number of degrees of freedom for W1
 !! @param[in] map_xi Dofmap for the cell at the base of the column for W1
@@ -95,6 +100,8 @@ contains
 !! @param[in] wqp_v Weights of the vertical quadrature points
 subroutine vorticity_rhs_code(nlayers,                                &
                               rhs, u, chi_1, chi_2, chi_3, panel_id,  &
+                              geometry, topology,                     &
+                              coord_system, scaled_radius,            &
                               ndf_xi, undf_xi, map_xi, diff_basis_xi, &
                               ndf_u, undf_u, map_u, basis_u,          &
                               ndf_chi, undf_chi, map_chi,             &
@@ -126,6 +133,11 @@ subroutine vorticity_rhs_code(nlayers,                                &
   real(kind=r_def), dimension(undf_u),                intent(in)    :: u
   real(kind=r_def), dimension(undf_chi),              intent(in)    :: chi_1, chi_2, chi_3
   real(kind=r_def), dimension(undf_pid),              intent(in)    :: panel_id
+
+  integer(i_def), intent(in) :: geometry
+  integer(i_def), intent(in) :: topology
+  integer(i_def), intent(in) :: coord_sys
+  real(r_def),    intent(in) :: scaled_radius
 
   real(kind=r_def), dimension(nqp_h), intent(in) :: wqp_h
   real(kind=r_def), dimension(nqp_v), intent(in) :: wqp_v

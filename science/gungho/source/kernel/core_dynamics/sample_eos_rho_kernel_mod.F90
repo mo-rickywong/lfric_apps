@@ -17,7 +17,6 @@ use argument_mod,               only : arg_type, func_type,   &
                                        ANY_SPACE_1, GH_BASIS, &
                                        CELL_COLUMN, GH_EVALUATOR
 use constants_mod,              only : r_def, i_def
-use idealised_config_mod,       only : test
 use fs_continuity_mod,          only : Wtheta, W3
 use kernel_mod,                 only : kernel_type
 

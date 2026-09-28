@@ -29,10 +29,7 @@ module compute_dl_matrix_kernel_mod
   use mesh_mod,                  only: geometry_spherical
 
   ! Configuration modules
-  use base_mesh_config_mod,      only: geometry, topology
   use damping_layer_config_mod,  only: dl_type, dl_type_latitude
-  use finite_element_config_mod, only: coord_system
-  use planet_config_mod,         only: scaled_radius
 
   implicit none
 
@@ -44,10 +41,14 @@ module compute_dl_matrix_kernel_mod
 
   type, public, extends(kernel_type) :: compute_dl_matrix_kernel_type
     private
-    type(arg_type) :: meta_args(10) = (/                                      &
+    type(arg_type) :: meta_args(14) = (/                                      &
          arg_type(GH_OPERATOR, GH_REAL, GH_WRITE, W2, W2),                    &
          arg_type(GH_FIELD*3,  GH_REAL, GH_READ,  ANY_SPACE_9),               &
          arg_type(GH_FIELD,    GH_REAL, GH_READ,  ANY_DISCONTINUOUS_SPACE_3), &
+         arg_type(GH_SCALAR,  GH_INTEGER, GH_READ),                        &! geometry
+         arg_type(GH_SCALAR,  GH_INTEGER, GH_READ),                        &! topology
+         arg_type(GH_SCALAR,  GH_INTEGER, GH_READ),                        &! coord_system
+         arg_type(GH_SCALAR,  GH_REAL,    GH_READ),                        &! scaled_radius
          arg_type(GH_SCALAR,   GH_REAL, GH_READ),                             &
          arg_type(GH_SCALAR,   GH_REAL, GH_READ),                             &
          arg_type(GH_SCALAR,   GH_REAL, GH_READ),                             &
@@ -84,6 +85,10 @@ contains
   !! @param[in] chi2     2nd coordinate field in Wchi
   !! @param[in] chi3     3rd coordinate field in Wchi
   !! @param[in] panel_id Field giving the ID for mesh panels
+!! @param[in] geometry
+!! @param[in] topology
+!! @param[in] coord_system
+!! @param[in] scaled_radius
   !! @param[in] dl_base_height
   !!                     Base height of damping layer
   !! @param[in] dl_strength
@@ -114,7 +119,9 @@ contains
   !! @param[in] wqp_v    Vertical quadrature weights
   subroutine compute_dl_matrix_code(cell, nlayers, ncell_3d,     &
                                     mm, chi1, chi2, chi3,        &
-                                    panel_id, dl_base_height,    &
+                                    panel_id, &
+geometry, topology, coord_system, scaled_radius, &
+dl_base_height,    &
                                     dl_strength, domain_height,  &
                                     radius, element_order_h,     &
                                     element_order_v, dt,         &
@@ -154,6 +161,11 @@ contains
     real(kind=r_def),    intent(in)    :: basis_w2(3,ndf_w2,nqp_h,nqp_v)
     integer(kind=i_def), intent(in)    :: element_order_h
     integer(kind=i_def), intent(in)    :: element_order_v
+
+  integer(i_def), intent(in) :: geometry
+  integer(i_def), intent(in) :: topology
+  integer(i_def), intent(in) :: coord_sys
+  real(r_def),    intent(in) :: scaled_radius
 
     ! Internal variables
     integer(kind=i_def) :: df, df2, dfc, k, ik

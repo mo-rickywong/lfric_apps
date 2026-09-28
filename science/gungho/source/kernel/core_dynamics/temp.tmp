@@ -1,0 +1,20 @@
+         arg_type(GH_SCALAR,  GH_INTEGER, GH_READ),                        &! geometry
+         arg_type(GH_SCALAR,  GH_INTEGER, GH_READ),                        &! topology
+         arg_type(GH_SCALAR,  GH_INTEGER, GH_READ),                        &! coord_system
+         arg_type(GH_SCALAR,  GH_REAL,    GH_READ),                        &! scaled_radius
+
+                                GH_FIELD, GH_SCALAR, &
+                                GH_REAL, GH_INTEGER, &
+                                GH_READ, GH_INC,     &
+
+  integer(i_def), intent(in) :: geometry
+  integer(i_def), intent(in) :: topology
+  integer(i_def), intent(in) :: coord_sys
+  real(r_def),    intent(in) :: scaled_radius
+
+geometry, topology, coord_system, scaled_radius, &
+
+!! @param[in] geometry
+!! @param[in] topology
+!! @param[in] coord_system
+!! @param[in] scaled_radius

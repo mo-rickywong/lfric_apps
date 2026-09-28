@@ -21,8 +21,8 @@ use kernel_mod,              only: kernel_type
 use argument_mod,            only: arg_type, func_type,       &
                                    GH_OPERATOR, GH_FIELD,     &
                                    GH_READ, GH_WRITE,         &
-                                   GH_REAL, GH_SCALAR,        &
-                                   ANY_SPACE_9,               &
+                                   GH_REAL, GH_INTEGER,       &
+                                   GH_SCALAR, ANY_SPACE_9,    &
                                    ANY_DISCONTINUOUS_SPACE_3, &
                                    GH_BASIS, GH_DIFF_BASIS,   &
                                    CELL_COLUMN, GH_QUADRATURE_XYoZ
@@ -33,10 +33,6 @@ use rotation_vector_mod,     only: rotation_vector_fplane,  &
 use cross_product_mod,       only: cross_product
 use mesh_mod,                only: geometry_spherical
 
-use base_mesh_config_mod,      only: geometry, topology
-use finite_element_config_mod, only: coord_system
-use planet_config_mod,         only: scaled_radius
-
 implicit none
 private
 
@@ -46,10 +42,14 @@ private
 
 type, public, extends(kernel_type) :: compute_coriolis_matrix_kernel_type
   private
-  type(arg_type) :: meta_args(5) = (/                                       &
+  type(arg_type) :: meta_args(9) = (/                                       &
        arg_type(GH_OPERATOR, GH_REAL, GH_WRITE, W2, W2),                    &
        arg_type(GH_FIELD*3,  GH_REAL, GH_READ,  ANY_SPACE_9),               &
        arg_type(GH_FIELD,    GH_REAL, GH_READ,  ANY_DISCONTINUOUS_SPACE_3), &
+       arg_type(GH_SCALAR,   GH_INTEGER, GH_READ),                          &! geometry
+       arg_type(GH_SCALAR,   GH_INTEGER, GH_READ),                          &! topology
+       arg_type(GH_SCALAR,   GH_INTEGER, GH_READ),                          &! coord_system
+       arg_type(GH_SCALAR,   GH_REAL,    GH_READ),                          &! scaled_radius
        arg_type(GH_SCALAR,   GH_REAL, GH_READ),                             &
        arg_type(GH_SCALAR,   GH_REAL, GH_READ)                              &
        /)
@@ -80,6 +80,10 @@ contains
 !! @param[in] chi_2 2nd coordinate field
 !! @param[in] chi_3 3rd coordinate field
 !! @param[in] panel_id A field giving the ID for mesh panels.
+!! @param[in] geometry
+!! @param[in] topology
+!! @param[in] coord_system
+!! @param[in] scaled_radius
 !! @param[in] omega    Planet angular velocity
 !! @param[in] f_lat    F-plane latitude
 !! @param[in] ndf      Degrees of freedom per cell.
@@ -102,6 +106,7 @@ subroutine compute_coriolis_matrix_code(cell, nlayers, ncell_3d,           &
                                         matrix,                            &
                                         chi_1, chi_2, chi_3,               &
                                         panel_id,                          &
+geometry, topology, coord_system, scaled_radius, &
                                         omega, f_lat,                      &
                                         ndf, basis,                        &
                                         ndf_chi, undf_chi,                 &
@@ -134,6 +139,11 @@ subroutine compute_coriolis_matrix_code(cell, nlayers, ncell_3d,           &
   real(kind=r_def),    intent(in)    :: wqp_v(nqp_v)
   real(kind=r_def),    intent(in)    :: omega
   real(kind=r_def),    intent(in)    :: f_lat
+
+  integer(i_def), intent(in) :: geometry
+  integer(i_def), intent(in) :: topology
+  integer(i_def), intent(in) :: coord_sys
+  real(r_def),    intent(in) :: scaled_radius
 
   ! Internal variables
   integer(kind=i_def)                          :: df, df2, k, ik
