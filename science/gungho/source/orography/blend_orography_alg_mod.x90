@@ -28,6 +28,7 @@ contains
   !!          driving model LBC orography using:
   !!          orog_new = w * orog_driving + (1-w) * orog_lam
   !!          where the weights w are defined by the blending mask.
+  !> @param[in]     config       Application configuration object
   !> @param[in,out] lam_orog     Current LAM orography to be blended
   !> @param[in]     driving_orog Driving model orography
   !> @param[in]     mesh_name    Name of the finest mesh

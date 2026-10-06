@@ -13,6 +13,8 @@ module analytic_orography_field_spherical_mod_test
   use global_mesh_mod,            only : global_mesh_type
   use analytic_orography_mod,     only : orography_profile
   use ugrid_mesh_data_mod,        only : ugrid_mesh_data_type
+  use extrusion_config_mod,       only : method_uniform, &
+                                         stretching_method_linear
 
   use mesh_mod, only: mesh_type, geometry_spherical, topology_periodic
   use finite_element_config_mod,  only :  coord_system_xyz
@@ -41,10 +43,11 @@ module analytic_orography_field_spherical_mod_test
   character(str_def), parameter   :: mesh_name   = 'unit_test'
   character(len=str_max_filename) :: file_prefix = "data/mesh_C16"
 
-  real(r_def), parameter :: radius         = 6371229.0_r_def
-  real(r_def), parameter :: domain_height  = 10000.0_r_def
-  real(r_def), parameter :: scaling_factor = 125.0_r_def
-  real(r_def), parameter :: scaled_radius  = scaling_factor*radius
+  real(r_def), parameter :: radius            = 6371229.0_r_def
+  real(r_def), parameter :: domain_height     = 10000.0_r_def
+  real(r_def), parameter :: scaling_factor    = 125.0_r_def
+  real(r_def), parameter :: scaled_radius     = scaling_factor*radius
+  real(r_def), parameter :: stretching_height = 1.0_r_def
 
   integer(i_def), parameter :: nlayers     = 10_i_def
   integer(i_def), parameter :: total_ranks = 1_i_def
@@ -63,8 +66,6 @@ contains
   subroutine setUp(this)
 
     use agnesi_orography_spherical_mod, only : agnesi_spherical_type
-    use extrusion_config_mod,           only : method_uniform, &
-                                               stretching_method_linear
     use finite_element_config_mod,      only : cellshape_quadrilateral, &
                                                coord_system_xyz,        &
                                                coord_space_wchi
@@ -98,7 +99,7 @@ contains
                                  planet_radius=radius,        &
                                  domain_height=domain_height, &
                                  number_of_layers=nlayers,    &
-                                 stretching_height=1.0_r_def, &
+                                 stretching_height=stretching_height,        &
                                  stretching_method=stretching_method_linear, &
                                  eta_values=(/0.5_r_def/) )
 
@@ -108,7 +109,7 @@ contains
                               rd             = 300.0_r_def,    &
                               cp             = 1000.0_r_def,   &
                               p_zero         = 100000.0_r_def, &
-                              scaling_factor = 125.0_r_def )
+                              scaling_factor = scaling_factor )
 
     ! Set Witch-of-Agnesi spherical configuration
     this%mountain_height   = 100.0_r_def
@@ -209,8 +210,6 @@ contains
     real(r_def)               :: eta(0:nlayers)
     real(r_def)               :: vertex_coords_2d(3,1), chi_surf, chi_test
 
-    real(r_def), parameter :: scaling_factor = 6371229.0_r_def
-
     ! Add global mesh
     call ugrid_mesh_data%read_from_file(trim(file_prefix)//'.nc', mesh_name)
     global_mesh = global_mesh_type( ugrid_mesh_data )
@@ -274,6 +273,8 @@ contains
                                            ndf, undf, map,                     &
                                            height_flat_surface,                &
                                            height_domain_top,                  &
+                                           stretching_height,                  &
+                                           stretching_method_linear,           &
                                            chi_1_in, chi_2_in, chi_3_in,       &
                                            chi_1_cart, chi_2_cart, chi_3_cart, &
                                            panel_id, &

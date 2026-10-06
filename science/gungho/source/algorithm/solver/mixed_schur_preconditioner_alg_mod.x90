@@ -462,7 +462,6 @@ contains
     type( r_solver_operator_type ), pointer :: div_star
     type( r_solver_field_type )             :: u_inc
     type(r_solver_field_type),      pointer :: w2_mask
-    integer( kind=i_def )                   :: mesh_id
 
     type(mesh_type), pointer :: mesh
 
@@ -478,9 +477,7 @@ contains
     if ( LPROF ) call start_timing( id, 'schur_precon.back_sub' )
 
     exner_inc => self%pressure_x%get_field_from_position(1)
-
-    mesh_id =  self%rhs_u%get_mesh_id()
-    mesh    => self%rhs_u%get_mesh()
+    mesh => self%rhs_u%get_mesh()
 
     ! Create increment fields
 

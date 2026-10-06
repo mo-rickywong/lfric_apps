@@ -58,12 +58,17 @@ contains
   !!                                      paired with their mesh.
   !> @param[in]     panel_id_inventory    Contains the model's panel ID fields
   !!                                      paired with their mesh.
+  !> @param[in]     stretching_height   Physical height above which surface altitude
+  !!                                    does not influence layer height (m)
+  !> @param[in]     stretching_method   Method of generating stretching
   !> @param[in]     surf_alt_w3           Surface altitude on the orography mesh
   subroutine setup_orography_alg( config,                                      &
                                   all_mesh_names,                              &
                                   orography_mesh_name,                         &
                                   chi_inventory,                               &
                                   panel_id_inventory,                          &
+                                  stretching_height,                           &
+                                  stretching_method,                           &
                                   surf_alt_w3 )
 
     use assign_orography_field_mod, only: assign_orography_field
@@ -82,6 +87,8 @@ contains
     type(inventory_by_mesh_type), intent(inout) :: chi_inventory
     type(inventory_by_mesh_type), intent(in)    :: panel_id_inventory
     type(field_type),             intent(in)    :: surf_alt_w3
+    integer(kind=i_def),          intent(in)    :: stretching_method
+    real(kind=r_def),             intent(in)    :: stretching_height
 
     ! local variables
     integer(kind=i_def)                   :: i, fs_id
@@ -189,22 +196,25 @@ contains
     ! ------------------------------------------------------------------------ !
 
     ! Assignment of orography from surface_altitude on orography mesh
-    call assign_orography_field(config, source_mesh,                           &
-        chi_inventory, panel_id_inventory, surf_alt_w0                         &
+    call assign_orography_field(                                               &
+        config, source_mesh, chi_inventory, panel_id_inventory,                &
+        stretching_height, stretching_method, surf_alt_w0                      &
     )
 
     ! Assign for shifted and double level meshes if they exist
     if (mesh_collection%check_for(source_mesh, SHIFTED)) then
       shifted_mesh => mesh_collection%get_mesh(source_mesh, SHIFTED)
-      call assign_orography_field(config, shifted_mesh,                        &
-          chi_inventory, panel_id_inventory, surf_alt_w0                       &
+      call assign_orography_field(                                             &
+          config, shifted_mesh, chi_inventory, panel_id_inventory,             &
+          stretching_height, stretching_method, surf_alt_w0                    &
       )
     end if
 
     if (mesh_collection%check_for(source_mesh, DOUBLE_LEVEL)) then
       double_level_mesh => mesh_collection%get_mesh(source_mesh, DOUBLE_LEVEL)
-      call assign_orography_field( config, double_level_mesh,                  &
-          chi_inventory, panel_id_inventory, surf_alt_w0                       &
+      call assign_orography_field(                                             &
+          config, double_level_mesh, chi_inventory, panel_id_inventory,        &
+          stretching_height, stretching_method, surf_alt_w0                    &
       )
     end if
 
@@ -305,22 +315,25 @@ contains
       ! ---------------------------------------------------------------------- !
       ! Adjust coordinates
       ! ---------------------------------------------------------------------- !
-      call assign_orography_field(config, target_mesh,                         &
-          chi_inventory, panel_id_inventory, surf_alt_w0_ptr                   &
+      call assign_orography_field(                                             &
+          config, target_mesh, chi_inventory, panel_id_inventory,              &
+           stretching_height, stretching_method, surf_alt_w0_ptr               &
       )
 
       ! Assign for shifted and double level meshes if they exist
       if (mesh_collection%check_for(target_mesh, SHIFTED)) then
         shifted_mesh => mesh_collection%get_mesh(target_mesh, SHIFTED)
-        call assign_orography_field(config, shifted_mesh,                      &
-            chi_inventory, panel_id_inventory, surf_alt_w0_ptr                 &
+        call assign_orography_field(                                           &
+            config, shifted_mesh, chi_inventory, panel_id_inventory,           &
+            stretching_height, stretching_method, surf_alt_w0_ptr              &
         )
       end if
 
       if (mesh_collection%check_for(target_mesh, DOUBLE_LEVEL)) then
         double_level_mesh => mesh_collection%get_mesh(target_mesh, DOUBLE_LEVEL)
-        call assign_orography_field(config, double_level_mesh,                 &
-            chi_inventory, panel_id_inventory, surf_alt_w0_ptr                 &
+        call assign_orography_field(                                           &
+            config, double_level_mesh, chi_inventory, panel_id_inventory,      &
+            stretching_height, stretching_method, surf_alt_w0_ptr              &
         )
       end if
     end do
