@@ -26,7 +26,8 @@ implicit none
 contains
 
 !> @brief Compute an analytic buoyancy field
-!> @param[in] chi Position in physical coordinates
+!> @param[in] geometry Enumeration value for mesh geometry
+!> @param[in] chi      Position in physical coordinates
 !> @result buoyancy The result buoyancy field
 function analytic_buoyancy(geometry, chi) result(buoyancy)
 
