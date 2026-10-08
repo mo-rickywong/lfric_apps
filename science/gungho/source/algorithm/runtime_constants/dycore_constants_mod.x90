@@ -17,7 +17,7 @@ module dycore_constants_mod
   ! Infrastructure
   use config_mod,                         only: config_type
   use constants_mod,                      only: i_def, r_def, l_def, str_def,  &
-                                                r_second, EPS
+                                                r_second, EPS, rmdi, imdi
   use sci_geometric_constants_mod,        only: get_coordinates,               &
                                                 get_panel_id,                  &
                                                 get_height_fe
@@ -89,10 +89,8 @@ contains
   !> @return The Coriolis operator
   function get_coriolis(config, mesh) result(coriolis)
 
-    use base_mesh_config_mod,    only: f_lat
     use compute_coriolis_matrix_kernel_mod, &
                                  only: compute_coriolis_matrix_kernel_type
-    use planet_config_mod,       only: scaled_omega
 
     implicit none
 
@@ -106,6 +104,16 @@ contains
     type(quadrature_xyoz_type),   pointer :: qr
     type(function_space_type),    pointer :: w2_fs
     integer(tik)                          :: id
+
+    integer(i_def) :: coord_system
+    real(r_def)    :: scaled_radius
+    real(r_def)    :: scaled_omega
+    real(r_def)    :: f_lat
+
+    coord_system  = config%finite_element%coord_system()
+    scaled_radius = config%planet%scaled_radius()
+    scaled_omega  = config%planet%scaled_omega()
+    f_lat         = config%base_mesh%f_lat()
 
     ! Initialise inventory if it hasn't been done so already
     if (.not. coriolis_inventory%is_initialised()) then
@@ -128,6 +136,10 @@ contains
 
       call invoke( compute_coriolis_matrix_kernel_type(coriolis,               &
                                                        chi, panel_id,          &
+                                                       mesh%geometry(),        &
+                                                       mesh%topology(),        &
+                                                       coord_system,           &
+                                                       scaled_radius,          &
                                                        scaled_omega,           &
                                                        f_lat, qr) )
       if ( LPROF ) call stop_timing( id, 'runtime_constants.dycore' )
@@ -140,14 +152,12 @@ contains
 
   !> @brief Returns the vertical Coriolis operator
   !> @param[in] config  Application configuration object
-  !> @param[in] mesh_id Mesh to get the object for
+  !> @param[in] mesh    Mesh to get the object for
   !> @return The Coriolis operator
   function get_vert_coriolis(config, mesh) result(vert_coriolis)
 
-    use base_mesh_config_mod,    only: f_lat
     use compute_vert_coriolis_matrix_kernel_mod, &
                                  only: compute_vert_coriolis_matrix_kernel_type
-    use planet_config_mod,       only: scaled_omega
 
     implicit none
 
@@ -162,6 +172,16 @@ contains
     type(function_space_type),    pointer :: w2_fs
     type(function_space_type),    pointer :: wt_fs
     integer(tik)                          :: id
+
+    integer(i_def) :: coord_system
+    real(r_def)    :: scaled_radius
+    real(r_def)    :: scaled_omega
+    real(r_def)    :: f_lat
+
+    coord_system  = config%finite_element%coord_system()
+    scaled_radius = config%planet%scaled_radius()
+    scaled_omega  = config%planet%scaled_omega()
+    f_lat         = config%base_mesh%f_lat()
 
     ! Initialise inventory if it hasn't been done so already
     if (.not. vert_coriolis_inventory%is_initialised()) then
@@ -183,9 +203,13 @@ contains
 
       call vert_coriolis_inventory%add_operator(vert_coriolis, wt_fs, w2_fs, mesh)
 
-      call invoke( compute_vert_coriolis_matrix_kernel_type(vert_coriolis,     &
-                                                            chi, panel_id,     &
-                                                            scaled_omega,      &
+      call invoke( compute_vert_coriolis_matrix_kernel_type(vert_coriolis,      &
+                                                            chi, panel_id,      &
+                                                            mesh%geometry(),    &
+                                                            mesh%topology(),    &
+                                                            coord_system,       &
+                                                            scaled_radius,      &
+                                                            scaled_omega,       &
                                                             f_lat, qr) )
       if ( LPROF ) call stop_timing( id, 'runtime_constants.dycore' )
     end if
@@ -263,10 +287,8 @@ contains
   function get_w2_mass_matrix(config, mesh, w2_op_name, model_clock) result(dynamics_mm_w2)
 
     use compute_dl_matrix_kernel_mod, only: compute_dl_matrix_kernel_type
-    use damping_layer_config_mod,     only: dl_base, dl_str
-    use extrusion_config_mod,         only: domain_height, planet_radius
     use sci_fem_constants_mod,        only: get_mass_matrix_fe
-    use formulation_config_mod,       only: dlayer_on, rotating, lagged_orog
+    use formulation_config_mod,       only: rotating, lagged_orog
     use lagged_orog_operator_kernel_mod, &
                                       only: lagged_orog_operator_kernel_type
     use sci_operator_algebra_kernel_mod, &
@@ -300,6 +322,32 @@ contains
     real(kind=r_second)                           :: dt
     type(operator_type),                  pointer :: coriolis
     integer(tik)                                  :: id
+
+    integer(i_def) :: order_h, order_v
+    integer(i_def) :: coord_system
+    real(r_def)    :: planet_radius
+    real(r_def)    :: domain_height
+    real(r_def)    :: dl_base, dl_str
+    integer(i_def) :: dl_type
+    logical(l_def) :: dlayer_on
+
+    order_h       = config%finite_element%element_order_h()
+    order_v       = config%finite_element%element_order_v()
+    coord_system  = config%finite_element%coord_system()
+
+    planet_radius = config%extrusion%planet_radius()
+    domain_height = config%extrusion%domain_height()
+
+    dlayer_on = config%formulation%dlayer_on()
+    if (dlayer_on) then
+      dl_type = config%damping_layer%dl_type()
+      dl_base = config%damping_layer%dl_base()
+      dl_str  = config%damping_layer%dl_str()
+    else
+      dl_type = imdi
+      dl_base = rmdi
+      dl_str  = rmdi
+    end if
 
     ! Check inventories are initialised
     if (.not. mm_w2_si_inventory%is_initialised()) then
@@ -345,8 +393,7 @@ contains
 
     if (.not. constant_exists) then
       ! Create the relevant W2 mass matrices
-      fs => function_space_collection%get_fs(mesh, element_order_h, &
-                                             element_order_v, W2)
+      fs => function_space_collection%get_fs(mesh, order_h, order_v, W2)
 
       ! Each matrix is built on a previous matrix. Generally either all three
       ! matrices are needed, or only the S.I. matrix (the final in the chain)
@@ -378,15 +425,12 @@ contains
           qr => get_qr_fe(config)
 
           if ( LPROF ) call start_timing( id, 'runtime_constants.dycore' )
-          call invoke( name = "compute_damping_layer_mass_matrix",             &
-                       compute_dl_matrix_kernel_type(mm_w2_dl, chi, panel_id,  &
-                                                     dl_base, dl_str,          &
-                                                     domain_height,            &
-                                                     planet_radius,            &
-                                                     element_order_h,          &
-                                                     element_order_v,          &
-                                                     dt_stored,                &
-                                                     qr) )
+          call invoke( name = "compute_damping_layer_mass_matrix",       &
+                       compute_dl_matrix_kernel_type(                    &
+                           mm_w2_dl, chi, panel_id, mesh%geometry(),     &
+                           mesh%topology(), coord_system, planet_radius, &
+                           dl_type, dl_base, dl_str, domain_height,      &
+                           order_h, order_v, dt_stored, qr) )
           if ( LPROF ) call stop_timing( id, 'runtime_constants.dycore' )
         else
           ! No damping layer, just copy the W2 mass matrix on this level

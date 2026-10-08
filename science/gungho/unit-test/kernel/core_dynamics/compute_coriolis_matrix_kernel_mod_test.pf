@@ -7,7 +7,7 @@
 !>
 module compute_coriolis_matrix_kernel_mod_test
 
-  use constants_mod, only : i_def, r_def, PI
+  use constants_mod, only : i_def, r_def, PI, rmdi
   use get_unit_test_m3x3_dofmap_mod, &
     only : get_w0_m3x3_dofmap, get_w2_m3x3_dofmap, get_w3_m3x3_dofmap
   use get_unit_test_m3x3_q3x3x3_sizes_mod,                   &
@@ -21,101 +21,39 @@ module compute_coriolis_matrix_kernel_mod_test
   use get_unit_test_3x3x3_chi_mod,         only : get_w0_3x3x3_field
   use funit
 
+  use mesh_mod,                  only: geometry_planar, topology_periodic
+  use finite_element_config_mod, only: coord_system_xyz
+
   implicit none
 
   private
-  public :: test_all
-
-  @TestCase
-  type, extends(TestCase), public :: compute_coriolis_matrix_test_type
-    private
-  contains
-    procedure setUp
-    procedure tearDown
-    procedure test_all
-  end type compute_coriolis_matrix_test_type
+  public :: set_up, tear_down, test_all
 
 contains
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  subroutine setUp( this )
+  @before
+  subroutine set_up()
 
-    use mesh_mod,                  only : geometry_planar, &
-                                          topology_periodic
-    use finite_element_config_mod, only : cellshape_quadrilateral, &
-                                          coord_system_xyz, coord_space_wchi
-    use formulation_config_mod,    only : eos_method_sampled,      &
-                                          moisture_formulation_dry
-    use feign_config_mod,          only : feign_base_mesh_config, &
-                                          feign_finite_element_config, &
-                                          feign_formulation_config, &
-                                          feign_planet_config
-    use sci_chi_transform_mod,     only : init_chi_transforms
+    use sci_chi_transform_mod, only: init_chi_transforms
 
     implicit none
 
-    class(compute_coriolis_matrix_test_type), intent(inout) :: this
-
-    call feign_base_mesh_config( file_prefix='foo',                &
-                                 prime_mesh_name='unit_test',      &
-                                 geometry=geometry_planar,         &
-                                 prepartitioned=.false.,           &
-                                 topology=topology_periodic,       &
-                                 fplane=.true.,                    &
-                                 f_lat_deg=45.0_r_def )
-
-    call feign_finite_element_config(           &
-             cellshape=cellshape_quadrilateral, &
-             element_order_h=0_i_def,           &
-             element_order_v=0_i_def,           &
-             rehabilitate=.true.,               &
-             coord_order=0_i_def,               &
-             coord_order_nonprime=1_i_def,      &
-             coord_space=coord_space_wchi,      &
-             coord_system=coord_system_xyz,     &
-             vorticity_in_w1=.false. )
-
-    call feign_formulation_config( dlayer_on=.false.,                      &
-                                   dry_static_adjust=.false.,              &
-                                   exner_from_eos=.false.,                 &
-                                   eos_method=eos_method_sampled,          &
-                                   init_exner_bt=.false.,                  &
-                                   l_multigrid=.false.,                    &
-                                   lagged_orog=.false.,                    &
-                                   rotating=.true.,                        &
-                                   shallow=.false.,                        &
-                                   moisture_formulation =                  &
-                                   moisture_formulation_dry,               &
-                                   moisture_in_solver=.true.,              &
-                                   p2theta_vert=.true.,                    &
-                                   theta_moist_source=.false.,             &
-                                   use_physics=.false.,                    &
-                                   use_wavedynamics=.false.,               &
-                                   use_multires_coupling=.false.,          &
-                                   si_momentum_equation=.true.,            &
-                                   horizontal_physics_predictor=.false.,   &
-                                   horizontal_transport_predictor=.false., &
-                                   solver_moisture_conservation=.true.,    &
-                                   vector_invariant=.true.)
-
     call init_chi_transforms(geometry_planar, topology_periodic)
 
-  end subroutine setUp
+  end subroutine set_up
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  subroutine tearDown( this )
+  @after
+  subroutine tear_down()
 
-    use config_loader_mod,     only: final_configuration
     use sci_chi_transform_mod, only: final_chi_transforms
 
     implicit none
 
-    class(compute_coriolis_matrix_test_type), intent(inout) :: this
-
-    call final_configuration()
     call final_chi_transforms()
 
-  end subroutine tearDown
+  end subroutine tear_down
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   @Test
@@ -134,6 +72,11 @@ contains
     real(r_def), parameter :: scaled_omega=7.292116E-5_r_def
     real(r_def), parameter :: f_lat_rad=(PI/4.0_r_def)*(PI/180.0_r_def)
     integer(i_def), parameter :: nlayers = 5
+
+    integer(i_def), parameter :: geometry = geometry_planar
+    integer(i_def), parameter :: topology = topology_periodic
+    integer(i_def), parameter :: coord_system = coord_system_xyz
+    real(r_def),    parameter :: radius = rmdi
 
     integer(i_def) :: i, j, k, cell
 
@@ -198,6 +141,10 @@ contains
                                        chi2_data,     &
                                        chi3_data,     &
                                        panel_id,      &
+                                       geometry,      &
+                                       topology,      &
+                                       coord_system,  &
+                                       radius,        &
                                        scaled_omega,  &
                                        f_lat_rad,     &
                                        ndf_w2,        &

@@ -26,7 +26,11 @@ module compute_total_pv_kernel_mod_test
                                                   get_gaussian_q3x3x3_quadrature_weights_z
   use get_unit_test_3x3x3_chi_mod,         only : get_wchi_3x3x3_field
   use coord_transform_mod,                 only : xyz2llr, llr2xyz
+  use finite_element_config_mod,           only : coord_system_xyz
   use funit
+
+  use mesh_mod, only: geometry_spherical, topology_periodic
+
 
   implicit none
 
@@ -36,58 +40,15 @@ module compute_total_pv_kernel_mod_test
   integer(i_def), parameter :: element_order_h = 0
   integer(i_def), parameter :: element_order_v = 0
 
-  real(r_def), parameter :: planet_radius = 6000000.0_r_def
-
 contains
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   @before
   subroutine set_up()
 
-    use mesh_mod,                  only : geometry_spherical, &
-                                          topology_periodic
-    use extrusion_config_mod,      only : method_uniform, &
-                                          stretching_method_linear
-    use finite_element_config_mod, only : cellshape_quadrilateral, &
-                                          coord_system_xyz, coord_space_wchi
-    use feign_config_mod,          only : feign_extrusion_config,      &
-                                          feign_finite_element_config, &
-                                          feign_planet_config,         &
-                                          feign_base_mesh_config
-    use sci_chi_transform_mod,     only : init_chi_transforms
+    use sci_chi_transform_mod, only: init_chi_transforms
 
     implicit none
-
-    call feign_base_mesh_config( file_prefix='foo',                &
-                                 prime_mesh_name='unit_test',      &
-                                 geometry=geometry_spherical,      &
-                                 prepartitioned=.false.,           &
-                                 topology=topology_periodic,       &
-                                 fplane=.false., f_lat_deg=0.0_r_def )
-
-    call feign_extrusion_config( planet_radius=planet_radius,                &
-                                 domain_height=10.0_r_def,                   &
-                                 method=method_uniform,                      &
-                                 number_of_layers=2_i_def,                   &
-                                 stretching_method=stretching_method_linear, &
-                                 stretching_height=1.0_r_def,                &
-                                 eta_values=(/0.5_r_def/) )
-
-    call feign_finite_element_config(           &
-             cellshape=cellshape_quadrilateral, &
-             coord_order=0_i_def,               &
-             coord_order_nonprime=1_i_def,      &
-             coord_space=coord_space_wchi,      &
-             coord_system=coord_system_xyz,     &
-             element_order_h=0_i_def,           &
-             element_order_v=0_i_def,           &
-             rehabilitate=.true.,               &
-             vorticity_in_w1=.false. )
-
-    call feign_planet_config( gravity=10.0_r_def, omega=8.0E-5_r_def, &
-                              rd=300.0_r_def, cp=1000.0_r_def,        &
-                              p_zero=100000.0_r_def,                  &
-                              scaling_factor=1.0_r_def )
 
     call init_chi_transforms(geometry_spherical, topology_periodic)
 
@@ -97,11 +58,12 @@ contains
   @after
   subroutine tear_down()
 
-    use config_loader_mod, only: final_configuration
+    use sci_chi_transform_mod, only: final_chi_transforms
+
 
     implicit none
 
-    call final_configuration()
+    call final_chi_transforms()
 
   end subroutine tear_down
 
@@ -122,6 +84,13 @@ contains
     real(r_def), parameter :: dz = 100.0_r_def
     real(r_def), parameter :: dtheta = 10.0_r_def
     real(r_def), parameter :: rho_ref = 5.0_r_def
+
+    integer(i_def), parameter :: geometry = geometry_spherical
+    integer(i_def), parameter :: topology = topology_periodic
+    integer(i_def), parameter :: coord_system = coord_system_xyz
+    integer(i_def), parameter :: radius = 6000000.0_r_def
+    real(r_def),    parameter :: f_lat = PI*45.0_r_def/180.0_r_def
+    real(r_def),    parameter :: omega = 8.0e-5_r_def
 
     real(r_def) :: lat_0, lon_0, r_0
     real(r_def) :: dlat, dlon, dr
@@ -156,9 +125,8 @@ contains
     real(r_def), allocatable :: xi(:)
     real(r_def), allocatable :: theta(:)
     real(r_def), allocatable :: rho(:)
-    real(r_def)              :: f_lat, omega
 
-     ! ------------------------------------------------------------------------ !
+    ! ------------------------------------------------------------------------ !
     ! Make mesh and function space details
     ! ------------------------------------------------------------------------ !
     ! Specify details for 3x3x3 grid -- biperiodic to make use of canned data
@@ -215,7 +183,7 @@ contains
                               dx, dy, dz, 0.0_r_def, map_wchi, nlayers)
     panel_id(:) = 1.0_r_def
     lat_0 = PI/4.0_r_def
-    call llr2xyz(0.0_r_def, lat_0, planet_radius, x0, y0, z0)
+    call llr2xyz(0.0_r_def, lat_0, radius, x0, y0, z0)
     call xyz2llr(dx, dy, dz, dlon, dlat, dr)
     chi1(:) = chi1(:) + x0
     chi2(:) = chi2(:) + y0
@@ -235,8 +203,6 @@ contains
     rho(:) = rho_ref
     pv(:) = 0.0_r_def
 
-    f_lat = PI*45.0_r_def/180.0_r_def
-    omega = 8.0e-5_r_def
     cell = 1
     call compute_total_pv_code(                          &
                                nlayers,                  &
@@ -248,8 +214,9 @@ contains
                                chi2,                     &
                                chi3,                     &
                                panel_id,                 &
-                               omega,                    &
-                               f_lat,                    &
+                               geometry, topology,       &
+                               coord_sytem, radius,      &
+                               omega, f_lat,             &
                                ndf_w3, undf_w3,          &
                                map_w3(:,cell),           &
                                basis_w3,                 &

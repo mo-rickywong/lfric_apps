@@ -49,7 +49,7 @@ type, public, extends(kernel_type) :: compute_coriolis_matrix_kernel_type
        arg_type(GH_SCALAR,   GH_INTEGER, GH_READ),                          &! geometry
        arg_type(GH_SCALAR,   GH_INTEGER, GH_READ),                          &! topology
        arg_type(GH_SCALAR,   GH_INTEGER, GH_READ),                          &! coord_system
-       arg_type(GH_SCALAR,   GH_REAL,    GH_READ),                          &! scaled_radius
+       arg_type(GH_SCALAR,   GH_REAL,    GH_READ),                          &! radius
        arg_type(GH_SCALAR,   GH_REAL, GH_READ),                             &
        arg_type(GH_SCALAR,   GH_REAL, GH_READ)                              &
        /)
@@ -83,7 +83,7 @@ contains
 !! @param[in] geometry
 !! @param[in] topology
 !! @param[in] coord_system
-!! @param[in] scaled_radius
+!! @param[in] radius
 !! @param[in] omega    Planet angular velocity
 !! @param[in] f_lat    F-plane latitude
 !! @param[in] ndf      Degrees of freedom per cell.
@@ -105,9 +105,9 @@ contains
 subroutine compute_coriolis_matrix_code(cell, nlayers, ncell_3d,           &
                                         matrix,                            &
                                         chi_1, chi_2, chi_3,               &
-                                        panel_id,                          &
-geometry, topology, coord_system, scaled_radius, &
-                                        omega, f_lat,                      &
+                                        panel_id, geometry, topology,      &
+                                        coord_system, radius, omega,       &
+                                        f_lat,                             &
                                         ndf, basis,                        &
                                         ndf_chi, undf_chi,                 &
                                         map_chi,                           &
@@ -142,8 +142,8 @@ geometry, topology, coord_system, scaled_radius, &
 
   integer(i_def), intent(in) :: geometry
   integer(i_def), intent(in) :: topology
-  integer(i_def), intent(in) :: coord_sys
-  real(r_def),    intent(in) :: scaled_radius
+  integer(i_def), intent(in) :: coord_system
+  real(r_def),    intent(in) :: radius
 
   ! Internal variables
   integer(kind=i_def)                          :: df, df2, k, ik
@@ -172,15 +172,17 @@ geometry, topology, coord_system, scaled_radius, &
 
     ! Calculate planet's rotation vector
     if ( geometry == geometry_spherical ) then
-      call rotation_vector_sphere(ndf_chi, nqp_h, nqp_v, chi_1_e, chi_2_e,     &
-                                  chi_3_e, ipanel, basis_chi, rotation_vector)
+      call rotation_vector_sphere(ndf_chi, nqp_h, nqp_v, chi_1_e, chi_2_e, &
+                                  chi_3_e, ipanel, geometry, topology,     &
+                                  coord_system, radius, omega, basis_chi,  &
+                                  rotation_vector)
     else
       call rotation_vector_fplane(nqp_h, nqp_v, omega, f_lat, rotation_vector)
     end if
 
     ! Calculate the Jacobian and its determinant
     call coordinate_jacobian(coord_system, geometry,            &
-                             topology, scaled_radius,           &
+                             topology, radius,                  &
                              ndf_chi, nqp_h, nqp_v,             &
                              chi_1_e, chi_2_e, chi_3_e, ipanel, &
                              basis_chi, diff_basis_chi, jac, dj)

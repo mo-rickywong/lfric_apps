@@ -30,13 +30,16 @@ module sample_eos_pressure_kernel_mod
   !>
   type, public, extends(kernel_type) :: sample_eos_pressure_kernel_type
     private
-    type(arg_type) :: meta_args(6) = (/                                       &
+    type(arg_type) :: meta_args(9) = (/                                       &
          arg_type(GH_FIELD,    GH_REAL, GH_WRITE, W3),                        &
          arg_type(GH_FIELD,    GH_REAL, GH_READ,  W3),                        &
          arg_type(GH_FIELD,    GH_REAL, GH_READ,  Wtheta),                    &
          arg_type(GH_FIELD,    GH_REAL, GH_READ,  Wtheta),                    &
          arg_type(GH_SCALAR, GH_INTEGER, GH_READ),                            &
-         arg_type(GH_SCALAR, GH_INTEGER, GH_READ)                             &
+         arg_type(GH_SCALAR, GH_INTEGER, GH_READ),                            &
+         arg_type(GH_SCALAR, GH_REAL, GH_READ),                               & ! rd
+         arg_type(GH_SCALAR, GH_REAL, GH_READ),                               & ! kappa
+         arg_type(GH_SCALAR, GH_REAL, GH_READ)                                & ! p_zero
          /)
     type(func_type) :: meta_funcs(2) = (/                                     &
          func_type(W3,          GH_BASIS),                                    &
@@ -63,6 +66,9 @@ contains
 !! @param[in] moist_dyn_gas Moist dynamics factor in gas law (1+mv/epsilon)
 !! @param[in] level_bot bottom level to compute
 !! @param[in] level_top top level to compute
+!! @param[in] rd
+!! @param[in] kappa
+!! @param[in] p_zero
 !! @param[in] ndf_w3 Number of degrees of freedom per cell for w3
 !! @param[in] undf_w3 Number of unique degrees of freedom for w3
 !! @param[in] map_w3 Dofmap for the cell at the base of the column for w3
@@ -71,9 +77,10 @@ contains
 !! @param[in] undf_wt Number of unique degrees of freedom for theta space
 !! @param[in] map_wt Dofmap for the cell at the base of the column for theta space
 !! @param[in] wt_basis Basis functions evaluated at the W3 DoFs
-subroutine sample_eos_pressure_code(nlayers,                           &
+subroutine sample_eos_pressure_code(nlayers,                       &
                                  exner, rho, theta, moist_dyn_gas, &
                                  level_bot, level_top,             &
+                                 rd, kappa, p_zero,                &
                                  ndf_w3, undf_w3, map_w3, w3_basis,&
                                  ndf_wt, undf_wt, map_wt, wt_basis)
 
@@ -96,6 +103,10 @@ subroutine sample_eos_pressure_code(nlayers,                           &
   real(kind=r_def), dimension(undf_w3),  intent(in)    :: rho
   real(kind=r_def), dimension(undf_wt),  intent(in)    :: theta
   real(kind=r_def), dimension(undf_wt),  intent(in)    :: moist_dyn_gas
+
+  real(kind=r_def), intent(in) :: rd
+  real(kind=r_def), intent(in) :: kappa
+  real(kind=r_def), intent(in) :: p_zero
 
   ! Internal variables
   integer(kind=i_def) :: df, k, dft, df3
@@ -129,7 +140,8 @@ subroutine sample_eos_pressure_code(nlayers,                           &
       end do
 
       ! Calcualte exner
-      exner(map_w3(df)+k) = calc_exner_pointwise(rho_cell, theta_vd_cell)
+      exner(map_w3(df)+k) = calc_exner_pointwise(rho_cell, theta_vd_cell, &
+                                                 rd, kappa, p_zero)
 
     end do
   end do

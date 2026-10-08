@@ -11,10 +11,11 @@ module compute_total_pv_kernel_mod
 
   use argument_mod,      only : arg_type, func_type,         &
                                 GH_FIELD, GH_WRITE, GH_READ, &
-                                GH_REAL, ANY_SPACE_9,        &
+                                GH_REAL, GH_INTEGER,         &
+                                ANY_SPACE_9,                 &
                                 ANY_DISCONTINUOUS_SPACE_3,   &
                                 GH_BASIS, GH_DIFF_BASIS,     &
-                                CELL_COLUMN, GH_SCALAR,       &
+                                CELL_COLUMN, GH_SCALAR,      &
                                 GH_QUADRATURE_XYoZ
   use constants_mod,     only : r_def, i_def
   use fs_continuity_mod, only : W0, W1, W3
@@ -24,10 +25,6 @@ module compute_total_pv_kernel_mod
                                rotation_vector_sphere
 
   use mesh_mod, only: geometry_spherical
-
-  use base_mesh_config_mod,      only: geometry, topology
-  use finite_element_config_mod, only: coord_system
-  use planet_config_mod,         only: scaled_radius
 
   implicit none
 
@@ -41,15 +38,19 @@ module compute_total_pv_kernel_mod
   !>
   type, public, extends(kernel_type) :: compute_total_pv_kernel_type
     private
-    type(arg_type) :: meta_args(8) = (/                                     &
+    type(arg_type) :: meta_args(12) = (/                                    &
         arg_type(GH_FIELD,   GH_REAL, GH_WRITE, W3),                        &
         arg_type(GH_FIELD,   GH_REAL, GH_READ,  W1),                        &
         arg_type(GH_FIELD,   GH_REAL, GH_READ,  W0),                        &
         arg_type(GH_FIELD,   GH_REAL, GH_READ, W3),                         &
         arg_type(GH_FIELD*3, GH_REAL, GH_READ,  ANY_SPACE_9),               &
         arg_type(GH_FIELD,   GH_REAL, GH_READ,  ANY_DISCONTINUOUS_SPACE_3), &
-        arg_type(GH_SCALAR,   GH_REAL, GH_READ),                            &
-        arg_type(GH_SCALAR,   GH_REAL, GH_READ)                             &
+        arg_type(GH_SCALAR,  GH_INTEGER, GH_READ),                          & ! geometry
+        arg_type(GH_SCALAR,  GH_INTEGER, GH_READ),                          & ! topology
+        arg_type(GH_SCALAR,  GH_INTEGER, GH_READ),                          & ! coord_system
+        arg_type(GH_SCALAR,  GH_REAL,    GH_READ),                          & ! radius
+        arg_type(GH_SCALAR,  GH_REAL,    GH_READ),                          &
+        arg_type(GH_SCALAR,  GH_REAL,    GH_READ)                           &
         /)
     type(func_type) :: meta_funcs(4) = (/                                  &
         func_type(ANY_SPACE_9, GH_BASIS, GH_DIFF_BASIS),                   &
@@ -80,6 +81,10 @@ contains
 !! @param[in] chi2      2nd coordinate field in Wchi
 !! @param[in] chi3      3rd coordinate field in Wchi
 !! @param[in] panel_id  Field giving the ID for mesh panels.
+!> @param[in] geometry
+!> @param[in] topology
+!> @param[in] coord_system
+!> @param[in] radius
 !! @param[in] omega     Planet angular velocity
 !! @param[in] f_lat     F-plane latitude
 !! @param[in] ndf_w3    Number of degrees of freedom per cell for w3
@@ -114,6 +119,7 @@ subroutine compute_total_pv_code(                                               
                                  theta,                                                  &
                                  rho,                                                    &
                                  chi1, chi2, chi3, panel_id,                             &
+                                 geometry, topology, coord_system, radius,               &
                                  omega, f_lat,                                           &
                                  ndf_w3, undf_w3, map_w3, w3_basis,                      &
                                  ndf_w1, undf_w1, map_w1, w1_basis,                      &
@@ -154,8 +160,12 @@ subroutine compute_total_pv_code(                                               
   real(kind=r_def), dimension(nqp_h),    intent(in) ::  wqp_h
   real(kind=r_def), dimension(nqp_v),    intent(in) ::  wqp_v
 
-  real(kind=r_def),    intent(in)    :: omega
-  real(kind=r_def),    intent(in)    :: f_lat
+  integer(kind=i_def), intent(in) :: geometry
+  integer(kind=i_def), intent(in) :: topology
+  integer(kind=i_def), intent(in) :: coord_system
+  real(kind=r_def),    intent(in) :: radius
+  real(kind=r_def),    intent(in) :: omega
+  real(kind=r_def),    intent(in) :: f_lat
 
   ! Internal variables
   integer(kind=i_def) :: df, k, ipanel
@@ -183,15 +193,17 @@ subroutine compute_total_pv_code(                                               
       chi2_e(df) = chi2( map_chi(df) + k )
       chi3_e(df) = chi3( map_chi(df) + k )
     end do
-    call coordinate_jacobian(coord_system, geometry, topology, scaled_radius, &
-                             ndf_chi, nqp_h, nqp_v, chi1_e, chi2_e, chi3_e,   &
+    call coordinate_jacobian(coord_system, geometry, topology, radius,      &
+                             ndf_chi, nqp_h, nqp_v, chi1_e, chi2_e, chi3_e, &
                              ipanel, chi_basis, chi_diff_basis, jac, dj)
     call coordinate_jacobian_inverse(nqp_h, nqp_v, jac, dj, jac_inv)
 
     ! Calculate rotation vector Omega = (0, 2*cos(lat), 2*sin(lat))
     if ( geometry == geometry_spherical ) then
-      call rotation_vector_sphere(ndf_chi, nqp_h, nqp_v, chi1_e, chi2_e,    &
-                                  chi3_e, ipanel, chi_basis, rotation_vector)
+      call rotation_vector_sphere(ndf_chi, nqp_h, nqp_v, chi1_e, chi2_e,  &
+                                  chi3_e, ipanel, geometry, topology,     &
+                                  coord_system, radius, omega, chi_basis, &
+                                  rotation_vector)
     else
       call rotation_vector_fplane(nqp_h, nqp_v, omega, f_lat, &
                                   rotation_vector)

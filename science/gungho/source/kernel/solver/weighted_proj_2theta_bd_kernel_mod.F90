@@ -121,8 +121,6 @@ contains
                                            adjacent_face,                   &
                                            nfaces_qr, nqp_f, wqp_f )
 
-    use calc_exner_pointwise_mod, only: calc_exner_pointwise
-
     implicit none
 
     ! Arguments

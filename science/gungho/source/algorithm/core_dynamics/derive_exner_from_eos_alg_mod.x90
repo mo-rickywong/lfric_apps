@@ -9,7 +9,7 @@
 module derive_exner_from_eos_alg_mod
 
   use config_mod,                         only: config_type
-  use constants_mod,                      only: i_def
+  use constants_mod,                      only: i_def, r_def
   use field_mod,                          only: field_type
   use derived_config_mod,                 only: bundle_size
   use field_indices_mod,                  only: igh_p, igh_d, igh_t
@@ -59,11 +59,23 @@ contains
     type( operator_type ),        pointer :: m3_inv => null()
     type( quadrature_xyoz_type ), pointer :: qr => null()
 
-    type( mesh_type ), pointer :: mesh => null()
+    type( mesh_type ), pointer :: mesh
     integer(i_def) :: nlayersm1
-    integer( tik )  :: id
+    integer( tik ) :: id
+
+    integer(i_def) :: coord_system
+    real(r_def)    :: scaled_radius
+    real(r_def)    :: rd
+    real(r_def)    :: kappa
+    real(r_def)    :: p_zero
 
     if ( LPROF ) call start_timing( id, 'dynamics.exner_from_eos' )
+
+    coord_system  = config%finite_element%coord_system()
+    scaled_radius = config%planet%scaled_radius()
+    rd            = config%planet%rd()
+    kappa         = config%planet%kappa()
+    p_zero        = config%planet%p_zero()
 
     mesh => state(igh_p)%get_mesh()
 
@@ -78,12 +90,16 @@ contains
       call invoke( sample_eos_pressure_kernel_type( state(igh_p), state(igh_d), &
                                                     state(igh_t),               &
                                                     moist_dyn_gas_law,          &
-                                                    0, nlayersm1) )
+                                                    0, nlayersm1,               &
+                                                    rd, kappa, p_zero ) )
     case(eos_method_projected)
       call invoke( project_eos_pressure_kernel_type( state(igh_p), state(igh_d), &
                                                      state(igh_t),               &
                                                      moist_dyn_gas_law, chi,     &
-                                                     panel_id, m3_inv, qr ) )
+                                                     panel_id, mesh%geometry(),  &
+                                                     mesh%topology(),            &
+                                                     coord_system, scaled_radius,&
+                                                     rd, kappa, p_zero, m3_inv, qr ) )
     case default
       call log_event( "Gungho: Unrecognised method to calculate pressure", LOG_LEVEL_ERROR )
     end select

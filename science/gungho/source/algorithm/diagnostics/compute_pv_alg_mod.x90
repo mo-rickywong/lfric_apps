@@ -30,8 +30,6 @@ contains
 
     use field_mod,                      only: field_type
     use operator_mod,                   only: operator_type
-    use base_mesh_config_mod,           only: f_lat
-    use planet_config_mod,              only: scaled_omega
     use sci_fem_constants_mod,          only: get_qr_fe, get_qr_fv,       &
                                               get_inverse_mass_matrix_fe, &
                                               get_inverse_mass_matrix_fv, &
@@ -69,7 +67,17 @@ contains
     integer(kind=i_def)          :: element_order_v
     logical(kind=l_def)          :: use_fe
 
-    type(mesh_type), pointer :: mesh => null()
+    type(mesh_type), pointer :: mesh
+
+    integer(kind=i_def) :: coord_system
+    real(kind=r_def)    :: scaled_radius
+    real(kind=r_def)    :: scaled_omega
+    real(kind=r_def)    :: f_lat
+
+    coord_system  = config%finite_element%coord_system()
+    scaled_radius = config%planet%scaled_radius()
+    scaled_omega  = config%planet%scaled_omega()
+    f_lat         = config%base_mesh%f_lat()
 
     mesh => u%get_mesh()
 
@@ -100,9 +108,11 @@ contains
                  sample_field_kernel_type(theta_in_w0, w0_rmultiplicity, theta) )
     call pv%copy_field_properties(r_pv)
     ! Calculate potential vorticity in W3
-    call invoke( compute_total_pv_kernel_type(r_pv, xi, theta_in_w0, rho,  &
-                                              chi, panel_id, scaled_omega, &
-                                              f_lat, qr),                  &
+    call invoke( compute_total_pv_kernel_type(r_pv, xi, theta_in_w0, rho,     &
+                                              chi, panel_id, mesh%geometry(), &
+                                              mesh%topology(), coord_system,  &
+                                              scaled_radius, scaled_omega,    &
+                                              f_lat, qr),                     &
                  dg_matrix_vector_kernel_type( pv, r_pv , m3_inv ) )
 
     nullify( qr, mesh, m3_inv )

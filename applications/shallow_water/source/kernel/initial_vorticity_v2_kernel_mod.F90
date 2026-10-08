@@ -13,9 +13,11 @@
 module initial_vorticity_v2_kernel_mod
 
   use argument_mod,            only: arg_type, func_type,         &
-                                     GH_FIELD, GH_READ, GH_WRITE, &
+                                     GH_FIELD, GH_SCALAR,         &
+                                     GH_READ, GH_WRITE,           &
                                      GH_BASIS, GH_DIFF_BASIS,     &
-                                     GH_INTEGER, CELL_COLUMN,     &
+                                     GH_INTEGER, GH_REAL,         &
+                                     CELL_COLUMN,                 &
                                      GH_QUADRATURE_XYoZ,          &
                                      ANY_SPACE_9,                 &
                                      ANY_DISCONTINUOUS_SPACE_3,   &
@@ -30,10 +32,6 @@ module initial_vorticity_v2_kernel_mod
 
   use mesh_mod, only: geometry_spherical
 
-  use base_mesh_config_mod,      only: geometry, topology, f_lat
-  use finite_element_config_mod, only: coord_system
-  use planet_config_mod,         only: scaled_radius, scaled_omega
-
   implicit none
 
   !---------------------------------------------------------------------------
@@ -44,12 +42,18 @@ module initial_vorticity_v2_kernel_mod
   !>
   type, public, extends(kernel_type) :: initial_vorticity_v2_kernel_type
     private
-    type(arg_type) :: meta_args(5) = (/                                    &
-        arg_type(GH_FIELD,   GH_REAL, GH_WRITE, W3),                       &
-        arg_type(GH_FIELD,   GH_REAL, GH_READ,  W2),                       &
-        arg_type(GH_FIELD,   GH_REAL, GH_READ,  W3),                       &
-        arg_type(GH_FIELD*3, GH_REAL, GH_READ,  ANY_SPACE_9),              &
-        arg_type(GH_FIELD,   GH_REAL, GH_READ,  ANY_DISCONTINUOUS_SPACE_3) &
+    type(arg_type) :: meta_args(11) = (/                                    &
+        arg_type(GH_FIELD,   GH_REAL, GH_WRITE, W3),                        &
+        arg_type(GH_FIELD,   GH_REAL, GH_READ,  W2),                        &
+        arg_type(GH_FIELD,   GH_REAL, GH_READ,  W3),                        &
+        arg_type(GH_FIELD*3, GH_REAL, GH_READ,  ANY_SPACE_9),               &
+        arg_type(GH_FIELD,   GH_REAL, GH_READ,  ANY_DISCONTINUOUS_SPACE_3), &
+        arg_type(GH_SCALAR,  GH_INTEGER, GH_READ),                          & ! geometry
+        arg_type(GH_SCALAR,  GH_INTEGER, GH_READ),                          & ! topology
+        arg_type(GH_SCALAR,  GH_INTEGER, GH_READ),                          & ! coord_system
+        arg_type(GH_SCALAR,  GH_REAL,    GH_READ),                          & ! radius
+        arg_type(GH_SCALAR,  GH_REAL,    GH_READ),                          & ! omega
+        arg_type(GH_SCALAR,  GH_REAL,    GH_READ)                           & ! f_lat
         /)
     type(func_type) :: meta_funcs(3) = (/               &
         func_type(W3, GH_BASIS),                        &
@@ -78,6 +82,12 @@ contains
 !> @param[in]     chi_2          2nd coordinate field
 !> @param[in]     chi_3          3rd coordinate field
 !> @param[in]     panel_id       Field containing the ID of the mesh panel
+!> @param[in]     geometry
+!> @param[in]     topology
+!> @param[in]     coord_system
+!> @param[in]     radius
+!> @param[in]     omega
+!> @param[in]     f_lat
 !> @param[in]     ndf_w2         Number of degrees of freedom per cell for w2
 !> @param[in]     undf_w2        Number unique of degrees of freedom  for w2
 !> @param[in]     map_w2         Dofmap for the cell at the base of the column for w2
@@ -96,6 +106,8 @@ contains
 !> @param[in]     wqp_v          Vertical quadrature weights
 subroutine initial_vorticity_v2_code(nlayers, r_q, curl_u, geopot,      &
                                      chi_1, chi_2, chi_3, panel_id,     &
+                                     geometry, topology, coord_system,  &
+                                     radius, omega, f_lat,              &
                                      ndf_w3, undf_w3, map_w3, w3_basis, &
                                      ndf_w2, undf_w2, map_w2, w2_basis, &
                                      ndf_chi, undf_chi, map_chi,        &
@@ -126,6 +138,13 @@ subroutine initial_vorticity_v2_code(nlayers, r_q, curl_u, geopot,      &
 
   real(kind=r_def), dimension(nqp_h), intent(in)      :: wqp_h
   real(kind=r_def), dimension(nqp_v), intent(in)      :: wqp_v
+
+  integer(kind=i_def),  intent(in) :: geometry
+  integer(kind=i_def),  intent(in) :: topology
+  integer(kind=i_def),  intent(in) :: coord_system
+  real(kind=r_def),     intent(in) :: radius
+  real(kind=r_def),     intent(in) :: omega
+  real(kind=r_def),     intent(in) :: f_lat
 
   ! Internal variables
   integer             :: df, loc
@@ -161,16 +180,17 @@ subroutine initial_vorticity_v2_code(nlayers, r_q, curl_u, geopot,      &
   ! Calculate rotation vector Omega = (0, 2*cos(lat), 2*sin(lat))
   if ( geometry == geometry_spherical ) then
     call rotation_vector_sphere(ndf_chi, nqp_h, nqp_v, chi_1_e, chi_2_e, &
-                                chi_3_e, ipanel, chi_basis, rotation_vector)
-  else
-    call rotation_vector_fplane(nqp_h, nqp_v, scaled_omega, f_lat, &
+                                chi_3_e, ipanel, geometry, topology,     &
+                                coord_system, radius, omega, chi_basis,  &
                                 rotation_vector)
+  else
+    call rotation_vector_fplane(nqp_h, nqp_v, omega, f_lat, rotation_vector)
   end if
 
   call coordinate_jacobian(coord_system,   &
                            geometry,       &
                            topology,       &
-                           scaled_radius,  &
+                           radius,         &
                            ndf_chi,        &
                            nqp_h,          &
                            nqp_v,          &

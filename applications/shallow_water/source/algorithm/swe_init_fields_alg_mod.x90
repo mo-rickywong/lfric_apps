@@ -217,6 +217,16 @@ contains
 
     type( mesh_type ), pointer :: mesh
 
+    integer(i_def) :: coord_system
+    real(r_def)    :: radius
+    real(r_def)    :: omega
+    real(r_def)    :: f_lat
+
+    coord_system = config%finite_element%coord_system()
+    radius       = config%planet%scaled_radius()
+    omega        = config%planet%scaled_omega()
+    f_lat        = config%base_mesh%f_lat()
+
     mesh     => geopot%get_mesh()
     chi      => get_coordinates(mesh)
     panel_id => get_panel_id(mesh)
@@ -242,7 +252,10 @@ contains
     call invoke( setval_c( r_u, 0.0_r_def ),              &
                  setval_c( r_q, 0.0_r_def ),              &
                  strong_curl_kernel_type( r_u, u_in_w1 ), &
-                 initial_vorticity_v2_kernel_type( r_q, r_u, geopot, chi, panel_id, qr ) )
+                 initial_vorticity_v2_kernel_type( r_q, r_u, geopot, chi, panel_id,   &
+                                                   mesh%geometry(), mesh%topology(),  &
+                                                   coord_sytem, radius, omega, f_lat, &
+                                                   qr ) )
 
     call mass_matrix_solver_alg(config, q, r_q)
 

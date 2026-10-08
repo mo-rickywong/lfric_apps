@@ -25,7 +25,6 @@ module shallow_hot_jupiter_kernel_mod
                                               GH_READ, CELL_COLUMN
   use constants_mod,                    only: r_def, i_def
   use sci_chi_transform_mod,            only: chi2llr
-  use calc_exner_pointwise_mod,         only: calc_exner_pointwise
   use fs_continuity_mod,                only: Wtheta
   use shallow_hot_jupiter_forcings_mod, only: shallow_hot_jupiter_newton_frequency, &
                                               shallow_hot_jupiter_equilibrium_theta
@@ -55,8 +54,9 @@ module shallow_hot_jupiter_kernel_mod
          arg_type(GH_FIELD,   GH_REAL, GH_READ,      Wtheta),                    &
          arg_type(GH_FIELD*3, GH_REAL, GH_READ,      ANY_SPACE_9),               &
          arg_type(GH_FIELD,   GH_REAL, GH_READ,      ANY_DISCONTINUOUS_SPACE_3), &
-         arg_type(GH_SCALAR,  GH_REAL, GH_READ),                                 &
-         arg_type(GH_SCALAR,  GH_REAL, GH_READ)                                  &
+         arg_type(GH_SCALAR,  GH_REAL, GH_READ),                                 & ! kappa
+         arg_type(GH_SCALAR,  GH_REAL, GH_READ)                                  & ! dt
+
          /)
     integer :: operates_on = CELL_COLUMN
   contains

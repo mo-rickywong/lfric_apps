@@ -268,7 +268,19 @@ contains
                         exner_big_halo
     integer(tik)     :: id
 
+    integer(i_def) :: coord_system
+    real(r_def)    :: scaled_radius
+    real(r_def)    :: rd
+    real(r_def)    :: kappa
+    real(r_def)    :: p_zero
+
     if ( LPROF ) call start_timing( id, 'tl_runge_kutta_timestep' )
+
+    coord_system  = config%finite_element%coord_system()
+    scaled_radius = config%planet%scaled_radius()
+    rd            = config%planet%rd()
+    kappa         = config%planet%kappa()
+    p_zero        = config%planet%p_zero()
 
     cast_dt = real(model_clock%get_seconds_per_step(), r_def)
 
@@ -394,7 +406,10 @@ contains
                                                      ls_state_stage(igh_d,stage+1), &
                                                      ls_state_stage(igh_t,stage+1), &
                                                      ls_moist_dyn(gas_law), chi,    &
-                                                     panel_id, m3_inv, qr ) )
+                                                     panel_id, mesh%geometry(),     &
+                                                     mesh%topology(), coord_system, &
+                                                     scaled_radius, rd, kappa,      &
+                                                     p_zero, m3_inv, qr ) )
 
     end do
 

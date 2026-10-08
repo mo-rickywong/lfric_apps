@@ -28,8 +28,7 @@ module compute_dl_matrix_kernel_mod
   use sci_coordinate_jacobian_mod, only: coordinate_jacobian
   use mesh_mod,                  only: geometry_spherical
 
-  ! Configuration modules
-  use damping_layer_config_mod,  only: dl_type, dl_type_latitude
+  use damping_layer_config_mod,  only: dl_type_latitude
 
   implicit none
 
@@ -45,27 +44,27 @@ module compute_dl_matrix_kernel_mod
          arg_type(GH_OPERATOR, GH_REAL, GH_WRITE, W2, W2),                    &
          arg_type(GH_FIELD*3,  GH_REAL, GH_READ,  ANY_SPACE_9),               &
          arg_type(GH_FIELD,    GH_REAL, GH_READ,  ANY_DISCONTINUOUS_SPACE_3), &
-         arg_type(GH_SCALAR,  GH_INTEGER, GH_READ),                        &! geometry
-         arg_type(GH_SCALAR,  GH_INTEGER, GH_READ),                        &! topology
-         arg_type(GH_SCALAR,  GH_INTEGER, GH_READ),                        &! coord_system
-         arg_type(GH_SCALAR,  GH_REAL,    GH_READ),                        &! scaled_radius
-         arg_type(GH_SCALAR,   GH_REAL, GH_READ),                             &
-         arg_type(GH_SCALAR,   GH_REAL, GH_READ),                             &
-         arg_type(GH_SCALAR,   GH_REAL, GH_READ),                             &
-         arg_type(GH_SCALAR,   GH_REAL, GH_READ),                             &
-         arg_type(GH_SCALAR,   GH_INTEGER, GH_READ),                          &
-         arg_type(GH_SCALAR,   GH_INTEGER, GH_READ),                          &
-         arg_type(GH_SCALAR,   GH_REAL, GH_READ)                              &
+         arg_type(GH_SCALAR,   GH_INTEGER, GH_READ),                          & ! geometry
+         arg_type(GH_SCALAR,   GH_INTEGER, GH_READ),                          & ! topology
+         arg_type(GH_SCALAR,   GH_INTEGER, GH_READ),                          & ! coord_system
+         arg_type(GH_SCALAR,   GH_REAL,    GH_READ),                          & ! radius
+         arg_type(GH_SCALAR,   GH_INTEGER, GH_READ),                          & ! dl_type
+         arg_type(GH_SCALAR,   GH_REAL,    GH_READ),                          & ! dl_base_height
+         arg_type(GH_SCALAR,   GH_REAL,    GH_READ),                          & ! dl_strength
+         arg_type(GH_SCALAR,   GH_REAL,    GH_READ),                          & ! domain_height
+         arg_type(GH_SCALAR,   GH_INTEGER, GH_READ),                          & ! element_order_h
+         arg_type(GH_SCALAR,   GH_INTEGER, GH_READ),                          & ! element_order_v
+         arg_type(GH_SCALAR,   GH_REAL, GH_READ)                              & ! dt
          /)
     type(func_type) :: meta_funcs(2) = (/                                    &
          func_type(ANY_SPACE_9, GH_BASIS, GH_DIFF_BASIS),                    &
          func_type(W2,          GH_BASIS)                                    &
          /)
-        integer :: operates_on = CELL_COLUMN
-        integer :: gh_shape = GH_QUADRATURE_XYoZ
+    integer :: operates_on = CELL_COLUMN
+    integer :: gh_shape = GH_QUADRATURE_XYoZ
   contains
     procedure, nopass :: compute_dl_matrix_code
-  end type
+  end type compute_dl_matrix_kernel_type
 
   !-------------------------------------------------------------------------------
   ! Contained functions/subroutines
@@ -85,17 +84,17 @@ contains
   !! @param[in] chi2     2nd coordinate field in Wchi
   !! @param[in] chi3     3rd coordinate field in Wchi
   !! @param[in] panel_id Field giving the ID for mesh panels
-!! @param[in] geometry
-!! @param[in] topology
-!! @param[in] coord_system
-!! @param[in] scaled_radius
+  !! @param[in] geometry
+  !! @param[in] topology
+  !! @param[in] coord_system
+  !! @param[in] radius   The planet radius
+  !! @param[in] dl_type  Enumeration for damping layer type
   !! @param[in] dl_base_height
   !!                     Base height of damping layer
   !! @param[in] dl_strength
   !!                     Strength of damping layer
   !! @param[in] domain_height
   !!                     The model domain height
-  !! @param[in] radius   The planet radius
   !! @param[in] element_order_h The model finite element order in the horizontal
   !!                            direction
   !! @param[in] element_order_v The model finite element order in the vertical
@@ -119,11 +118,11 @@ contains
   !! @param[in] wqp_v    Vertical quadrature weights
   subroutine compute_dl_matrix_code(cell, nlayers, ncell_3d,     &
                                     mm, chi1, chi2, chi3,        &
-                                    panel_id, &
-geometry, topology, coord_system, scaled_radius, &
-dl_base_height,    &
+                                    panel_id, geometry, topology,&
+                                    coord_system, radius,        &
+                                    dl_type, dl_base_height,     &
                                     dl_strength, domain_height,  &
-                                    radius, element_order_h,     &
+                                    element_order_h,             &
                                     element_order_v, dt,         &
                                     ndf_w2, basis_w2,            &
                                     ndf_chi, undf_chi, map_chi,  &
@@ -154,7 +153,6 @@ dl_base_height,    &
     real(kind=r_def),    intent(in)    :: dl_base_height
     real(kind=r_def),    intent(in)    :: dl_strength
     real(kind=r_def),    intent(in)    :: domain_height
-    real(kind=r_def),    intent(in)    :: radius
     real(kind=r_second), intent(in)    :: dt
     real(kind=r_def),    intent(in)    :: wqp_h(nqp_h)
     real(kind=r_def),    intent(in)    :: wqp_v(nqp_v)
@@ -162,10 +160,11 @@ dl_base_height,    &
     integer(kind=i_def), intent(in)    :: element_order_h
     integer(kind=i_def), intent(in)    :: element_order_v
 
-  integer(i_def), intent(in) :: geometry
-  integer(i_def), intent(in) :: topology
-  integer(i_def), intent(in) :: coord_sys
-  real(r_def),    intent(in) :: scaled_radius
+    integer(i_def), intent(in) :: geometry
+    integer(i_def), intent(in) :: topology
+    integer(i_def), intent(in) :: coord_system
+    real(r_def),    intent(in) :: radius
+    integer(i_def), intent(in) :: dl_type
 
     ! Internal variables
     integer(kind=i_def) :: df, df2, dfc, k, ik
@@ -230,8 +229,8 @@ dl_base_height,    &
         chi2_e(df) = chi2(map_chi(df) + k - 1)
         chi3_e(df) = chi3(map_chi(df) + k - 1)
       end do
-      call coordinate_jacobian(coord_system, geometry, topology, scaled_radius, &
-                               ndf_chi, nqp_h, nqp_v, chi1_e, chi2_e, chi3_e,   &
+      call coordinate_jacobian(coord_system, geometry, topology, radius,      &
+                               ndf_chi, nqp_h, nqp_v, chi1_e, chi2_e, chi3_e, &
                                ipanel, basis_chi, diff_basis_chi, jac, dj)
 
       ik = k + (cell-1)*nlayers
@@ -252,7 +251,7 @@ dl_base_height,    &
 
             call chi2llr(chi1_at_quad, chi2_at_quad, chi3_at_quad, &
                          ipanel, geometry, topology,               &
-                         coord_system, scaled_radius,              &
+                         coord_system, radius,                     &
                          long_at_quad, lat_at_quad, r_at_quad)
             z = r_at_quad - radius
 

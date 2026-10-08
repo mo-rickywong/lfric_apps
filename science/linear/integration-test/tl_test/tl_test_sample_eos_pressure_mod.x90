@@ -24,7 +24,6 @@ module tl_test_sample_eos_pressure_mod
   use function_space_collection_mod,  only: function_space_collection
   use driver_modeldb_mod,             only: modeldb_type
   use moist_dyn_mod,                  only: num_moist_factors, gas_law
-  use planet_config_mod,              only: cp
   use log_mod,                        only: log_event,         &
                                             log_scratch_space, &
                                             LOG_LEVEL_INFO
@@ -49,8 +48,8 @@ module tl_test_sample_eos_pressure_mod
                                        twod_mesh )
     implicit none
 
-    type(mesh_type), pointer, intent(in)   :: mesh
-    type(mesh_type), pointer, intent(in)   :: twod_mesh
+    type(mesh_type),            intent(in) :: mesh
+    type(mesh_type),            intent(in) :: twod_mesh
     type(modeldb_type), target, intent(in) :: modeldb
 
     character(str_def) :: label = "sample_eos_pressure"
@@ -86,6 +85,9 @@ module tl_test_sample_eos_pressure_mod
 
     real(r_def) :: norm_diff, norm_diff_prev
     real(r_def) :: gamma
+    real(r_def) :: rd
+    real(r_def) :: kappa
+    real(r_def) :: p_zero
 
     integer :: n, i
     real(r_def), parameter :: tol = 1.e-3_r_def
@@ -93,6 +95,10 @@ module tl_test_sample_eos_pressure_mod
 
     call log_event( "TL Test: " // trim(label), &
                      LOG_LEVEL_INFO )
+
+    rd     = modeldb%config%planet%rd()
+    kappa  = modeldb%config%planet%kappa()
+    p_zero = modeldb%config%planet%p_zero()
 
     prognostic_fields => modeldb%fields%get_field_collection( &
                                            "prognostic_fields")
@@ -134,10 +140,10 @@ module tl_test_sample_eos_pressure_mod
     ! Taylor Remainder Convergence Test
     call invoke( setval_C( n1_exner, 0.0_r_def ) )
     nlayersm1 = mesh%get_nlayers()-1
-    call invoke( sample_eos_pressure_kernel_type(      &
+    call invoke( sample_eos_pressure_kernel_type(   &
                    n1_exner, ls_rho, ls_theta,      &
                    ls_moist_dyn(gas_law),           &
-                   0, nlayersm1) )
+                   0, nlayersm1, rd, kappa, p_zero) )
 
     call invoke( assign_field_random_kernel_type( random_rho, 1.0_r_def ) )
     call invoke( assign_field_random_kernel_type( random_theta, 1.0_r_def  ) )
@@ -169,7 +175,7 @@ module tl_test_sample_eos_pressure_mod
       call invoke( sample_eos_pressure_kernel_type(      &
                          n2_exner, n_rho, n_theta,       &
                          n_moist_dyn(gas_law),           &
-                         0, nlayersm1) )
+                         0, nlayersm1, rd, kappa, p_zero ) )
 
       call invoke( tl_sample_eos_pressure_kernel_type(           &
                          p_exner, p_rho, p_theta,                &

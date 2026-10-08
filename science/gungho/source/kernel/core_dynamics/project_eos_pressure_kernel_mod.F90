@@ -10,6 +10,7 @@ module project_eos_pressure_kernel_mod
 
   use argument_mod,      only : arg_type, func_type,       &
                                 GH_FIELD, GH_OPERATOR,     &
+                                GH_SCALAR, GH_INTEGER,     &
                                 GH_READ, GH_WRITE,         &
                                 GH_REAL, ANY_SPACE_2,      &
                                 ANY_DISCONTINUOUS_SPACE_3, &
@@ -18,10 +19,6 @@ module project_eos_pressure_kernel_mod
   use constants_mod,     only : r_def, i_def
   use fs_continuity_mod, only : W3, Wtheta
   use kernel_mod,        only : kernel_type
-
-  use base_mesh_config_mod,      only: geometry, topology
-  use finite_element_config_mod, only: coord_system
-  use planet_config_mod,         only: scaled_radius
 
   implicit none
 
@@ -35,13 +32,20 @@ module project_eos_pressure_kernel_mod
   !>
   type, public, extends(kernel_type) :: project_eos_pressure_kernel_type
     private
-    type(arg_type) :: meta_args(7) = (/                                       &
+    type(arg_type) :: meta_args(14) = (/                                      &
          arg_type(GH_FIELD,    GH_REAL, GH_WRITE, W3),                        &
          arg_type(GH_FIELD,    GH_REAL, GH_READ,  W3),                        &
          arg_type(GH_FIELD,    GH_REAL, GH_READ,  Wtheta),                    &
          arg_type(GH_FIELD,    GH_REAL, GH_READ,  Wtheta),                    &
          arg_type(GH_FIELD*3,  GH_REAL, GH_READ,  ANY_SPACE_2),               &
          arg_type(GH_FIELD,    GH_REAL, GH_READ,  ANY_DISCONTINUOUS_SPACE_3), &
+         arg_type(GH_SCALAR,   GH_INTEGER, GH_READ),                          & ! geometry
+         arg_type(GH_SCALAR,   GH_INTEGER, GH_READ),                          & ! topology
+         arg_type(GH_SCALAR,   GH_INTEGER, GH_READ),                          & ! coord_system
+         arg_type(GH_SCALAR,   GH_REAL,    GH_READ),                          & ! radius
+         arg_type(GH_SCALAR,   GH_REAL,    GH_READ),                          & ! rd
+         arg_type(GH_SCALAR,   GH_REAL,    GH_READ),                          & ! kappa
+         arg_type(GH_SCALAR,   GH_REAL,    GH_READ),                          & ! p_zero
          arg_type(GH_OPERATOR, GH_REAL, GH_READ,  W3, W3)                     &
          /)
     type(func_type) :: meta_funcs(3) = (/                                     &
@@ -73,6 +77,13 @@ contains
 !! @param[in] chi_2 2nd coordinate field in Wchi
 !! @param[in] chi_3 3rd coordinate field in Wchi
 !! @param[in] panel_id Field giving the ID for mesh panels
+!! @param[in] geometry
+!! @param[in] topology
+!! @param[in] coord_system
+!! @param[in] radius
+!! @param[in] rd
+!! @param[in] kappa
+!! @param[in] p_zero
 !! @param[in] ncell_3d Number of cells
 !! @param[in] m3_inv Inverse of W3 mass matrix
 !! @param[in] ndf_w3 Number of degrees of freedom per cell for w3
@@ -100,6 +111,8 @@ subroutine project_eos_pressure_code(cell, nlayers,                             
                                      exner, rho, theta, moist_dyn_gas,             &
                                      chi1, chi2, chi3,                             &
                                      panel_id,                                     &
+                                     geometry, topology, coord_system, radius,     &
+                                     rd, kappa, p_zero,                            &
                                      ncell_3d, m3_inv,                             &
                                      ndf_w3, undf_w3, map_w3, w3_basis,            &
                                      ndf_wt, undf_wt, map_wt, wt_basis,            &
@@ -134,12 +147,20 @@ subroutine project_eos_pressure_code(cell, nlayers,                             
   real(kind=r_def), dimension(undf_wt),  intent(in)    :: theta
   real(kind=r_def), dimension(undf_wt),  intent(in)    :: moist_dyn_gas
   real(kind=r_def), dimension(undf_chi), intent(in)    :: chi1, chi2, chi3
-  real(kind=r_def), dimension(undf_pid), intent(in)  :: panel_id
+  real(kind=r_def), dimension(undf_pid), intent(in)    :: panel_id
 
   real(kind=r_def), dimension(ncell_3d,ndf_w3,ndf_w3), intent(in) :: m3_inv
 
   real(kind=r_def), dimension(nqp_h), intent(in) ::  wqp_h
   real(kind=r_def), dimension(nqp_v), intent(in) ::  wqp_v
+
+  integer(kind=i_def), intent(in)  :: geometry
+  integer(kind=i_def), intent(in)  :: topology
+  integer(kind=i_def), intent(in)  :: coord_system
+  real(kind=r_def),    intent(in)  :: radius
+  real(kind=r_def),    intent(in)  :: rd
+  real(kind=r_def),    intent(in)  :: kappa
+  real(kind=r_def),    intent(in)  :: p_zero
 
   ! Internal variables
   integer(kind=i_def) :: df, k, ik, ipanel
@@ -162,8 +183,8 @@ subroutine project_eos_pressure_code(cell, nlayers,                             
       chi2_e(df) = chi2(map_chi(df) + k)
       chi3_e(df) = chi3(map_chi(df) + k)
     end do
-    call coordinate_jacobian(coord_system, geometry, topology, scaled_radius, &
-                             ndf_chi, nqp_h, nqp_v, chi1_e, chi2_e, chi3_e,   &
+    call coordinate_jacobian(coord_system, geometry, topology, radius,      &
+                             ndf_chi, nqp_h, nqp_v, chi1_e, chi2_e, chi3_e, &
                              ipanel, chi_basis, chi_diff_basis, jac, dj)
 
     do df = 1, ndf_w3
@@ -185,7 +206,8 @@ subroutine project_eos_pressure_code(cell, nlayers,                             
           theta_vd_at_quad = theta_vd_at_quad + theta_vd_e(df)*wt_basis(1,df,qp1,qp2)
         end do
         exner_at_quad = wqp_h(qp1)*wqp_v(qp2)*dj(qp1,qp2) &
-                      *calc_exner_pointwise(rho_at_quad, theta_vd_at_quad)
+                      *calc_exner_pointwise(rho_at_quad, theta_vd_at_quad, &
+                                            rd, kappa, p_zero)
 
         do df = 1, ndf_w3
           r_exner(df) = r_exner(df) + w3_basis(1,df,qp1,qp2)*exner_at_quad

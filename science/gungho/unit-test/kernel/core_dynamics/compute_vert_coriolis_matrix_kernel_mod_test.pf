@@ -24,135 +24,48 @@ module compute_vert_coriolis_matrix_kernel_mod_test
           only : get_w0_3x3x3_field
   use funit
 
+  use mesh_mod,                  only: geometry_spherical, topology_non_periodic
+  use finite_element_config_mod, only: coord_system_native
+
   implicit none
 
   private
-  public :: test_all
-
-  @TestCase
-  type, extends(TestCase), public :: compute_vert_coriolis_matrix_test_type
-    private
-  contains
-    procedure setUp
-    procedure tearDown
-    procedure test_all
-  end type compute_vert_coriolis_matrix_test_type
+  public :: set_up, tear_down, test_all
 
 contains
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  subroutine setUp( this )
+  @before
+  subroutine set_up()
 
-    use mesh_mod,                  only : geometry_spherical,                  &
-                                          topology_non_periodic
-    use extrusion_config_mod,      only : method_uniform,                      &
-                                          stretching_method_linear
-    use finite_element_config_mod, only : cellshape_quadrilateral,             &
-                                          coord_system_native, coord_space_wchi
-    use formulation_config_mod,    only : eos_method_sampled,                  &
-                                          moisture_formulation_dry
-    use feign_config_mod,          only : feign_base_mesh_config,              &
-                                          feign_extrusion_config,              &
-                                          feign_finite_element_config,         &
-                                          feign_formulation_config,            &
-                                          feign_planet_config
-    use sci_chi_transform_mod,     only : init_chi_transforms
+    use sci_chi_transform_mod, only: init_chi_transforms
 
     implicit none
 
-    class(compute_vert_coriolis_matrix_test_type), intent(inout) :: this
-
-    call feign_base_mesh_config(                                               &
-            file_prefix='foo',                                                 &
-            prime_mesh_name='unit_test',                                       &
-            geometry=geometry_spherical,                                       &
-            prepartitioned=.false.,                                            &
-            topology=topology_non_periodic,                                    &
-            fplane=.true.,                                                     &
-            f_lat_deg=45.0_r_def                                               &
-    )
-    call feign_extrusion_config(                                               &
-            planet_radius=1900000.0_r_def,                                     &
-            domain_height=0.3_r_def,                                           &
-            method=method_uniform,                                             &
-            number_of_layers=3_i_def,                                          &
-            stretching_method=stretching_method_linear,                        &
-            stretching_height=1.0_r_def,                                       &
-            eta_values=(/ 0.5_r_def /)                                         &
-    )
-    call feign_finite_element_config(                                          &
-            cellshape=cellshape_quadrilateral,                                 &
-            element_order_h=0_i_def,                                           &
-            element_order_v=0_i_def,                                           &
-            rehabilitate=.true.,                                               &
-            coord_order=0_i_def,                                               &
-            coord_order_nonprime=1_i_def,                                      &
-            coord_space=coord_space_wchi,                                      &
-            coord_system=coord_system_native,                                  &
-            vorticity_in_w1=.false.                                            &
-    )
-    call feign_formulation_config(                                             &
-            dlayer_on=.false.,                                                 &
-            dry_static_adjust=.false.,                                         &
-            exner_from_eos=.false.,                                            &
-            eos_method=eos_method_sampled,                                     &
-            init_exner_bt=.false.,                                             &
-            l_multigrid=.false.,                                               &
-            lagged_orog=.false.,                                               &
-            rotating=.true.,                                                   &
-            shallow=.false.,                                                   &
-            moisture_formulation =                                             &
-            moisture_formulation_dry,                                          &
-            moisture_in_solver=.true.,                                         &
-            p2theta_vert=.true.,                                               &
-            theta_moist_source=.false.,                                        &
-            use_physics=.false.,                                               &
-            use_wavedynamics=.false.,                                          &
-            use_multires_coupling=.false.,                                     &
-            si_momentum_equation=.true.,                                       &
-            horizontal_physics_predictor=.false.,                              &
-            horizontal_transport_predictor=.false.,                            &
-            solver_moisture_conservation=.true.,                               &
-            vector_invariant=.true.                                            &
-    )
-    call feign_planet_config(                                                  &
-            gravity=10.0_r_def,                                                &
-            omega=2.7e-5_r_def,                                                &
-            rd=200.0_r_def,                                                    &
-            cp=700.0_r_def,                                                    &
-            p_zero=100000.0_r_def,                                             &
-            scaling_factor=1.0_r_def                                           &
-    )
-
     call init_chi_transforms(geometry_spherical, topology_non_periodic)
 
-  end subroutine setUp
+  end subroutine set_up
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  subroutine tearDown( this )
+  @after
+  subroutine tear_down()
 
-    use config_loader_mod,     only: final_configuration
     use sci_chi_transform_mod, only: final_chi_transforms
 
     implicit none
 
-    class(compute_vert_coriolis_matrix_test_type), intent(inout) :: this
-
-    call final_configuration()
     call final_chi_transforms()
 
   end subroutine tearDown
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   @Test
-  subroutine test_all( this )
+  subroutine test_all()
 
     use, intrinsic :: iso_fortran_env, only : real64
     use compute_vert_coriolis_matrix_kernel_mod, only : compute_vert_coriolis_matrix_code
 
     implicit none
-
-    class(compute_vert_coriolis_matrix_test_type), intent(inout) :: this
 
     real(r_def), parameter :: radius = 1900000.0_r_def
     real(r_def), parameter :: lon0 = 0.0_r_def
@@ -160,6 +73,11 @@ contains
     real(r_def), parameter :: scaled_omega = 2.7e-5_r_def
     real(r_def), parameter :: f_lat_rad = lat0
     integer(i_def), parameter :: nlayers = 3
+
+    integer(i_def), parameter :: geometry = geometry_spherical
+    integer(i_def), parameter :: topology = toplogy_non_periodic
+    integer(i_def), parameter :: coord_system = coord_system_native
+    real(r_def),    parameter :: scaled_radius = radius*1.0_r_def
 
     ! Cells are going to be tiny so that the coordinates hardly change in a cell
     real(r_def), parameter :: dlon = 0.0012_r_def
@@ -293,6 +211,10 @@ contains
                                             chi2_data,     &
                                             chi3_data,     &
                                             panel_id,      &
+                                            geometry,      &
+                                            topology,      &
+                                            coord_system,  &
+                                            scaled_radius, &
                                             scaled_omega,  &
                                             f_lat_rad,     &
                                             ndf_wt,        &

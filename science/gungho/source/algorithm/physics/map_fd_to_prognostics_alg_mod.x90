@@ -55,16 +55,11 @@ module map_fd_to_prognostics_alg_mod
   use moist_dyn_mod,                   only: num_moist_factors, gas_law
   use moist_dyn_factors_alg_mod,       only: moist_dyn_factors_alg
 
-  ! Object types
-  use config_mod, only: config_type
-
   ! Configuration modules
   use formulation_config_mod,    only: rotating, shallow
-  use finite_element_config_mod, only: coord_system, coord_system_native
   use physics_config_mod,        only: sample_physics_winds, &
                                        sample_physics_winds_correction
-  use planet_config_mod,         only: scaled_radius, gravity, p_zero, &
-                                       kappa, rd, cp
+  use planet_config_mod,         only: gravity, cp
   use initialization_config_mod, only: init_exner_method_dump,                 &
                                        init_exner_method_hydrostatic
 
@@ -271,7 +266,13 @@ contains
     type( mesh_type ), pointer :: mesh
     integer(tik)               :: id
 
+    integer(i_def) :: coord_system
+    real(r_def)    :: scaled_radius
+
     if ( LPROF ) call start_timing( id, 'mappings.set_wind' )
+
+    coord_system  = config%finite_element%coord_system()
+    scaled_radius = config%planet%scaled_radius()
 
     mesh => u%get_mesh()
 
@@ -416,8 +417,16 @@ contains
     integer(i_def)                 :: eos_level, eos_lev_m1, eos_lev_m1_copy, &
                                       nlayersm1
 
+    real(r_def) :: rd
+    real(r_def) :: kappa
+    real(r_def) :: p_zero
+
     nullify(geopotential, chi, panel_id, height_w3, &
             height_wth, vert_coriolis, mesh, mask )
+
+    rd     = config%planet%rd()
+    kappa  = config%planet%kappa()
+    p_zero = config%planet%p_zero()
 
     mesh => exner%get_mesh()
     height_w3  => get_height_fv(config, mesh, W3)
@@ -470,7 +479,8 @@ contains
         call invoke(sample_eos_pressure_kernel_type(exner, rho, theta, &
                                                     moist_dyn(gas_law),&
                                                     eos_lev_m1,        &
-                                                    eos_lev_m1_copy))
+                                                    eos_lev_m1_copy,   &
+                                                    rd, kappa, p_zero))
       end if
       call invoke( hydrostatic_coriolis_kernel_type( exner, theta,            &
                                                      c_vert_term,             &
@@ -501,7 +511,8 @@ contains
              ! Compute exner from EoS
              sample_eos_pressure_kernel_type( exner, rho,                    &
                                               theta, moist_dyn(gas_law),     &
-                                              0, nlayersm1),                 &
+                                              0, nlayersm1,                  &
+                                              rd, kappa, p_zero ),           &
 
              ! Compute exner in Wtheta (required to calculate T)
              sample_w3_to_wtheta_kernel_type( exner_in_wth, exner,           &

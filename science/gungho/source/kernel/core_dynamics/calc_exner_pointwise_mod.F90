@@ -8,7 +8,6 @@
 module calc_exner_pointwise_mod
 
 use constants_mod,     only : r_def
-use planet_config_mod, only : kappa, Rd, p_zero
 
 implicit none
 
@@ -27,12 +26,18 @@ contains
 !>          exner = ( Rd/p0 * rho * theta ) ^ (  kappa / ( 1 - kappa ) )
 !! @param[in] rho   Density perturbation
 !! @param[in] theta Potential temperature perturbation
+!! @param[in] rd
+!! @param[in] kappa
+!! @param[in] p_zero
 !! @return    exner Pressure perturbation
-function calc_exner_pointwise(rho, theta) result(exner)
+function calc_exner_pointwise(rho, theta, rd, kappa, p_zero) result(exner)
 
   implicit none
 
   real(kind=r_def)              :: exner
+  real(kind=r_def), intent(in)  :: Rd
+  real(kind=r_def), intent(in)  :: kappa
+  real(kind=r_def), intent(in)  :: p_zero
   real(kind=r_def), intent(in)  :: rho, theta
 
    exner = ( Rd * rho * theta/p_zero ) ** (  kappa / ( 1.0_r_def - kappa ) )
@@ -50,12 +55,12 @@ end function calc_exner_pointwise
 !! @param[in] rho_s   Reference density
 !! @param[in] theta_s Reference potential temperature
 !! @return    exner   Pressure perturbation
-function linear_calc_exner_pointwise(rho, theta, exner_s, rho_s, theta_s) result(exner)
+function linear_calc_exner_pointwise(rho, theta, exner_s, rho_s, theta_s, kappa) result(exner)
 
   implicit none
 
   real(kind=r_def)              :: exner
-  real(kind=r_def), intent(in)  :: rho, theta, exner_s, rho_s, theta_s
+  real(kind=r_def), intent(in)  :: rho, theta, exner_s, rho_s, theta_s, kappa
 
   exner = kappa / ( 1.0_r_def - kappa ) * exner_s * ( rho/rho_s + theta/theta_s )
 
@@ -69,13 +74,19 @@ end function linear_calc_exner_pointwise
 !>          pressure = ( Rd/p0 * rho * theta ) ^ (  kappa / ( 1 - kappa ) )
 !! @param[in] rho   Density perturbation
 !! @param[in] theta Potential temperature perturbation
+!! @param[in] rd
+!! @param[in] kappa
+!! @param[in] p_zero
 !! @return    pressure Pressure perturbation
-function calc_pressure_pointwise(rho, theta) result(pressure)
+function calc_pressure_pointwise(rho, theta, rd, kappa, p_zero) result(pressure)
 
   implicit none
 
   real(kind=r_def)              :: pressure
   real(kind=r_def), intent(in)  :: rho, theta
+  real(kind=r_def), intent(in)  :: Rd
+  real(kind=r_def), intent(in)  :: kappa
+  real(kind=r_def), intent(in)  :: p_zero
 
   pressure = p_zero * ( Rd/p_zero * rho * theta ) ** (  1.0_r_def / ( 1.0_r_def - kappa ) )
 

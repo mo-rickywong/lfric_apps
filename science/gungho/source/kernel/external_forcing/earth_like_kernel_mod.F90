@@ -25,7 +25,6 @@ module earth_like_kernel_mod
                                       GH_READ, CELL_COLUMN
   use constants_mod,            only: r_def, i_def
   use sci_chi_transform_mod,    only: chi2llr
-  use calc_exner_pointwise_mod, only: calc_exner_pointwise
   use fs_continuity_mod,        only: Wtheta
   use earth_like_forcings_mod,  only: earth_like_newton_frequency, &
                                       earth_like_equilibrium_theta

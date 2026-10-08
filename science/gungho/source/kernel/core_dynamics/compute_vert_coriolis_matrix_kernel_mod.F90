@@ -22,8 +22,8 @@ use kernel_mod,              only: kernel_type
 use argument_mod,            only: arg_type, func_type,       &
                                    GH_OPERATOR, GH_FIELD,     &
                                    GH_READ, GH_WRITE,         &
-                                   GH_REAL, GH_SCALAR,        &
-                                   ANY_SPACE_9,               &
+                                   GH_REAL, GH_INTEGER,       &
+                                   GH_SCALAR, ANY_SPACE_9,    &
                                    ANY_DISCONTINUOUS_SPACE_3, &
                                    GH_BASIS, GH_DIFF_BASIS,   &
                                    CELL_COLUMN, GH_QUADRATURE_XYoZ
@@ -35,10 +35,6 @@ use rotation_vector_mod,     only: rotation_vector_fplane,  &
                                    vert_vector_sphere
 use cross_product_mod,       only: cross_product
 
-use base_mesh_config_mod,      only: geometry, topology
-use finite_element_config_mod, only: coord_system
-use planet_config_mod,         only: scaled_radius
-
 implicit none
 private
 
@@ -48,12 +44,16 @@ private
 
 type, public, extends(kernel_type) :: compute_vert_coriolis_matrix_kernel_type
   private
-  type(arg_type) :: meta_args(5) = (/                                          &
+  type(arg_type) :: meta_args(9) = (/                                          &
       arg_type(GH_OPERATOR, GH_REAL, GH_WRITE, Wtheta, W2),                    &
       arg_type(GH_FIELD*3,  GH_REAL, GH_READ,  ANY_SPACE_9),                   &
       arg_type(GH_FIELD,    GH_REAL, GH_READ,  ANY_DISCONTINUOUS_SPACE_3),     &
-      arg_type(GH_SCALAR,   GH_REAL, GH_READ),                                 &
-      arg_type(GH_SCALAR,   GH_REAL, GH_READ)                                  &
+      arg_type(GH_SCALAR,   GH_INTEGER, GH_READ),                              & ! geometry
+      arg_type(GH_SCALAR,   GH_INTEGER, GH_READ),                              & ! topology
+      arg_type(GH_SCALAR,   GH_INTEGER, GH_READ),                              & ! coord_system
+      arg_type(GH_SCALAR,   GH_REAL,    GH_READ),                              & ! radius
+      arg_type(GH_SCALAR,   GH_REAL,    GH_READ),                              & ! omega
+      arg_type(GH_SCALAR,   GH_REAL,    GH_READ)                               & ! f_lat
   /)
   type(func_type) :: meta_funcs(3) = (/                                        &
       func_type(Wtheta,      GH_BASIS),                                        &
@@ -83,6 +83,10 @@ contains
 !> @param[in]     chi_2           2nd coordinate field
 !> @param[in]     chi_3           3rd coordinate field
 !> @param[in]     panel_id        A field giving the ID for mesh panels
+!> @param[in]     geometry
+!> @param[in]     topology
+!> @param[in]     coord_system
+!> @param[in]     radius
 !> @param[in]     omega           Planet angular velocity
 !> @param[in]     f_lat           F-plane latitude
 !> @param[in]     ndf_wt          Num of DoFs per cell for Wtheta
@@ -104,8 +108,9 @@ contains
 subroutine compute_vert_coriolis_matrix_code(col_idx, nlayers, ncell_3d,       &
                                              matrix,                           &
                                              chi_1, chi_2, chi_3,              &
-                                             panel_id,                         &
-                                             omega, f_lat,                     &
+                                             panel_id, geometry, topology,     &
+                                             coord_system, radius, omega,      &
+                                             f_lat,                            &
                                              ndf_wt, basis_wt,                 &
                                              ndf_w2, basis_w2,                 &
                                              ndf_chi, undf_chi,                &
@@ -138,8 +143,13 @@ subroutine compute_vert_coriolis_matrix_code(col_idx, nlayers, ncell_3d,       &
   real(kind=r_def),    intent(in)    :: panel_id(undf_pid)
   real(kind=r_def),    intent(in)    :: wqp_h(nqp_h)
   real(kind=r_def),    intent(in)    :: wqp_v(nqp_v)
-  real(kind=r_def),    intent(in)    :: omega
-  real(kind=r_def),    intent(in)    :: f_lat
+
+  integer(kind=i_def), intent(in) :: geometry
+  integer(kind=i_def), intent(in) :: topology
+  integer(kind=i_def), intent(in) :: coord_system
+  real(kind=r_def),    intent(in) :: radius
+  real(kind=r_def),    intent(in) :: omega
+  real(kind=r_def),    intent(in) :: f_lat
 
   ! Internal variables
   integer(kind=i_def) :: df_wt, df_w2, df_chi, k, ik
@@ -168,10 +178,13 @@ subroutine compute_vert_coriolis_matrix_code(col_idx, nlayers, ncell_3d,       &
 
     ! Calculate planet's rotation vector and the vertical vector
     if ( geometry == geometry_spherical ) then
-      call rotation_vector_sphere(ndf_chi, nqp_h, nqp_v, chi_1_e, chi_2_e,     &
-                                  chi_3_e, ipanel, basis_chi, rotation_vector)
-      call vert_vector_sphere(ndf_chi, nqp_h, nqp_v, chi_1_e, chi_2_e,         &
-                              chi_3_e, ipanel, basis_chi, vert_vec)
+      call rotation_vector_sphere(ndf_chi, nqp_h, nqp_v, chi_1_e, chi_2_e, &
+                                  chi_3_e, ipanel, geometry, topology,     &
+                                  coord_system, radius, omega, basis_chi,  &
+                                  rotation_vector)
+      call vert_vector_sphere(ndf_chi, nqp_h, nqp_v, chi_1_e, chi_2_e, &
+                              chi_3_e, ipanel, geometry, topology,     &
+                              coord_system, radius, basis_chi, vert_vec)
     else
       call rotation_vector_fplane(nqp_h, nqp_v, omega, f_lat, rotation_vector)
       do qp2 = 1, nqp_v
@@ -183,7 +196,7 @@ subroutine compute_vert_coriolis_matrix_code(col_idx, nlayers, ncell_3d,       &
 
     ! Calculate the Jacobian
     call coordinate_jacobian(coord_system, geometry,            &
-                             topology, scaled_radius,           &
+                             topology, radius,                  &
                              ndf_chi, nqp_h, nqp_v,             &
                              chi_1_e, chi_2_e, chi_3_e, ipanel, &
                              basis_chi, diff_basis_chi, jac, dj)
