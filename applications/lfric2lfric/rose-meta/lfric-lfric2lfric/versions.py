@@ -591,3 +591,45 @@ class vn32_t776(MacroUpgrade):
         self.add_setting(config, [nml, "turb_len_fac"], "8.0")
 
         return config, self.reports
+
+
+class vn32_t881(MacroUpgrade):
+    """Upgrade macro for ticket None by None."""
+
+    BEFORE_TAG = "vn3.2_t776"
+    AFTER_TAG = "vn3.2_t881"
+
+    def upgrade(self, config, meta_config=None):
+        # Commands From: rose-meta/lfric-gungho
+        choice_nml = "namelist:section_choice"
+        iau_nml = "namelist:iau"
+        iau_addinf_nml = "namelist:iau_addinf_io(.*)"
+        iau_ainc_nml = "namelist:iau_ainc_io(.*)"
+        iau_bcorr_nml = "namelist:iau_bcorr_io(.*)"
+        iau = self.get_setting_value(config, [choice_nml, "iau"])
+        if iau == ".false.":
+            self.ignore_setting(config, [choice_nml, "iau_sst"], state="!!")
+            self.ignore_setting(config, [choice_nml, "iau_surf"], state="!!")
+            self.ignore_setting(config, [iau_nml], state="!!")
+            self.ignore_setting(config, [iau_ainc_nml], state="!!")
+        self.enable_setting(config, [iau_nml, "iau_ainc_multifile"])
+        self.enable_setting(config, [iau_nml, "iau_mode"])
+        self.enable_setting(config, [iau_nml, "iau_outerloop"])
+        self.enable_setting(config, [iau_nml, "iau_pc2"])
+        self.enable_setting(config, [iau_nml, "iau_tendency_ainc"])
+        self.enable_setting(config, [iau_nml, "iau_use_level_on_temp"])
+        self.enable_setting(config, [iau_nml, "iau_wet_density"])
+        self.enable_setting(config, [iau_nml, "iau_use_addinf"])
+        self.enable_setting(config, [iau_nml, "iau_use_bcorr"])
+        use_bcorr_io = self.get_setting_value(
+            config, [iau_nml, "iau_use_bcorr"]
+        )
+        if use_bcorr_io == ".false.":
+            self.ignore_setting(config, [iau_bcorr_nml], state="!!")
+        use_addinf_io = self.get_setting_value(
+            config, [iau_nml, "iau_use_addinf"]
+        )
+        if use_addinf_io == ".false.":
+            self.ignore_setting(config, [iau_addinf_nml], state="!!")
+
+        return config, self.reports
