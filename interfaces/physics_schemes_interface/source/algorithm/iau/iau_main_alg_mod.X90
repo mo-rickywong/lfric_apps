@@ -45,8 +45,8 @@ module iau_main_alg_mod
     implicit none
 
     ! Arguments
-    type( modeldb_type ), intent(inout), target  :: modeldb
-    type( mesh_type ),    intent(in),    pointer :: twod_mesh
+    type( modeldb_type ), intent(inout), target :: modeldb
+    type( mesh_type ),    intent(in)            :: twod_mesh
 
     ! Internal variables
     logical( l_def ) :: iau_ainc_active

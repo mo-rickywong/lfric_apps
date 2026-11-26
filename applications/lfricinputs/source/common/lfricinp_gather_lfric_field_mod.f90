@@ -38,11 +38,11 @@ implicit none
 !  and puts into correct location using the global id (gid) map
 !
 ! Arguments
-type(field_type),    intent(in)    :: lfric_field
-real(kind=real64),   intent(out)   :: global_field_array(:)
+type(field_type),      intent(in)  :: lfric_field
+real(kind=real64),     intent(out) :: global_field_array(:)
 type(lfric_comm_type), intent(in)  :: comm
-integer(kind=int64), intent(in)    :: level
-type(mesh_type),     intent(in), pointer :: twod_mesh
+integer(kind=int64),   intent(in)  :: level
+type(mesh_type),       intent(in)  :: twod_mesh
 
 ! Local variables
 type(mesh_type), pointer :: mesh => null()

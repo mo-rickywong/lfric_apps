@@ -38,9 +38,10 @@ subroutine lfricinp_create_ancil_fields( ancil_fields, mesh, twod_mesh )
 
 implicit none
 
-type( field_collection_type ), intent( out )         :: ancil_fields
-type( mesh_type ),             intent( in ), pointer :: mesh
-type( mesh_type ),             intent( in ), pointer :: twod_mesh
+type( field_collection_type ), intent( out ) :: ancil_fields
+
+type( mesh_type ), intent( in ) :: mesh
+type( mesh_type ), intent( in ) :: twod_mesh
 
 ! Set up ancil_fields collection
 write(log_scratch_space,'(A,A)') "Create ancil fields: "// &
@@ -68,8 +69,8 @@ implicit none
 
 character(*), intent(in)                    :: name
 type(field_collection_type), intent(in out) :: ancil_fields
-type( mesh_type ), intent(in), pointer      :: mesh
-type( mesh_type ), intent(in), pointer      :: twod_mesh
+type( mesh_type ),        intent(in)        :: mesh
+type( mesh_type ),        intent(in)        :: twod_mesh
 logical(l_def), optional, intent(in)        :: twod
 integer(i_def), optional, intent(in)        :: ndata
 

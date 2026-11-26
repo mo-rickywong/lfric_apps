@@ -87,7 +87,7 @@ contains
     type( field_type ), intent( inout ) :: theta_inc
     type( field_type ), intent( inout ) :: dcfl, dcff, dbcf
 
-    type(mesh_type), intent(in), pointer :: mesh
+    type(mesh_type), intent(in) :: mesh
 
     ! Temporary unpacked fields from collections
     type( field_type ), pointer :: exner_in_wth        => null()

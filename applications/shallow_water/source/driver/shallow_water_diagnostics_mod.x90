@@ -49,10 +49,10 @@ contains
 
     implicit none
 
-    type(mesh_type),         intent(in), pointer :: mesh
-    type(modeldb_type),      intent(in), target  :: modeldb
-    logical,                 intent(in)          :: nodal_output_on_w3
-    integer(i_def),          intent(in)          :: initial_flag
+    type(mesh_type),    intent(in)         :: mesh
+    type(modeldb_type), intent(in), target :: modeldb
+    logical,            intent(in)         :: nodal_output_on_w3
+    integer(i_def),     intent(in)         :: initial_flag
 
     type( field_collection_type ), pointer :: prognostic_fields => null()
 

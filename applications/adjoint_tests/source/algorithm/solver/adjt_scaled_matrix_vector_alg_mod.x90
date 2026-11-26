@@ -59,11 +59,10 @@ module adjt_scaled_matrix_vector_alg_mod
 
     implicit none
 
-    type(config_type), intent(in) :: config
-
     ! Arguments
-    type(mesh_type), pointer, intent(in) :: mesh
-    type(model_clock_type),   intent(in) :: model_clock
+    type(config_type),      intent(in) :: config
+    type(mesh_type),        intent(in) :: mesh
+    type(model_clock_type), intent(in) :: model_clock
 
     ! Randomised prognostics to initialise SI operators
     type(field_type) :: init_op_t, init_op_d, init_op_p, init_op_moist_dyn(num_moist_factors)

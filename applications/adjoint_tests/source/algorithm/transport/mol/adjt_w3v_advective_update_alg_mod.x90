@@ -43,8 +43,8 @@ module adjt_w3v_advective_update_alg_mod
     implicit none
 
     ! Arguments
-    type(config_type),              intent(in) :: config
-    type(mesh_type), pointer,       intent(in) :: mesh
+    type(config_type), intent(in) :: config
+    type(mesh_type),   intent(in) :: mesh
 
     ! Arguments for tl and adj calls
     type(r_tran_field_type) :: advective_increment

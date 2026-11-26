@@ -240,8 +240,8 @@ contains
     type( field_collection_type ), intent(inout) :: chemistry_fields
     type( field_collection_type ), intent(inout) :: aerosol_fields
 
-    type(mesh_type),  intent(in), pointer :: mesh
-    type(mesh_type),  intent(in), pointer :: twod_mesh
+    type(mesh_type), target, intent(in) :: mesh
+    type(mesh_type), target, intent(in) :: twod_mesh
 
     class( model_clock_type ), intent(in) :: clock
     real( kind=r_def ),        intent(in) :: dt

@@ -111,12 +111,12 @@ contains
     implicit none
 
     type( field_collection_type ), intent( inout ) :: depository
-    type( field_collection_type ), intent( inout )   :: ancil_fields
+    type( field_collection_type ), intent( inout ) :: ancil_fields
 
-    type( mesh_type ), intent(in), pointer :: mesh
-    type( mesh_type ), intent(in), pointer :: twod_mesh
-    type( mesh_type ), intent(in), pointer :: aerosol_mesh
-    type( mesh_type ), intent(in), pointer :: aerosol_twod_mesh
+    type( mesh_type ), intent(in) :: mesh
+    type( mesh_type ), intent(in) :: twod_mesh
+    type( mesh_type ), intent(in) :: aerosol_mesh
+    type( mesh_type ), intent(in) :: aerosol_twod_mesh
 
     type(linked_list_type), intent(out) :: ancil_times_list
 
@@ -890,8 +890,8 @@ contains
     type( field_collection_type ), intent( inout ) :: depository
     type( field_collection_type ), intent( inout ) :: ancil_fields
 
-    type( mesh_type ), intent(in), pointer :: mesh
-    type( mesh_type ), intent(in), pointer :: twod_mesh
+    type( mesh_type ), intent(in) :: mesh
+    type( mesh_type ), intent(in) :: twod_mesh
 
     ! Set up ancil_fields collection
     write(log_scratch_space,'(A,A)') "Create ancil fields: "// &
@@ -1004,17 +1004,17 @@ contains
 
     implicit none
 
-    character(*),                   intent(in)          :: name
-    type( field_collection_type ),  intent(inout)       :: depository
-    type( field_collection_type ),  intent(inout)       :: ancil_fields
-    type( mesh_type ),    pointer,  intent(in)          :: mesh
-    type( mesh_type ),    pointer,  intent(in)          :: twod_mesh
-    logical(l_def),       optional, intent(in)          :: twod
-    integer(i_def),       optional, intent(in)          :: ndata
-    logical(l_def),       optional, intent(in)          :: ndata_first
-    type(time_axis_type), optional, intent(inout)       :: time_axis
-    type( mesh_type ), optional, pointer, intent(in)    :: alt_mesh
-    type( mesh_type ), optional, pointer, intent(in)    :: alt_twod_mesh
+    character(*),                   intent(in)    :: name
+    type( field_collection_type ),  intent(inout) :: depository
+    type( field_collection_type ),  intent(inout) :: ancil_fields
+    type( mesh_type ),              intent(in)    :: mesh
+    type( mesh_type ),              intent(in)    :: twod_mesh
+    logical(l_def),       optional, intent(in)    :: twod
+    integer(i_def),       optional, intent(in)    :: ndata
+    logical(l_def),       optional, intent(in)    :: ndata_first
+    type(time_axis_type), optional, intent(inout) :: time_axis
+    type( mesh_type ), optional,    intent(in)    :: alt_mesh
+    type( mesh_type ), optional,    intent(in)    :: alt_twod_mesh
 
     ! Local variables
     type(field_type)          :: new_field

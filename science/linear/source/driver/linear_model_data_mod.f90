@@ -78,8 +78,8 @@ contains
 
     type( modeldb_type ), target, intent(inout) :: modeldb
 
-    type( mesh_type ), pointer, intent(in) :: mesh
-    type( mesh_type ),     pointer, intent(in) :: twod_mesh
+    type( mesh_type ), intent(in) :: mesh
+    type( mesh_type ), intent(in) :: twod_mesh
 
     select case( ls_option )
 
@@ -114,8 +114,8 @@ contains
 
     type( modeldb_type ), target, intent(inout) :: modeldb
 
-    type( mesh_type ), pointer, intent(in) :: mesh
-    type( mesh_type ),     pointer, intent(in) :: twod_mesh
+    type( mesh_type ), intent(in) :: mesh
+    type( mesh_type ), intent(in) :: twod_mesh
 
     type( field_collection_type ), pointer :: depository
     type( field_collection_type ), pointer :: prognostics
@@ -193,8 +193,8 @@ contains
 
     type( modeldb_type ), target, intent(inout) :: modeldb
 
-    type( mesh_type ), pointer, intent(in) :: mesh
-    type( mesh_type ), pointer, intent(in) :: twod_mesh
+    type( mesh_type ), intent(in) :: mesh
+    type( mesh_type ), intent(in) :: twod_mesh
 
     type( field_collection_type ), pointer :: depository
     type( field_collection_type ), pointer :: prognostics
@@ -317,8 +317,8 @@ contains
 
     implicit none
 
-    type( mesh_type ), pointer, intent(in) :: mesh
-    type( mesh_type ), pointer, intent(in) :: twod_mesh
+    type( mesh_type ), intent(in) :: mesh
+    type( mesh_type ), intent(in) :: twod_mesh
 
     type( modeldb_type ), target, intent(inout) :: modeldb
 
@@ -425,8 +425,8 @@ contains
 
     implicit none
 
-    type( mesh_type ), pointer, intent(in) :: mesh
-    type( mesh_type ), pointer, intent(in) :: twod_mesh
+    type( mesh_type ), intent(in) :: mesh
+    type( mesh_type ), intent(in) :: twod_mesh
 
     type( modeldb_type ), target, intent(inout) :: modeldb
     type(field_collection_type), pointer :: prognostic_fields

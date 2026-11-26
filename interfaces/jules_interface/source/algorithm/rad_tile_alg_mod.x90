@@ -86,13 +86,14 @@ subroutine rad_tile_alg(config,                                              &
   type( field_type ), intent( inout ) :: tile_swinc_diffuse_albedo
   type( field_type ), intent( inout ) :: tile_lw_albedo
   type( field_type ), intent( inout ) :: tile_lwinc_albedo
+
   type( field_collection_type ), intent(in)    :: derived_fields
   type( field_collection_type ), intent(inout) :: radiation_fields
   type( field_collection_type ), intent(in)    :: orography_fields
   type( field_collection_type ), intent(inout) :: surface_fields
   type( field_collection_type ), intent(in)    :: soil_fields
   type( field_collection_type ), intent(in)    :: snow_fields
-  type( mesh_type ), pointer,    intent(in)    :: twod_mesh
+  type( mesh_type ),             intent(in)    :: twod_mesh
   integer( kind=i_def ),         intent(in)    :: timestep
 
   ! Unpacked fields from collections

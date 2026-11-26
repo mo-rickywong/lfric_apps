@@ -141,9 +141,9 @@ module coupler_mod
                                      modeldb )
     implicit none
 
-    type( mesh_type ),             intent(in), pointer :: mesh
-    type( mesh_type ),             intent(in), pointer :: twod_mesh
-    type(modeldb_type),            intent(inout)       :: modeldb
+    type( mesh_type ),  intent(in)    :: mesh
+    type( mesh_type ),  intent(in)    :: twod_mesh
+    type(modeldb_type), intent(inout) :: modeldb
 
     type( field_collection_type ),             pointer :: depository
     type( field_collection_type ),             pointer :: prognostic_fields
@@ -672,11 +672,11 @@ module coupler_mod
 
     implicit none
 
-    character(*), intent(in)                       :: name
-    type(field_collection_type), intent(inout)     :: depository
-    type(field_collection_type), intent(inout)     :: prognostic_fields
-    type(function_space_type), pointer, intent(in) :: vector_space
-    logical(l_def), optional, intent(in)           :: checkpoint_flag
+    character(*),                intent(in)    :: name
+    type(field_collection_type), intent(inout) :: depository
+    type(field_collection_type), intent(inout) :: prognostic_fields
+    type(function_space_type),   intent(in)    :: vector_space
+    logical(l_def), optional,    intent(in)    :: checkpoint_flag
 
     !Local variables
     !field to initialize

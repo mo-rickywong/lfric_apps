@@ -95,16 +95,16 @@ module update_iau_inc_alg_mod
 
     type(config_type), intent(in) :: config
 
-    type( field_collection_type ), intent(inout)       :: iau_tot_inc
-    type( mesh_type ),             intent(in), pointer :: twod_mesh
-    type( field_collection_type ), intent(inout)       :: prognostic_fields
-    type( field_collection_type ), intent(in)          :: derived_fields
-    type( field_collection_type ), intent(inout)       :: cloud_fields
-    type( field_type ),            intent(in)          :: moist_dyn(num_moist_factors)
-    type( field_collection_type ), intent(inout)       :: surface_fields
-    type( field_collection_type ), intent(inout)       :: soil_fields
-    type( field_collection_type ), intent(inout)       :: snow_fields
-    class( model_clock_type ),     intent(in)          :: model_clock
+    type( field_collection_type ), intent(inout) :: iau_tot_inc
+    type( mesh_type ),             intent(in)    :: twod_mesh
+    type( field_collection_type ), intent(inout) :: prognostic_fields
+    type( field_collection_type ), intent(in)    :: derived_fields
+    type( field_collection_type ), intent(inout) :: cloud_fields
+    type( field_type ),            intent(in)    :: moist_dyn(num_moist_factors)
+    type( field_collection_type ), intent(inout) :: surface_fields
+    type( field_collection_type ), intent(inout) :: soil_fields
+    type( field_collection_type ), intent(inout) :: snow_fields
+    class( model_clock_type ),     intent(in)    :: model_clock
 
     type( field_type ), pointer :: u
     type( field_type ), pointer :: theta
@@ -615,12 +615,12 @@ module update_iau_inc_alg_mod
     implicit none
 
     ! Arguments
-    type( modeldb_type ), intent(inout), target  :: modeldb
-    type( mesh_type ),       intent(in), pointer :: twod_mesh
-    logical( l_def ), intent(in)                 :: iau_ainc_active
-    logical( l_def ), intent(in)                 :: iau_addinf_active
-    logical( l_def ), intent(in)                 :: iau_bcorr_active
-    logical( l_def ), intent(in)                 :: iau_pertinc_active
+    type( modeldb_type ), intent(inout), target :: modeldb
+    type( mesh_type ), intent(in)               :: twod_mesh
+    logical( l_def ), intent(in)                :: iau_ainc_active
+    logical( l_def ), intent(in)                :: iau_addinf_active
+    logical( l_def ), intent(in)                :: iau_bcorr_active
+    logical( l_def ), intent(in)                :: iau_pertinc_active
 
     ! Internal variables
     type( field_collection_type ), pointer :: iau_fields

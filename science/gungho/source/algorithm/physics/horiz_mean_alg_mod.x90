@@ -36,10 +36,10 @@ contains
 
   implicit none
 
-  type( field_type ),      intent(inout)  :: horiz_mean
-  integer( kind = i_def ), intent(in)     :: nlayers
-  type( mesh_type ), pointer, intent(in)  :: twod_mesh
-  type( field_type ),      intent(in)     :: field
+  type( field_type ),      intent(inout) :: horiz_mean
+  integer( kind = i_def ), intent(in)    :: nlayers
+  type( mesh_type ),       intent(in)    :: twod_mesh
+  type( field_type ),      intent(in)    :: field
 
   integer( kind=i_def ) :: k
   integer( kind=i_def ) :: mesh_size, n_vert_dofs

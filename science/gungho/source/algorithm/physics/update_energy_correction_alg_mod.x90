@@ -47,8 +47,8 @@ contains
     type( field_type ), intent(in)    :: accumulated_fluxes
     real( kind=r_def ), intent(in)    :: total_dry_mass, dt
 
-    type( mesh_type ), intent(in), pointer :: mesh
-    type( mesh_type ), intent(in), pointer :: twod_mesh
+    type( mesh_type ), intent(in) :: mesh
+    type( mesh_type ), intent(in) :: twod_mesh
 
     real( kind=r_def ), intent(inout) :: total_energy
     real( kind=r_def ), intent(inout) :: total_energy_previous

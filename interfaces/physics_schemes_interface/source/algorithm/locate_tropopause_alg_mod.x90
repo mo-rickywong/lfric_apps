@@ -44,9 +44,9 @@ subroutine locate_tropopause_alg(config, trop_level, theta, exner_in_wth, &
   type(config_type), intent(in) :: config
 
   type( integer_field_type ), intent(inout) :: trop_level
-  type( field_type ), intent(in)    :: theta, exner_in_wth
-  type( mesh_type ),  intent(in), pointer :: twod_mesh
-  logical( l_def ),   intent(in)    :: trop_diag
+  type( field_type ), intent(in)            :: theta, exner_in_wth
+  type( mesh_type ),  intent(in)            :: twod_mesh
+  logical( l_def ),   intent(in)            :: trop_diag
 
   ! Local fields
   type( field_type ),         pointer :: height_wth => null()

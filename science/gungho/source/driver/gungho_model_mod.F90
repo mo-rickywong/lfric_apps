@@ -460,9 +460,9 @@ contains
 
     implicit none
 
-    type( mesh_type ), intent(in), pointer :: mesh
+    type( mesh_type ),       intent(in)    :: mesh
     class(model_clock_type), intent(inout) :: model_clock
-    type(config_type), intent(in) :: config
+    type(config_type),       intent(in)    :: config
 
 #ifdef UM_PHYSICS
     integer(i_def) :: ncells
@@ -1178,8 +1178,8 @@ contains
                                       moisture_formulation_dry
     implicit none
 
-    type( mesh_type ),    intent(in),    pointer :: mesh
-    type( modeldb_type ), intent(inout), target  :: modeldb
+    type( mesh_type ),    intent(in)            :: mesh
+    type( modeldb_type ), intent(inout), target :: modeldb
 
     type( field_collection_type ), pointer :: prognostic_fields => null()
     type( field_collection_type ), pointer :: moisture_fields => null()

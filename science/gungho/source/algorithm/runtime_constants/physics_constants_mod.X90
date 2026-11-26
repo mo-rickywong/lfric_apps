@@ -628,8 +628,8 @@ contains
 
     implicit none
 
-    type(config_type), intent(in)          :: config
-    type(mesh_type),   intent(in), pointer :: mesh
+    type(config_type), intent(in) :: config
+    type(mesh_type),   intent(in) :: mesh
 
     integer(kind=i_def)                :: local_mesh_id
     type(field_type),          pointer :: Pnm_star

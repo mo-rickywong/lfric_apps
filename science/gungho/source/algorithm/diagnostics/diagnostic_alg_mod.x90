@@ -651,12 +651,13 @@ contains
     type(config_type), intent(in) :: config
 
     type(field_collection_type), intent(in) :: derived_fields
-    type(field_type),  intent(in)    :: rho_field
-    type(field_type),  intent(in)    :: mr(nummr)
-    type(field_type),  intent(in)    :: exner_field
-    type(mesh_type),   intent(in), pointer :: mesh
-    type(mesh_type),   intent(in), pointer :: twod_mesh
-    real(kind=r_def),  intent(in)    :: temperature_correction_rate
+
+    type(field_type), intent(in) :: rho_field
+    type(field_type), intent(in) :: mr(nummr)
+    type(field_type), intent(in) :: exner_field
+    type(mesh_type),  intent(in) :: mesh
+    type(mesh_type),  intent(in) :: twod_mesh
+    real(kind=r_def), intent(in) :: temperature_correction_rate
 
     ! Set up local fields
     ! 3D fields

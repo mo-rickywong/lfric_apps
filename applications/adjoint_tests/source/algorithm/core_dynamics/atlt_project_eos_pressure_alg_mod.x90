@@ -49,7 +49,7 @@ module atlt_project_eos_pressure_alg_mod
     implicit none
 
     ! Arguments
-    type(mesh_type), pointer,       intent(in) :: mesh
+    type(mesh_type),                intent(in) :: mesh
     type(field_type), dimension(3), intent(in) :: chi
     type(field_type),               intent(in) :: panel_id
 

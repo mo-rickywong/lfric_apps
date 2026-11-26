@@ -49,11 +49,11 @@ module lfric2lfric_init_coupler_mod
 
     implicit none
 
-    type(mesh_type), pointer, intent(in)     :: mesh
-    character(*),             intent(in)     :: coupler
-    integer(i_def),           intent(in)     :: element_order_h
-    integer(i_def),           intent(in)     :: element_order_v
-    type(modeldb_type),       intent(inout)  :: modeldb
+    type(mesh_type),    intent(in)    :: mesh
+    character(*),       intent(in)    :: coupler
+    integer(i_def),     intent(in)    :: element_order_h
+    integer(i_def),     intent(in)    :: element_order_v
+    type(modeldb_type), intent(inout) :: modeldb
 
     ! Field name
     character(str_def)                   :: name_cpl
@@ -130,11 +130,11 @@ module lfric2lfric_init_coupler_mod
 
     implicit none
 
-    type(mesh_type), pointer, intent(in)     :: mesh
-    character(*),             intent(in)     :: coupler
-    integer(i_def),           intent(in)     :: element_order_h
-    integer(i_def),           intent(in)     :: element_order_v
-    type(modeldb_type),       intent(inout)  :: modeldb
+    type(mesh_type),    intent(in)    :: mesh
+    character(*),       intent(in)    :: coupler
+    integer(i_def),     intent(in)    :: element_order_h
+    integer(i_def),     intent(in)    :: element_order_v
+    type(modeldb_type), intent(inout) :: modeldb
 
     ! Field name
     character(str_def)                   :: name_cpl
@@ -230,11 +230,11 @@ module lfric2lfric_init_coupler_mod
 
     implicit none
 
-    type(mesh_type), pointer, intent(in)     :: mesh
-    character(*),             intent(in)     :: coupler
-    integer(i_def),           intent(in)     :: element_order_h
-    integer(i_def),           intent(in)     :: element_order_v
-    type(modeldb_type),       intent(inout)  :: modeldb
+    type(mesh_type),    intent(in)    :: mesh
+    character(*),       intent(in)    :: coupler
+    integer(i_def),     intent(in)    :: element_order_h
+    integer(i_def),     intent(in)    :: element_order_v
+    type(modeldb_type), intent(inout) :: modeldb
 
     write(log_scratch_space, '(A)' ) &
         "lfric2lfric_init_coupler_src: to use OASIS, " // &
@@ -248,11 +248,11 @@ module lfric2lfric_init_coupler_mod
 
     implicit none
 
-    type(mesh_type), pointer, intent(in)     :: mesh
-    character(*),             intent(in)     :: coupler
-    integer(i_def),           intent(in)     :: element_order_h
-    integer(i_def),           intent(in)     :: element_order_v
-    type(modeldb_type),       intent(inout)  :: modeldb
+    type(mesh_type),    intent(in)    :: mesh
+    character(*),       intent(in)    :: coupler
+    integer(i_def),     intent(in)    :: element_order_h
+    integer(i_def),     intent(in)    :: element_order_v
+    type(modeldb_type), intent(inout) :: modeldb
 
     write(log_scratch_space, '(A)' ) &
         "lfric2lfric_init_coupler_dst: to use OASIS, " // &

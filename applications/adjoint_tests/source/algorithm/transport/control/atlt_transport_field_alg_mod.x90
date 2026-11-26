@@ -69,7 +69,7 @@ module atlt_transport_field_alg_mod
 
     ! Arguments
     type(config_type),                 intent(in) :: config
-    type(mesh_type), pointer,          intent(in) :: mesh
+    type(mesh_type),                   intent(in) :: mesh
     type(model_clock_type),            intent(in) :: model_clock
     type(adj_trans_lookup_cache_type), intent(in) :: adj_lookup_table_cache
 

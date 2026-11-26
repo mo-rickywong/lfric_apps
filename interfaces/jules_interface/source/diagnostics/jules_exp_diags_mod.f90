@@ -51,7 +51,8 @@ contains
     type( field_type ), intent(inout) :: soil_respiration
     type( field_type ), intent(inout) :: chr10m
 
-    type( mesh_type ), intent(in), pointer :: mesh
+    type( mesh_type ), intent(in) :: mesh
+    
     type(mesh_type), pointer :: twod_mesh
     type(function_space_type), pointer :: vector_space
 

@@ -58,10 +58,10 @@ contains
 
     implicit none
 
-    type(modeldb_type), target,     intent(inout) :: modeldb
-    type(mesh_type), pointer,       intent(in)    :: mesh
-    type(mesh_type), pointer,       intent(in)    :: twod_mesh
-    integer(kind=i_def),            intent(in)    :: num_steps
+    type(modeldb_type), target, intent(inout) :: modeldb
+    type(mesh_type),            intent(in)    :: mesh
+    type(mesh_type),            intent(in)    :: twod_mesh
+    integer(kind=i_def),        intent(in)    :: num_steps
 
     ! Prognostic fields
     type(field_type)                               :: u, rho, theta, exner, &

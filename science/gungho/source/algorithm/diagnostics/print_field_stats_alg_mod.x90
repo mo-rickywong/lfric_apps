@@ -300,7 +300,7 @@ subroutine pre_print_field_stats_alg(config, mesh, fs_id,                &
   ! Arguments
   type(config_type), intent(in) :: config
 
-  type(mesh_type),  pointer, intent(in)    :: mesh
+  type(mesh_type),           intent(in)    :: mesh
   integer(kind=i_def),       intent(in)    :: fs_id
   integer(kind=i_def),       intent(in)    :: elt_order_h, elt_order_v
   type(field_type), pointer, intent(inout) :: latitude, longitude, height

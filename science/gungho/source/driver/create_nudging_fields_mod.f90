@@ -40,11 +40,13 @@ module create_nudging_fields_mod
   !> @param[in]    twod_mesh  The current 2d mesh
   !> @param[in]    mapper     Provides access to the field collections
   subroutine create_nudging_fields(modeldb, mesh, twod_mesh, mapper)
+    
     implicit none
-    type(modeldb_type), intent(in)          :: modeldb
-    type(mesh_type), intent(in), pointer    :: mesh
-    type(mesh_type), intent(in), pointer    :: twod_mesh
-    type(field_mapper_type), intent(in)     :: mapper
+
+    type(modeldb_type),      intent(in) :: modeldb
+    type(mesh_type),         intent(in) :: mesh
+    type(mesh_type),         intent(in) :: twod_mesh
+    type(field_mapper_type), intent(in) :: mapper
 
     type(gungho_time_axes_type), pointer    :: gungho_axes
 

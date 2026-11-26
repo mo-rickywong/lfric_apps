@@ -139,8 +139,8 @@ contains
 
     type(field_collection_type), pointer, intent(inout) :: field_collection
     character(len=*),                     intent(in)    :: field_name
-    type(mesh_type),             pointer, intent(in)    :: mesh
-    type(mesh_type),             pointer, intent(in)    :: twod_mesh
+    type(mesh_type), target,              intent(in)    :: mesh
+    type(mesh_type), target,              intent(in)    :: twod_mesh
     character(len=nf90_max_name),         intent(in)    :: prefix
 
     ! Field object to initialise

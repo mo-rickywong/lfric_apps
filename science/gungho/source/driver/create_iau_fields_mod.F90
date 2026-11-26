@@ -57,11 +57,11 @@ module create_iau_fields_mod
 
     implicit none
 
-    type(mesh_type),             intent(in), pointer :: mesh
-    type(mesh_type),             intent(in), pointer :: twod_mesh
-    type(field_collection_type), intent(inout)       :: depository
-    type(field_collection_type), intent(inout)       :: prognostic_fields
-    type(modeldb_type),          intent(inout)       :: modeldb
+    type(mesh_type),             intent(in)    :: mesh
+    type(mesh_type),             intent(in)    :: twod_mesh
+    type(field_collection_type), intent(inout) :: depository
+    type(field_collection_type), intent(inout) :: prognostic_fields
+    type(modeldb_type),          intent(inout) :: modeldb
 
     type(field_collection_type), pointer             :: iau_fields
     type(field_collection_type), pointer             :: iau_surf_fields
@@ -296,7 +296,7 @@ module create_iau_fields_mod
 
     implicit none
 
-    type(mesh_type),    intent(in), pointer :: mesh
+    type(mesh_type),    intent(in)    :: mesh
     type(modeldb_type), intent(inout) :: modeldb
     character(*),       intent(in)    :: iau_incs
     character(*),       intent(in)    :: u_in_w3_inc_name

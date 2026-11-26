@@ -87,16 +87,16 @@ contains
     type( field_collection_type ), intent( in )    :: aerosol_fields
     type( field_collection_type ), intent( in )    :: radiation_fields
 
-    type( field_type ), intent( in )               :: rho_in_wth
-    type( field_type ), intent( in )               :: theta_in_wth
-    type( field_type ), intent( in )               :: exner_in_wth
-    type( field_type ), intent( in )               :: exner_in_w3
-    type( field_type ), intent( in )               :: rho
-    type( field_type ), intent( in )               :: rho_aero
-    type( integer_field_type ), intent( in )       :: trop_level
-    type(mesh_type), intent( in ),        pointer  :: aerosol_mesh
-    type(mesh_type), intent( in ),        pointer  :: aerosol_twod_mesh
-    integer( kind=i_def ), intent( in )            :: timestep
+    type( field_type ), intent( in )         :: rho_in_wth
+    type( field_type ), intent( in )         :: theta_in_wth
+    type( field_type ), intent( in )         :: exner_in_wth
+    type( field_type ), intent( in )         :: exner_in_w3
+    type( field_type ), intent( in )         :: rho
+    type( field_type ), intent( in )         :: rho_aero
+    type( integer_field_type ), intent( in ) :: trop_level
+    type(mesh_type),    intent( in )         :: aerosol_mesh
+    type(mesh_type),    intent( in )         :: aerosol_twod_mesh
+    integer( kind=i_def ), intent( in )      :: timestep
 
     type(function_space_type), pointer :: w3_2d_aero => null()
     type(function_space_type), pointer :: wth_aero => null()

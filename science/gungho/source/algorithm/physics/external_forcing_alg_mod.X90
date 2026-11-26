@@ -140,7 +140,7 @@ contains
     type(field_type),            intent(out)   :: dtheta_forcing, du_forcing
     type(field_type),            intent(out)   :: dmv_forcing, dmcl_forcing
     type(field_type),            intent(out)   :: dcfl_forcing, dbcf_forcing
-    type(mesh_type),    pointer, intent(in)    :: twod_mesh
+    type(mesh_type),             intent(in)    :: twod_mesh
     real(kind=r_def),            intent(in)    :: dt, time_now
     logical(kind=l_def),         intent(inout) :: theta_forcing_done
     logical(kind=l_def),         intent(inout) :: vapour_forcing_done

@@ -37,8 +37,8 @@ contains
 
     implicit none
 
-    class(function_space_type), intent(in), pointer      :: fs
-    character(*),               intent(in)               :: name
+    class(function_space_type), intent(in) :: fs
+    character(*),               intent(in) :: name
     class(field_real32_type),   intent(out), &
                                      allocatable, target :: lfric_field
     class(test_field_32_type),  intent(out), allocatable :: test_field
@@ -64,8 +64,8 @@ contains
 
     implicit none
 
-    type(function_space_type), intent(in), pointer      :: fs
-    character(*),              intent(in)               :: name
+    type(function_space_type), intent(in) :: fs
+    character(*),              intent(in) :: name
     type(field_real64_type),   intent(out), &
                                     allocatable, target :: lfric_field
     type(test_field_64_type),  intent(out), allocatable :: test_field

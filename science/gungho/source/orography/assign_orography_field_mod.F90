@@ -170,7 +170,7 @@ contains
     ! Arguments
     type(inventory_by_mesh_type), intent(inout) :: chi_inventory
     type(inventory_by_mesh_type), intent(in)    :: panel_id_inventory
-    type(mesh_type),     pointer, intent(in)    :: mesh
+    type(mesh_type),              intent(in)    :: mesh
     integer(kind=i_def),          intent(in)    :: stretching_method
     real(kind=r_def),             intent(in)    :: stretching_height
 

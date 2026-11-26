@@ -73,9 +73,10 @@ module jedi_lfric_utils_mod
     implicit none
 
     type( field_collection_type ), intent(inout) :: field_collection
-    type(mesh_type), intent(in), pointer  :: mesh
-    integer(i_def), intent(in)            :: fs_enumerator
-    character(*), intent(in)              :: field_name
+    
+    type(mesh_type), intent(in) :: mesh
+    integer(i_def),  intent(in) :: fs_enumerator
+    character(*),    intent(in) :: field_name
 
     type(field_type), allocatable         :: field
 

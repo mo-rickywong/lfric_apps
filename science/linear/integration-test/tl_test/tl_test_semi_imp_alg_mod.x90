@@ -57,8 +57,8 @@ module tl_test_semi_imp_alg_mod
 
     implicit none
 
-    type(mesh_type), pointer, intent(in) :: mesh
-    type(mesh_type), pointer, intent(in) :: twod_mesh
+    type(mesh_type), intent(in) :: mesh
+    type(mesh_type), intent(in) :: twod_mesh
 
     type(modeldb_type), target, intent(inout) :: modeldb
 

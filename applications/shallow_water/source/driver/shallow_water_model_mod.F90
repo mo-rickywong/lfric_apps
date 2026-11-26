@@ -284,8 +284,8 @@ module shallow_water_model_mod
 
     implicit none
 
-    type(mesh_type),    pointer, intent(in)    :: mesh
-    type(modeldb_type),          intent(inout) :: modeldb
+    type(mesh_type),    intent(in)    :: mesh
+    type(modeldb_type), intent(inout) :: modeldb
 
     type(field_collection_type), pointer :: prognostic_fields => null()
 

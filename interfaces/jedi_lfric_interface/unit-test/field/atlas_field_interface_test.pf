@@ -235,7 +235,7 @@ contains
     integer( i_def ),            pointer, intent(in) :: horizontal_map_ptr(:)
     integer( i_def ),                     intent(in) :: ncells
     integer( i_def ),                     intent(in) :: nlevels
-    type( function_space_type ), pointer, intent(in) :: fspace
+    type( function_space_type ),          intent(in) :: fspace
     character( str_def ),                 intent(in) :: lfric_field_name
     character( str_def ),       optional, intent(in) :: atlas_field_name
     logical( l_def ),           optional, intent(in) :: fill_direction_up

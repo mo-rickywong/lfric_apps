@@ -107,10 +107,10 @@ end function has_xios_io
     implicit none
     class(field_maker_type), intent(inout) :: self
 
-    type(mesh_type), intent(in), pointer :: mesh
-    type(mesh_type), intent(in), pointer :: twod_mesh
+    type(mesh_type),         target, intent(in) :: mesh
+    type(mesh_type),         target, intent(in) :: twod_mesh
     type(field_mapper_type), target, intent(in) :: mapper
-    class(clock_type), intent(in) :: clock
+    class(clock_type),               intent(in) :: clock
 
     self%mesh => mesh
     self%twod_mesh => twod_mesh

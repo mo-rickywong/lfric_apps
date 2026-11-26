@@ -39,8 +39,8 @@ module adjt_assemble_w2h_from_w2hb_alg_mod
     implicit none
 
     ! Arguments
-    type(config_type),        intent(in) :: config
-    type(mesh_type), pointer, intent(in) :: mesh
+    type(config_type), intent(in) :: config
+    type(mesh_type),   intent(in) :: mesh
 
     ! Arguments for tl and adj calls
     type(field_type)    :: field_w2h

@@ -152,11 +152,13 @@ module create_lbcs_mod
     !> @param[in]    mapper     Provides access to the field collections
     !> @param[in]    clock      The model clock
     subroutine create_lbc_fields(mesh, twod_mesh, mapper, clock)
+     
      implicit none
-     type(mesh_type), intent(in), pointer    :: mesh
-     type(mesh_type), intent(in), pointer    :: twod_mesh
-     type(field_mapper_type), intent(in)     :: mapper
-     class(clock_type), intent(in)           :: clock
+
+     type(mesh_type),         intent(in) :: mesh
+     type(mesh_type),         intent(in) :: twod_mesh
+     type(field_mapper_type), intent(in) :: mapper
+     class(clock_type),       intent(in) :: clock
 
      type(gungho_time_axes_type), pointer    :: gungho_axes
 

@@ -51,14 +51,15 @@ module tl_test_advect_theta_field_mod
   !> @param[in] twod_mesh The current 2d mesh
   !>
   subroutine test_advect_theta_field( modeldb,  &
-                                      mesh,        &
+                                      mesh,     &
                                       twod_mesh )
 
     implicit none
 
-    type(mesh_type),    pointer, intent(in) :: mesh
-    type(mesh_type),    pointer, intent(in) :: twod_mesh
-    type(modeldb_type), target,  intent(in) :: modeldb
+    type(mesh_type), intent(in) :: mesh
+    type(mesh_type), intent(in) :: twod_mesh
+
+    type(modeldb_type), target, intent(in) :: modeldb
 
     character(str_def) :: label = "advect_theta_field"
 

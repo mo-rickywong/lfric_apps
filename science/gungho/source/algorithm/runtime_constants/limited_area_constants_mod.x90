@@ -134,9 +134,9 @@ contains
     implicit none
 
     ! Arguments
-    type(mesh_type), pointer, intent(in) :: mesh
-    logical(kind=l_def),      intent(in) :: use_fe
-    character(len=str_def),   intent(in) :: finest_mesh_name
+    type(mesh_type),        intent(in) :: mesh
+    logical(kind=l_def),    intent(in) :: use_fe
+    character(len=str_def), intent(in) :: finest_mesh_name
 
     ! Internal variables
     integer(kind=i_def)                :: mesh_id
@@ -277,8 +277,8 @@ contains
 
     implicit none
 
-    type(mesh_type), pointer, intent(in)  :: finest_mesh
-    logical(kind=l_def),      intent(in)  :: use_fe
+    type(mesh_type),          intent(in) :: finest_mesh
+    logical(kind=l_def),      intent(in) :: use_fe
     type(function_space_type),   pointer  :: w2_fs
     type(function_space_type),   pointer  :: w3_fs
     type(field_type),            pointer  :: mask_w2

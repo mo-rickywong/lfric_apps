@@ -37,8 +37,8 @@ module atlt_poly1d_vert_adv_alg_mod
     implicit none
 
     ! Arguments
-    type(config_type),              intent(in) :: config
-    type(mesh_type), pointer,       intent(in) :: mesh
+    type(config_type), intent(in) :: config
+    type(mesh_type),   intent(in) :: mesh
 
     ! Passive arguments for tl and adj calls
     type(field_type)    :: ls_wind
@@ -116,8 +116,8 @@ module atlt_poly1d_vert_adv_alg_mod
     implicit none
 
     ! Arguments
-    type(function_space_type), pointer, intent(in) :: vector_space_w2v_ptr
-    type(function_space_type), pointer, intent(in) :: vector_space_wtheta_ptr
+    type(function_space_type),          intent(in) :: vector_space_w2v_ptr
+    type(function_space_type),          intent(in) :: vector_space_wtheta_ptr
     type(field_type),                   intent(in) :: ls_wind
     type(field_type),                   intent(in) :: ls_tracer
     type(field_type),                   intent(in) :: coeff

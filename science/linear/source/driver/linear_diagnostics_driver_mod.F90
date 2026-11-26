@@ -70,11 +70,11 @@ contains
 
     implicit none
 
-    class(modeldb_type),      intent(inout) :: modeldb
-    type(mesh_type), pointer, intent(in)    :: mesh
-    type(mesh_type), pointer, intent(in)    :: twod_mesh
-    character(*),             intent(in)    :: io_context_name
-    logical(l_def),           intent(in)    :: nodal_output_on_w3
+    class(modeldb_type), intent(inout) :: modeldb
+    type(mesh_type),     intent(in)    :: mesh
+    type(mesh_type),     intent(in)    :: twod_mesh
+    character(*),        intent(in)    :: io_context_name
+    logical(l_def),      intent(in)    :: nodal_output_on_w3
 #ifdef USE_XIOS
     type(lfric_xios_context_type), pointer :: io_context
     ! Call clock initial step before initial conditions output
@@ -108,10 +108,10 @@ contains
 
     implicit none
 
-    type(mesh_type),      intent(in), pointer :: mesh
-    type(mesh_type),      intent(in), pointer :: twod_mesh
-    type(modeldb_type),   intent(in), target  :: modeldb
-    logical,              intent(in)          :: nodal_output_on_w3
+    type(mesh_type),    intent(in)         :: mesh
+    type(mesh_type),    intent(in)         :: twod_mesh
+    type(modeldb_type), intent(in), target :: modeldb
+    logical,            intent(in)         :: nodal_output_on_w3
 
     type(field_collection_type), pointer :: prognostic_fields
     type(field_collection_type), pointer :: moisture_fields => null()

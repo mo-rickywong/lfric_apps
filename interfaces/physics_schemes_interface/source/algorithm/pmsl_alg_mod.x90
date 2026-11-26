@@ -64,7 +64,7 @@ contains
     type( field_type ), intent(in)            :: exner_w3
     type( field_collection_type ), intent(in) :: derived_fields
     type( field_type ), intent(in)            :: theta_wth
-    type( mesh_type ),  intent(in), pointer   :: twod_mesh
+    type( mesh_type ),  intent(in)            :: twod_mesh
 
     ! Define PMSL field
     type( field_type ) :: pmsl, pmsl_unsmooth, t_at_mean_sea_level

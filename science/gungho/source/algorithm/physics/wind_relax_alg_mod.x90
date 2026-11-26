@@ -67,10 +67,10 @@ contains
   implicit none
 
   type( config_type ), intent(in)         :: config
-  type( field_type ), intent(inout)       :: du_forcing
-  type( field_type ), intent(in), target  :: u
-  type( mesh_type ),  intent(in), pointer :: twod_mesh
-  type( field_type ), intent(in), target  :: exner
+  type( field_type ),  intent(inout)      :: du_forcing
+  type( field_type ),  intent(in), target :: u
+  type( mesh_type ),   intent(in)         :: twod_mesh
+  type( field_type ),  intent(in), target :: exner
 
   real( kind=r_def ),    intent(in) :: time_now
   integer( kind=i_def ), intent(in) :: nlayers

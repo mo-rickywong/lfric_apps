@@ -336,13 +336,14 @@ subroutine create_model_data( modeldb,           &
 
     implicit none
 
-    type( modeldb_type ), intent(inout)       :: modeldb
-    type( mesh_type ),    intent(in), pointer :: mesh
-    type( mesh_type ),    intent(in), pointer :: twod_mesh
-    type( mesh_type ),    intent(in), pointer :: aerosol_mesh
-    type( mesh_type ),    intent(in), pointer :: aerosol_twod_mesh
-    type( mesh_type ),    intent(in), pointer :: nudging_mesh
-    type( mesh_type ),    intent(in), pointer :: nudging_twod_mesh
+    type( modeldb_type ), intent(inout) :: modeldb
+
+    type( mesh_type ), intent(in) :: mesh
+    type( mesh_type ), intent(in) :: twod_mesh
+    type( mesh_type ), intent(in) :: aerosol_mesh
+    type( mesh_type ), intent(in) :: aerosol_twod_mesh
+    type( mesh_type ), intent(in) :: nudging_mesh
+    type( mesh_type ), intent(in) :: nudging_twod_mesh
 
     type(field_mapper_type), target :: field_mapper
 
@@ -559,11 +560,12 @@ subroutine create_model_data( modeldb,           &
 
     implicit none
 
-    type( modeldb_type ), intent(inout)       :: modeldb
-    type( mesh_type ),    intent(in), pointer :: mesh
-    type( mesh_type ),    intent(in), pointer :: twod_mesh
-    type( mesh_type ),    intent(in), pointer :: aerosol_mesh
-    type( mesh_type ),    intent(in), pointer :: aerosol_twod_mesh
+    type( modeldb_type ), intent(inout) :: modeldb
+
+    type( mesh_type ), intent(in) :: mesh
+    type( mesh_type ), intent(in) :: twod_mesh
+    type( mesh_type ), intent(in) :: aerosol_mesh
+    type( mesh_type ), intent(in) :: aerosol_twod_mesh
 
     type(field_collection_type), pointer :: depository
     type(field_collection_type), pointer :: fd_fields
@@ -615,8 +617,8 @@ subroutine create_model_data( modeldb,           &
     implicit none
 
     type(modeldb_type), intent(inout) :: modeldb
-    type( mesh_type ),  intent(in), pointer :: mesh
-    type( mesh_type ),  intent(in), pointer :: twod_mesh
+    type( mesh_type ),  intent(in)    :: mesh
+    type( mesh_type ),  intent(in)    :: twod_mesh
 
     type( field_type ), pointer :: theta => null()
     type( field_type ), pointer :: rho   => null()

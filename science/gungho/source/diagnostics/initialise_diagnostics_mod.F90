@@ -71,12 +71,12 @@ contains
 
     implicit none
 
-    type(field_type),                   intent(out) :: field
-    character(*),                       intent(in)  :: unique_id
-    logical(l_def), optional,           intent(in)  :: activate
-    logical(l_def), optional,           intent(in)  :: deactivate
-    type(mesh_type), pointer, optional, intent(in)  :: force_mesh
-    integer(kind=i_def), optional,      intent(in)  :: force_rad_levels
+    type(field_type),                  intent(out) :: field
+    character(*),                      intent(in)  :: unique_id
+    logical(l_def),          optional, intent(in)  :: activate
+    logical(l_def),          optional, intent(in)  :: deactivate
+    type(mesh_type), target, optional, intent(in)  :: force_mesh
+    integer(kind=i_def),     optional, intent(in)  :: force_rad_levels
 
     logical(kind=l_def) :: is_activated
     logical(kind=l_def) :: is_deactivated

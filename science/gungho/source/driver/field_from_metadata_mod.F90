@@ -54,9 +54,9 @@ contains
     type(field_type),                   intent(out) :: field
     character(*),                       intent(in)  :: xios_id
     logical(l_def), optional,           intent(in)  :: empty
-    type(mesh_type), pointer, optional, intent(in)  :: mesh_3d
-    type(mesh_type), pointer, optional, intent(in)  :: mesh_2d
-    type(mesh_type), pointer, optional, intent(in)  :: force_mesh
+    type(mesh_type), optional, target,  intent(in)  :: mesh_3d
+    type(mesh_type), optional, target,  intent(in)  :: mesh_2d
+    type(mesh_type), optional, target,  intent(in)  :: force_mesh
     integer(kind=i_def), optional,      intent(in)  :: force_rad_levels
     integer(kind=i_def), optional,      intent(in)  :: force_order_h
     integer(kind=i_def), optional,      intent(in)  :: force_order_v
@@ -121,9 +121,9 @@ contains
     type(integer_field_type),           intent(out) :: field
     character(*),                       intent(in)  :: xios_id
     logical(l_def), optional,           intent(in)  :: empty
-    type(mesh_type), pointer, optional, intent(in)  :: mesh_3d
-    type(mesh_type), pointer, optional, intent(in)  :: mesh_2d
-    type(mesh_type), pointer, optional, intent(in)  :: force_mesh
+    type(mesh_type), optional, target,  intent(in)  :: mesh_3d
+    type(mesh_type), optional, target,  intent(in)  :: mesh_2d
+    type(mesh_type), optional, target,  intent(in)  :: force_mesh
     integer(kind=i_def), optional,      intent(in)  :: force_rad_levels
     integer(kind=i_def), optional,      intent(in)  :: force_order_h
     integer(kind=i_def), optional,      intent(in)  :: force_order_v

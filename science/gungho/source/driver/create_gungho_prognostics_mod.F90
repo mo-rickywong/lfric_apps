@@ -169,10 +169,11 @@ contains
 
     implicit none
 
-    type(mesh_type), intent(in), pointer      :: mesh
-    type(mesh_type), intent(in), pointer      :: twod_mesh
-    type( field_mapper_type ), intent(in)     :: mapper
-    class( clock_type ), intent(in)           :: clock
+    type(mesh_type), intent(in) :: mesh
+    type(mesh_type), intent(in) :: twod_mesh
+    
+    type( field_mapper_type ), intent(in) :: mapper
+    class( clock_type ), intent(in)       :: clock
 
     type( field_maker_type ) :: creator
     logical(l_def) :: legacy

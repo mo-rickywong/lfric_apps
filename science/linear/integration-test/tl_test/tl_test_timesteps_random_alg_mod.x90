@@ -70,10 +70,10 @@ module tl_test_timesteps_random_alg_mod
 
     implicit none
 
-    type(modeldb_type), target,    intent(inout) :: modeldb
-    type(mesh_type), pointer,      intent(in)    :: mesh
-    type(mesh_type), pointer,      intent(in)    :: twod_mesh
-    class(model_clock_type),       intent(in)    :: model_clock
+    type(modeldb_type), target, intent(inout) :: modeldb
+    type(mesh_type),            intent(in)    :: mesh
+    type(mesh_type),            intent(in)    :: twod_mesh
+    class(model_clock_type),    intent(in)    :: model_clock
 
     character(str_def) :: label = "timesteps"
 

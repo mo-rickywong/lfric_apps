@@ -48,10 +48,10 @@ module jedi_lfric_io_update_mod
 
     implicit none
 
-    type(field_collection_type), intent(inout)   :: io_collection
-    type(mesh_type), pointer, intent(in)         :: mesh_3d
-    type(mesh_type), pointer, intent(in)         :: mesh_2d
-    type(jedi_lfric_field_meta_type), intent(in) :: field_meta_data
+    type(field_collection_type),      intent(inout) :: io_collection
+    type(mesh_type), target,          intent(in)    :: mesh_3d
+    type(mesh_type), target,          intent(in)    :: mesh_2d
+    type(jedi_lfric_field_meta_type), intent(in)    :: field_meta_data
 
     ! Local
     class(field_parent_type), pointer     :: field_ptr => null()

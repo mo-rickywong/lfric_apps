@@ -65,7 +65,7 @@ subroutine atl_physics_alg(modeldb,    &
   type(field_type),            intent(in)    :: rhs_np1(bundle_size)
   type(field_type),            intent(in)    :: rhs_adv(bundle_size)
   type(field_type),            intent(in)    :: ls_state(bundle_size)
-  type(mesh_type),    pointer, intent(in)    :: mesh
+  type(mesh_type),             intent(in)    :: mesh
   real(kind=r_def),            intent(in)    :: dt
 
   type(field_type) :: u_bl_inc

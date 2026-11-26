@@ -173,7 +173,7 @@ implicit none
 
 type(shum_file_type), intent(in out) :: um_output_file
 type(lfricinp_grid_type), intent(in) :: um_grid
-type(mesh_type), pointer, intent(in) :: lfric_mesh
+type(mesh_type),          intent(in) :: lfric_mesh
 character(len=*), parameter :: routinename = 'lfric2um_set_integer_constants'
 ! Dumps and fieldsfiles have int consts length 46
 integer(kind=int64) :: int_constants(46) = um_imdi
@@ -212,7 +212,7 @@ implicit none
 
 type(shum_file_type), intent(in out) :: um_output_file
 type(lfricinp_grid_type), intent(in) :: um_grid
-type(mesh_type), pointer, intent(in) :: lfric_mesh
+type(mesh_type),          intent(in) :: lfric_mesh
 character(len=*), parameter :: routinename = 'lfric2um_set_real_constants'
 ! Dumps and fieldsfiles have real consts length 38
 real(kind=real64) :: real_constants(38) = um_rmdi
@@ -237,7 +237,8 @@ subroutine lfric2um_set_level_dep_constants(um_output_file, lfric_mesh)
 implicit none
 
 type(shum_file_type), intent(in out) :: um_output_file
-type(mesh_type), pointer, intent(in) :: lfric_mesh
+type(mesh_type),      intent(in)     :: lfric_mesh
+
 character(len=*), parameter :: routinename = 'lfric2um_set_level_dep_constants'
 real(kind=real64), allocatable :: level_dep_constants(:,:)
 real(kind=real64) :: model_height

@@ -695,8 +695,8 @@ contains
 
     real(kind=r_def), intent(in)  :: dtemp_encorr
 
-    type(mesh_type), intent(in), pointer :: mesh
-    type(mesh_type), intent(in), pointer :: twod_mesh
+    type(mesh_type), intent(in) :: mesh
+    type(mesh_type), intent(in) :: twod_mesh
 
     ! Reference fields
     type( field_type ),       pointer :: rho_ref

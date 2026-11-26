@@ -45,8 +45,8 @@ contains
                                       modeldb )
     implicit none
 
-    type(mesh_type),     intent(in),   pointer :: mesh
-    type(modeldb_type),  intent(inout), target :: modeldb
+    type(mesh_type),    intent(in)            :: mesh
+    type(modeldb_type), intent(inout), target :: modeldb
 
     type( field_collection_type ), pointer :: prognostic_fields => null()
     type( field_type ),            pointer :: mr(:) => null()

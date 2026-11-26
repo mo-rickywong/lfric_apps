@@ -76,7 +76,7 @@ module adj_lookup_table_mod
     class(adj_lookup_table_type), intent(inout) :: self
     integer(kind=i_def),             intent(in) :: nindices
     integer(kind=i_def),             intent(in) :: nsets_max
-    type(mesh_type),        pointer, intent(in) :: mesh
+    type(mesh_type),                 intent(in) :: mesh
     integer(kind=i_def),             intent(in) :: fs
     integer(kind=i_def),             intent(in) :: stencil_depth
     integer(kind=i_def),   optional, intent(in) :: ndata

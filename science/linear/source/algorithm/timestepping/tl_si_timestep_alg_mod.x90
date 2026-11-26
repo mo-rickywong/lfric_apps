@@ -391,8 +391,8 @@ contains
     ! field groups
     type( field_collection_type ), intent( inout ) :: derived_fields
 
-    type( mesh_type ), intent( in ), pointer :: mesh
-    type( mesh_type ), intent( in ), pointer :: twod_mesh
+    type( mesh_type ), intent( in ) :: mesh
+    type( mesh_type ), intent( in ) :: twod_mesh
 
     real( kind=r_def ) :: cast_dt
     type( field_collection_type ) :: cloud_fields

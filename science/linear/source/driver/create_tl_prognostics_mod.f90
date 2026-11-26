@@ -42,8 +42,8 @@ contains
 
     implicit none
 
-    type( mesh_type ), intent(in), pointer     :: mesh
-    type( mesh_type ), intent(in), pointer     :: twod_mesh
+    type( mesh_type ), intent(in) :: mesh
+    type( mesh_type ), intent(in) :: twod_mesh
 
     type(field_collection_type), intent(inout) :: fd_field_collection
     type(field_collection_type), intent(inout) :: depository

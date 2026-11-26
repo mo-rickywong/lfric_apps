@@ -35,7 +35,8 @@ contains
 
     implicit none
 
-    type( mesh_type ),  intent(in), pointer :: mesh
+    type( mesh_type ), intent(in) :: mesh
+    
     ! prognostic fields
     type( field_vector_type ), intent(inout) :: fv
     type( field_type )                       :: f1, f2

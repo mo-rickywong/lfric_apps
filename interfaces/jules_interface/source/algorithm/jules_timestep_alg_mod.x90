@@ -208,7 +208,7 @@ contains
     type( field_collection_type ), intent( inout ) :: aerosol_fields
 
     class(model_clock_type), intent(in) :: model_clock
-    type(mesh_type), intent(in), pointer :: twod_mesh
+    type(mesh_type),         intent(in) :: twod_mesh
 
     ! For rad_tile_alg
     type( field_type ) :: tile_sw_diffuse_albedo, tile_sw_direct_albedo

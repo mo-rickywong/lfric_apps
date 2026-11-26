@@ -56,8 +56,8 @@ contains
   subroutine create_gravity_wave_prognostics(mesh, wind, pressure, buoyancy)
 
     implicit none
-    type( mesh_type ), intent(in), pointer :: mesh
 
+    type( mesh_type ), intent(in)    :: mesh
     type( field_type), intent(inout) :: wind
     type( field_type), intent(inout) :: pressure
     type( field_type), intent(inout) :: buoyancy

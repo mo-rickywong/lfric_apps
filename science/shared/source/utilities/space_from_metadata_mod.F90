@@ -236,14 +236,15 @@ contains
 
     implicit none
 
-    character(*),                       intent(in)  :: xios_id
-    type(mesh_type), pointer, optional, intent(in)  :: mesh_3d
-    type(mesh_type), pointer, optional, intent(in)  :: mesh_2d
-    type(mesh_type), pointer, optional, intent(in)  :: force_mesh
-    integer(kind=i_def), optional,      intent(in)  :: force_rad_levels
-    integer(kind=i_def), optional,      intent(in)  :: force_order_h
-    integer(kind=i_def), optional,      intent(in)  :: force_order_v
-    integer(kind=i_def), optional,      intent(in)  :: force_ndata
+    character(*),                      intent(in) :: xios_id
+    type(mesh_type), target, optional, intent(in) :: mesh_3d
+    type(mesh_type), target, optional, intent(in) :: mesh_2d
+    type(mesh_type), target, optional, intent(in) :: force_mesh
+    
+    integer(kind=i_def), optional, intent(in) :: force_rad_levels
+    integer(kind=i_def), optional, intent(in) :: force_order_h
+    integer(kind=i_def), optional, intent(in) :: force_order_v
+    integer(kind=i_def), optional, intent(in) :: force_ndata
 
     character(str_def)  :: grid_ref
     character(str_def)  :: domain_ref

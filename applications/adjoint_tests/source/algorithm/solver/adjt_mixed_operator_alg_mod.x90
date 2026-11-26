@@ -59,10 +59,9 @@ contains
 
     implicit none
 
-    type(config_type), intent(in) :: config
-
-    type(mesh_type), pointer, intent(in) :: mesh
-    type(model_clock_type),   intent(in) :: model_clock
+    type(config_type),      intent(in) :: config
+    type(mesh_type),        intent(in) :: mesh
+    type(model_clock_type), intent(in) :: model_clock
 
     ! Prognostic fields
     type(field_type)                 :: rhs(bundle_size)

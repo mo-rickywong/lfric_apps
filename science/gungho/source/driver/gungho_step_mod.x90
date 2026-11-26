@@ -72,10 +72,10 @@ module gungho_step_mod
 
     implicit none
 
-    type(mesh_type), intent(in), pointer    :: mesh
-    type(mesh_type), intent(in), pointer    :: twod_mesh
-    type(modeldb_type), intent(inout),target:: modeldb
-    class(model_clock_type), intent(in)     :: model_clock
+    type(mesh_type),            intent(in)    :: mesh
+    type(mesh_type),            intent(in)    :: twod_mesh
+    type(modeldb_type), target, intent(inout) :: modeldb
+    class(model_clock_type),    intent(in)    :: model_clock
 
     type( field_collection_type ), pointer :: prognostic_fields => null()
     type( field_collection_type ), pointer :: moisture_fields => null()

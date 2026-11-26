@@ -64,20 +64,20 @@ module lfric2lfric_init_mod
 
     implicit none
 
-    type(modeldb_type), intent(inout)       :: modeldb
-    character(len=*),   intent(in)          :: context_src
-    character(len=*),   intent(in)          :: context_dst
-    character(len=*),   intent(in)          :: start_dump_filename
-    integer(i_def),     intent(in)          :: mode
-    character(len=*),   intent(in)          :: origin_collection_name
-    type(mesh_type),    intent(in), pointer :: origin_mesh
-    type(mesh_type),    intent(in), pointer :: origin_twod_mesh
-    character(len=*),   intent(in)          :: interm_collection_name
-    type(mesh_type),    intent(in), pointer :: interm_mesh
-    type(mesh_type),    intent(in), pointer :: interm_twod_mesh
-    character(len=*),   intent(in)          :: target_collection_name
-    type(mesh_type),    intent(in), pointer :: target_mesh
-    type(mesh_type),    intent(in), pointer :: target_twod_mesh
+    type(modeldb_type), intent(inout) :: modeldb
+    character(len=*),   intent(in)    :: context_src
+    character(len=*),   intent(in)    :: context_dst
+    character(len=*),   intent(in)    :: start_dump_filename
+    integer(i_def),     intent(in)    :: mode
+    character(len=*),   intent(in)    :: origin_collection_name
+    type(mesh_type),    intent(in)    :: origin_mesh
+    type(mesh_type),    intent(in)    :: origin_twod_mesh
+    character(len=*),   intent(in)    :: interm_collection_name
+    type(mesh_type),    intent(in)    :: interm_mesh
+    type(mesh_type),    intent(in)    :: interm_twod_mesh
+    character(len=*),   intent(in)    :: target_collection_name
+    type(mesh_type),    intent(in)    :: target_mesh
+    type(mesh_type),    intent(in)    :: target_twod_mesh
 
     logical(l_def), pointer :: horizontal_change
     logical(l_def), pointer :: vertical_change

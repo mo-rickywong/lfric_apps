@@ -678,8 +678,8 @@ contains
     real(kind=r_def),                    intent(inout) :: skeb_spectral_coeffc(:)
     real(kind=r_def),                    intent(inout) :: skeb_spectral_coeffs(:)
     real(kind=r_def),                    intent(inout) :: skeb_power_law(:)
-    type(mesh_type),            pointer, intent(in)    :: mesh
-    type(mesh_type),            pointer, intent(in)    :: twod_mesh
+    type(mesh_type),                     intent(in)    :: mesh
+    type(mesh_type),                     intent(in)    :: twod_mesh
 
     ! Internal variables
     ! Reference fields

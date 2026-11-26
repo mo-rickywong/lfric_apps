@@ -56,8 +56,8 @@ subroutine lfricinp_create_lfric_fields( mesh, twod_mesh,              &
 
 implicit none
 
-type(mesh_type), intent(in), pointer :: mesh
-type(mesh_type), intent(in), pointer :: twod_mesh
+type(mesh_type), target, intent(in) :: mesh
+type(mesh_type), target, intent(in) :: twod_mesh
 
 type(field_collection_type), intent(in out) :: field_collection
 

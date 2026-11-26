@@ -114,8 +114,8 @@ subroutine create_linear_fields( mesh, twod_mesh, linear_fields )
 
   implicit none
 
-  type( mesh_type ), pointer,     intent(in) :: mesh
-  type( mesh_type ), pointer,     intent(in) :: twod_mesh
+  type( mesh_type ),     target, intent(in)  :: mesh
+  type( mesh_type ),     target, intent(in)  :: twod_mesh
   type( field_collection_type ), intent(out) :: linear_fields
 
   ! Local

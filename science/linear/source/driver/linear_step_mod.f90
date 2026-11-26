@@ -60,10 +60,10 @@ module linear_step_mod
 
     implicit none
 
-    type( mesh_type ), pointer,      intent(in)    :: mesh
-    type( mesh_type ), pointer,      intent(in)    :: twod_mesh
-    type( modeldb_type ), target, intent(inout)    :: modeldb
-    class(model_clock_type),         intent(in)    :: model_clock
+    type( mesh_type ),            intent(in)    :: mesh
+    type( mesh_type ),            intent(in)    :: twod_mesh
+    type( modeldb_type ), target, intent(inout) :: modeldb
+    class(model_clock_type),      intent(in)    :: model_clock
 
     type( field_collection_type ), pointer :: prognostic_fields => null()
     type( field_collection_type ), pointer :: diagnostic_fields => null()

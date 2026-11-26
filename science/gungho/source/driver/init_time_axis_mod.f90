@@ -63,8 +63,8 @@ module init_time_axis_mod
     type(field_collection_type),        intent(inout)        :: collection
     type(field_collection_type),        intent(inout)        :: depository
     type(field_collection_type),        intent(inout)        :: prognostic_fields
-    type(mesh_type), pointer,           intent(in)           :: mesh
-    type(mesh_type), optional, pointer, intent(in)           :: twod_mesh
+    type(mesh_type),                    intent(in)           :: mesh
+    type(mesh_type), optional,          intent(in)           :: twod_mesh
     logical(l_def),  optional,          intent(in)           :: twod
     integer(i_def),  optional,          intent(in)           :: ndata
     character(*),                       intent(in)           :: name

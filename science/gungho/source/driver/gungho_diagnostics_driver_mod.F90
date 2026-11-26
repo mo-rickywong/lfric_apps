@@ -91,10 +91,10 @@ contains
 
     implicit none
 
-    class(modeldb_type), intent(inout), target  :: modeldb
-    type(mesh_type),     intent(in),    pointer :: mesh
-    type(mesh_type),     intent(in),    pointer :: twod_mesh
-    logical,             intent(in)             :: nodal_output_on_w3
+    class(modeldb_type), intent(inout), target :: modeldb
+    type(mesh_type),     intent(in)            :: mesh
+    type(mesh_type),     intent(in)            :: twod_mesh
+    logical,             intent(in)            :: nodal_output_on_w3
 
     type(field_collection_type), pointer :: prognostic_fields
     type(field_collection_type), pointer :: pos_tracer_last_outer

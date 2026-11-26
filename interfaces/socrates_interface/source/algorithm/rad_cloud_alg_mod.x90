@@ -88,7 +88,7 @@ subroutine rad_cloud_alg(config, rand_seed, n_cloud_layer, &
   type( field_collection_type ), intent(in) :: convection_fields
   type( field_collection_type ), intent(in) :: derived_fields
 
-  type( mesh_type ), pointer, intent(in) :: twod_mesh
+  type( mesh_type ), intent(in) :: twod_mesh
 
   logical( kind=l_def ), intent(in) :: rad_this_tstep, rad_inc_this_tstep
   logical( kind=l_def ), intent(in) :: cosp_this_tstep

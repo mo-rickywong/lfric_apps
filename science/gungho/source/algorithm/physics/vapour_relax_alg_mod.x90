@@ -74,10 +74,10 @@ contains
 
   type(config_type), intent(in) :: config
 
-  type( field_type ), intent(inout)       :: dmv_forcing
-  type( field_type ), intent(in), target  :: mr_v, theta
-  type( field_type ), intent(in), target  :: exner_in_wth
-  type( mesh_type ),  intent(in), pointer :: twod_mesh
+  type( field_type ), intent(inout)      :: dmv_forcing
+  type( field_type ), intent(in), target :: mr_v, theta
+  type( field_type ), intent(in), target :: exner_in_wth
+  type( mesh_type ),  intent(in)         :: twod_mesh
 
   real( kind=r_def ),    intent(in) :: time_now
   integer( kind=i_def ), intent(in) :: nlayers
